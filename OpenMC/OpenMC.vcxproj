@@ -127,6 +127,10 @@
   <ItemGroup>
     <ClCompile Include="Src\main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\Helpers\Singleton.h" />
+    <ClInclude Include="Src\Systems\Window.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

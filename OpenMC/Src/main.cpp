@@ -1,8 +1,10 @@
 #include <functional>
 #include <iostream>
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "Helpers/Singleton.h"
+#include "Systems/Window.h"
 
 int main() {
     glfwInit();
@@ -10,7 +12,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenMC", NULL, NULL);
+    GLFWwindow* window = Singleton<Window>::GetInstance()->Create("OpenMC", 800, 600, true);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
