@@ -127,10 +127,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Camera\Camera.cpp" />
     <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\ResourceManager\ResourceManager.cpp" />
+    <ClCompile Include="Src\SpriteRenderer\SpriteRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Camera\Camera.h" />
     <ClInclude Include="Src\Helpers\Singleton.h" />
+    <ClInclude Include="Src\Helpers\UtilTool.h" />
+    <ClInclude Include="Src\ResourceManager\Mesh.h" />
+    <ClInclude Include="Src\ResourceManager\Model.h" />
+    <ClInclude Include="Src\ResourceManager\ResourceManager.h" />
+    <ClInclude Include="Src\ResourceManager\Shader.h" />
+    <ClInclude Include="Src\ResourceManager\Texture.h" />
+    <ClInclude Include="Src\SpriteRenderer\SpriteRenderer.h" />
     <ClInclude Include="Src\Systems\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

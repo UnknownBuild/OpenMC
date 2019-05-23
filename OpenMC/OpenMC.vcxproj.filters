@@ -19,10 +19,28 @@
     <Filter Include="头文件\Systems">
       <UniqueIdentifier>{3bf9f254-0f69-4f21-b960-64e618720f09}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Camare">
+      <UniqueIdentifier>{ef6b3baa-0dcd-49fb-a4b2-970fe38ac288}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\ResourceManager">
+      <UniqueIdentifier>{9b945141-a380-471a-aaf0-fbfb0e24a31e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\SpriteRenderer">
+      <UniqueIdentifier>{a10133d9-33f3-497c-94eb-db1e536e3cb3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\main.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Camera\Camera.cpp">
+      <Filter>源文件\Camare</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ResourceManager\ResourceManager.cpp">
+      <Filter>源文件\ResourceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\SpriteRenderer\SpriteRenderer.cpp">
+      <Filter>源文件\SpriteRenderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +49,30 @@
     </ClInclude>
     <ClInclude Include="Src\Systems\Window.h">
       <Filter>头文件\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Camera\Camera.h">
+      <Filter>源文件\Camare</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Helpers\UtilTool.h">
+      <Filter>头文件\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ResourceManager\ResourceManager.h">
+      <Filter>源文件\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ResourceManager\Shader.h">
+      <Filter>源文件\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ResourceManager\Texture.h">
+      <Filter>源文件\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ResourceManager\Mesh.h">
+      <Filter>源文件\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ResourceManager\Model.h">
+      <Filter>源文件\ResourceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\SpriteRenderer\SpriteRenderer.h">
+      <Filter>源文件\SpriteRenderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
