@@ -22,7 +22,7 @@ cd vcpkg
 
 然后设置`VCPKG_ROOT`环境变量，为 Vcpkg 所在目录。
 
-修改 GLAD 的默认 profile，改为使用 Core 版本和指定 API 为 4.6。
+修改 GLAD 的默认 portfile，改为使用 Core 版本和指定 API 为 4.6。
 
 ```bash
 vcpkg edit glad
