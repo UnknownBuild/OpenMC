@@ -2,8 +2,7 @@
 
 #include <glad/glad.h>
 
-class Texture2D
-{
+class Texture2D {
 public:
   unsigned int ID;
   unsigned int Width, Height;

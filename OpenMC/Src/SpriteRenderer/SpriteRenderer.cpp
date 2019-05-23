@@ -1,37 +1,57 @@
 ﻿#include "SpriteRenderer.h"
 
-SpriteRenderer::SpriteRenderer(Shader& shader, Shader& fontShader)
-{
-  this->shader = shader;
-  this->fontShader = fontShader;
+SpriteRenderer::SpriteRenderer() {
+  // 初始化着色器
+  this->objectShader = &ResourceManager::LoadShader("GLSL/Object.vs.glsl",
+    "GLSL/Object.fs.glsl", "object");
+  this->fontShader = &ResourceManager::LoadShader("GLSL/Font.vs.glsl",
+    "GLSL/Font.fs.glsl", "font");
+  // 初始化字体
+  ResourceManager::InitFont("Resources/Fonts/RAVIE.TTF");
+  // 初始化立方体
   this->initRenderData();
 }
 
-SpriteRenderer::~SpriteRenderer()
-{
+SpriteRenderer::~SpriteRenderer() {
   glDeleteVertexArrays(1, &this->quadVAO);
 }
 
-void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec3 position, glm::vec3 size, GLfloat rotate, glm::vec3 color)
-{
-  this->shader.Use();
+void SpriteRenderer::SetLight(glm::vec3 color, glm::vec3 direction, glm::vec3 viewPostion) {
+  this->objectShader->Use();
+  this->objectShader->SetVector3f("dirLight.color", color);
+  this->objectShader->SetVector3f("dirLight.direction", direction);
+  this->objectShader->SetVector3f("viewPos", viewPostion);
+}
+
+void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view) {
+  this->objectShader->Use();
+  this->objectShader->SetMatrix4("projection", projection);
+  this->objectShader->SetMatrix4("view", view);
+}
+
+void SpriteRenderer::SetWindowSize(int w, int h) {
+  this->fontShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
+}
+
+void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec3 position, glm::vec3 size, GLfloat rotate, glm::vec3 color) {
+  this->objectShader->Use();
   glm::mat4 model = glm::mat4(1.0f);
   model = glm::translate(model, position);
   model = glm::rotate(model, rotate, glm::vec3(0.0f, 0.0f, 1.0f));
 
   model = glm::scale(model, size);
 
-  this->shader.SetMatrix4("model", model);
-  this->shader.SetInteger("hasTexture", true);
-  this->shader.SetInteger("hasColor", true);
-  this->shader.SetInteger("material.diffuse", 0);
-  this->shader.SetVector3f("strength", glm::vec3(0.3, 0.8, 0.4));
+  this->objectShader->SetMatrix4("model", model);
+  this->objectShader->SetInteger("hasTexture", true);
+  this->objectShader->SetInteger("hasColor", true);
+  this->objectShader->SetInteger("material.diffuse", 0);
+  this->objectShader->SetInteger("material.shininess", 32);
+  this->objectShader->SetVector3f("strength", glm::vec3(0.3, 0.8, 0.4));
 
   // Render textured quad
-  this->shader.SetVector3f("light.ambient", color);
-  this->shader.SetVector3f("light.diffuse", color);
-  this->shader.SetVector3f("light.specular", color);
-  this->shader.SetInteger("light.shininess", 32);
+  this->objectShader->SetVector3f("dirLight.ambient", color);
+  this->objectShader->SetVector3f("dirLight.diffuse", color);
+  this->objectShader->SetVector3f("dirLight.specular", color);
 
   glActiveTexture(GL_TEXTURE0);
   texture.Bind();
@@ -42,16 +62,16 @@ void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec3 position, glm::vec
 }
 
 void SpriteRenderer::DrawSprite(Model& modelObj, glm::vec3 position, glm::vec3 size, GLfloat rotate, glm::vec3 value) {
-  this->shader.Use();
-
+  this->objectShader->Use();
+  
   glm::mat4 model = glm::mat4(1.0f);
   model = glm::translate(model, position);
   model = glm::rotate(model, rotate, glm::vec3(0.0f, 1.0f, 0.0f));
   model = glm::scale(model, size);
 
-  this->shader.SetMatrix4("model", model);
-  this->shader.SetVector3f("strength", value);
-  modelObj.Draw(&this->shader);
+  this->objectShader->SetMatrix4("model", model);
+  this->objectShader->SetVector3f("strength", value);
+  modelObj.Draw(this->objectShader);
 }
 
 void SpriteRenderer::initRenderData()
@@ -136,15 +156,14 @@ void SpriteRenderer::initRenderData()
 
 void SpriteRenderer::RenderText(std::string text, glm::vec2 postion, GLfloat scale, glm::vec3 color)
 {
-  fontShader.Use();
-  fontShader.SetVector3f("textColor", color);
-  fontShader.SetInteger("text", 0);
+  fontShader->Use();
+  fontShader->SetVector3f("textColor", color);
+  fontShader->SetInteger("text", 0);
   glActiveTexture(GL_TEXTURE0);
   glBindVertexArray(ResourceManager::fontVAO);
 
   std::string::const_iterator c;
-  for (c = text.begin(); c != text.end(); c++)
-  {
+  for (c = text.begin(); c != text.end(); c++) {
     Character ch = ResourceManager::Characters[*c];
 
     GLfloat xpos = postion.x + ch.Bearing.x * scale;
