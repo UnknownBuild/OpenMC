@@ -144,6 +144,12 @@
     <ClInclude Include="Src\SpriteRenderer\SpriteRenderer.h" />
     <ClInclude Include="Src\Systems\Window.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="GLSL\Font.fs.glsl" />
+    <None Include="GLSL\Font.vs.glsl" />
+    <None Include="GLSL\Object.fs.glsl" />
+    <None Include="GLSL\Object.vs.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -28,6 +28,9 @@
     <Filter Include="源文件\SpriteRenderer">
       <UniqueIdentifier>{a10133d9-33f3-497c-94eb-db1e536e3cb3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\GLSL">
+      <UniqueIdentifier>{03c17738-542d-4583-8e32-fab9ea4a3d4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\main.cpp">
@@ -74,5 +77,19 @@
     <ClInclude Include="Src\SpriteRenderer\SpriteRenderer.h">
       <Filter>源文件\SpriteRenderer</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GLSL\Object.fs.glsl">
+      <Filter>源文件\GLSL</Filter>
+    </None>
+    <None Include="GLSL\Object.vs.glsl">
+      <Filter>源文件\GLSL</Filter>
+    </None>
+    <None Include="GLSL\Font.fs.glsl">
+      <Filter>源文件\GLSL</Filter>
+    </None>
+    <None Include="GLSL\Font.vs.glsl">
+      <Filter>源文件\GLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>
