@@ -5,13 +5,13 @@ A simple game like Minecraft built by OpenGL.
 ## Required
 
 - Windows
-- Visual Studio 2019 (支持Vcpkg，理论上2017也支持)
-- Python 3 (支持GLAD源码生成)
+- Visual Studio 2019 (支持 Vcpkg，理论上 2017 也支持)
+- Python 3 (支持 GLAD 源码生成)
 - Git
 
 ## Quick Start
 
-运行源码需要安装Vcpkg。
+运行源码需要安装 Vcpkg。
 
 ```
 $ git clone https://github.com/Microsoft/vcpkg.git
@@ -20,9 +20,9 @@ $ .\bootstrap-vcpkg.bat
 $ .\vcpkg integrate install --triplet x64-windows
 ```
 
-然后设置`VCPKG_ROOT`环境变量，为Vcpkg所在目录。
+然后设置`VCPKG_ROOT`环境变量，为 Vcpkg 所在目录。
 
-修改GLAD的默认portfile，改为使用Core版本和指定API为4.6。
+修改 GLAD 的默认 portfile，改为使用 Core 版本和指定 API 为 4.6。
 
 ```
 $ vcpkg edit glad
@@ -48,14 +48,14 @@ vcpkg_configure_cmake(
 安装依赖库。
 
 ```
-$ vcpkg install glfw3:x64-windows glad:x64-windows glm:x64-windows imgui:x64-windows assimp:x64-windows stb:x64-windows
+$ vcpkg install glfw3:x64-windows glad:x64-windows glm:x64-windows imgui:x64-windows assimp:x64-windows stb:x64-windows freetype:x64-windows
 ```
 
-使用Visual Studio启动该仓库内的解决方案，运行即可。
+使用 Visual Studio 启动该仓库内的解决方案，运行即可。
 
 ## Specify Triplet
 
-Quick Start是使用`x64-windows`平台编译运行程序，Vcpkg支持以下的平台。
+Quick Start 是使用`x64-windows`平台编译运行程序，Vcpkg 支持以下的平台。
 
 ```
 $ vcpkg help triplet
@@ -83,4 +83,3 @@ Available architecture triplets:
   <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static</VcpkgTriplet>
 </PropertyGroup>
 ```
-
