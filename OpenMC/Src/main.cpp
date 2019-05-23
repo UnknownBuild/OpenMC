@@ -39,18 +39,11 @@ int main() {
     ResourceManager::LoadModel("Resources/Models/Table/Table.obj", "table");
     // 初始化纹理
     ResourceManager::LoadTexture("Resources/Textures/awesomeface.png", false, "face");
-    // 初始化字体
-    ResourceManager::InitFont("Resources/Fonts/RAVIE.TTF");
-    // 初始化着色器
-    ResourceManager::LoadShader("GLSL/Object.vs.glsl",
-      "GLSL/Object.fs.glsl", "object").Use().
-      SetVector3f("light.color", glm::vec3(1, 0.88, 0.88));
-    ResourceManager::LoadShader("GLSL/Font.vs.glsl",
-      "GLSL/Font.fs.glsl", "font").Use().
-      SetMatrix4("projection", glm::ortho(0.0f, 800.0f, 0.0f, 600.0f));
+
+  
     // 初始化渲染管理器
-    SpriteRenderer* Renderer = new SpriteRenderer(ResourceManager::GetShader("object"),
-      ResourceManager::GetShader("font"));
+    SpriteRenderer* Renderer = new SpriteRenderer();
+    Renderer->SetWindowSize(800, 600);
     // 初始化摄像头
     Camera* camera = new Camera(window);
     camera->SetLookPostion(glm::vec3(20, 20, 30));
@@ -68,15 +61,13 @@ int main() {
         glViewport(0, 0, 800, 600);
 
         // test begin
-        Shader objectShader = ResourceManager::GetShader("object").Use();
+     
+        Renderer->SetLight(glm::vec3(1, 0.8, 0.9), glm::vec3(-3, -10, 0), camera->Position);
 
-        objectShader.SetVector3f("viewPos", camera->Position);
-        objectShader.SetVector3f("light.position", glm::vec3(0, 20, 0));
-        objectShader.SetMatrix4("projection",
-          glm::perspective((float)glm::radians(camera->Zoom), 800.0f / 600.0f, 0.1f, 100.0f));
-        objectShader.SetMatrix4("view", camera->GetViewMatrix());
+        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), 800.0f / 600.0f, 0.1f, 100.0f),
+          camera->GetViewMatrix());
 
-        Renderer->RenderText("NB ShowShow", glm::vec2(100, 0), 1.0);
+        Renderer->RenderText("NB ShowShow", glm::vec2(30, 30), 1.0);
 
         Renderer->DrawSprite(ResourceManager::GetModel("garden"), glm::vec3(0, -4, 0));
 

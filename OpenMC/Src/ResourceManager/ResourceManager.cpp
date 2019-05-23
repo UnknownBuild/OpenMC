@@ -13,54 +13,44 @@ std::map<std::string, Model>        ResourceManager::Models;
 std::map<GLchar, Character>         ResourceManager::Characters;
 unsigned int ResourceManager::fontVAO, ResourceManager::fontVBO;
 
-Shader& ResourceManager::LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, std::string name)
-{
+Shader& ResourceManager::LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, std::string name) {
   Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile);
   return Shaders[name];
 }
 
-Shader& ResourceManager::GetShader(std::string name)
-{
+Shader& ResourceManager::GetShader(std::string name) {
   return Shaders[name];
 }
 
-Texture2D& ResourceManager::LoadTexture(const GLchar* file, GLboolean alpha, std::string name)
-{
+Texture2D& ResourceManager::LoadTexture(const GLchar* file, GLboolean alpha, std::string name) {
   Textures[name] = loadTextureFromFile(file, alpha);
   return Textures[name];
 }
 
-Texture2D& ResourceManager::GetTexture(std::string name)
-{
+Texture2D& ResourceManager::GetTexture(std::string name) {
   return Textures[name];
 }
 
 Model& ResourceManager::LoadModel(const GLchar* file, std::string name) {
   Models[name] = loadModelFromFile(file);
   return Models[name];
-
 }
 Model& ResourceManager::GetModel(std::string name) {
   return Models[name];
 }
 
-void ResourceManager::Clear()
-{
+void ResourceManager::Clear(){
   for (auto iter : Shaders)
     glDeleteProgram(iter.second.ID);
   for (auto iter : Textures)
     glDeleteTextures(1, &iter.second.ID);
-
-
 }
 
-Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLchar * fShaderFile)
-{
+Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLchar * fShaderFile) {
   std::string vertexCode;
   std::string fragmentCode;
   std::string geometryCode;
-  try
-  {
+  try {
     // Open files
     std::ifstream vertexShaderFile(vShaderFile);
     std::ifstream fragmentShaderFile(fShaderFile);
@@ -71,9 +61,7 @@ Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLc
     fragmentShaderFile.close();
     vertexCode = vShaderStream.str();
     fragmentCode = fShaderStream.str();
-  }
-  catch (std::exception e)
-  {
+  } catch (std::exception e) {
     std::cout << "ERROR::SHADER: Failed to read shader files" << std::endl;
   }
   const GLchar* vShaderCode = vertexCode.c_str();
@@ -84,11 +72,9 @@ Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLc
   return shader;
 }
 
-Texture2D ResourceManager::loadTextureFromFile(const GLchar * file, GLboolean alpha)
-{
+Texture2D ResourceManager::loadTextureFromFile(const GLchar * file, GLboolean alpha) {
   Texture2D texture;
-  if (alpha)
-  {
+  if (alpha) {
     texture.Internal_Format = GL_RGBA;
     texture.Image_Format = GL_RGBA;
   }
@@ -128,10 +114,8 @@ void ResourceManager::InitFont(const GLchar* path) {
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-  for (GLubyte c = 0; c < 128; c++)
-  {
-    if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-    {
+  for (GLubyte c = 0; c < 128; c++) {
+    if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
       std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
       continue;
     }

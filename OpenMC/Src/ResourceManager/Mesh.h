@@ -52,10 +52,10 @@ public:
   }
 
   void Draw(Shader* shader) {
-    shader->SetVector3f("light.ambient", glm::vec3(0));
-    shader->SetVector3f("light.diffuse", glm::vec3(0));
-    shader->SetVector3f("light.specular", glm::vec3(0));
-    shader->SetFloat("light.shininess", 32);
+    shader->SetVector3f("dirLight.ambient", glm::vec3(0));
+    shader->SetVector3f("dirLight.diffuse", glm::vec3(0));
+    shader->SetVector3f("dirLight.specular", glm::vec3(0));
+    shader->SetFloat("material.shininess", 32);
     shader->SetInteger("material.specular", 0);
     shader->SetInteger("material.diffuse", 0);
     shader->SetInteger("material.normal", 0);
@@ -66,11 +66,11 @@ public:
       string name = textures[i].type;
       if (name == "color") {
         hasColor = true;
-        shader->SetVector3f("light.ambient", textures[i].ambientColor);
-        shader->SetVector3f("light.diffuse", textures[i].diffuseColor);
-        shader->SetVector3f("light.specular", textures[i].specularColor);
+        shader->SetVector3f("dirLight.ambient", textures[i].ambientColor);
+        shader->SetVector3f("dirLight.diffuse", textures[i].diffuseColor);
+        shader->SetVector3f("dirLight.specular", textures[i].specularColor);
         if (textures[i].shininess != 0) {
-          shader->SetFloat("light.shininess", textures[i].shininess);
+          shader->SetFloat("material.shininess", textures[i].shininess);
         }
       } else {
         hasTexture = true;
