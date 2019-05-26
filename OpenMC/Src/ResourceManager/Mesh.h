@@ -52,25 +52,18 @@ public:
   }
 
   void Draw(Shader* shader) {
-    shader->SetVector3f("dirLight.ambient", glm::vec3(0));
-    shader->SetVector3f("dirLight.diffuse", glm::vec3(0));
-    shader->SetVector3f("dirLight.specular", glm::vec3(0));
     shader->SetFloat("material.shininess", 32);
     shader->SetInteger("material.specular", 0);
     shader->SetInteger("material.diffuse", 0);
-    shader->SetInteger("material.normal", 0);
-    shader->SetInteger("material.height", 0);
     bool hasColor = false;
     bool hasTexture = false;
     for (unsigned int i = 0; i < textures.size(); i++) {
       string name = textures[i].type;
       if (name == "color") {
         hasColor = true;
-        shader->SetVector3f("dirLight.ambient", textures[i].ambientColor);
-        shader->SetVector3f("dirLight.diffuse", textures[i].diffuseColor);
-        shader->SetVector3f("dirLight.specular", textures[i].specularColor);
+        shader->SetVector3f("material.color", glm::max(textures[i].diffuseColor, glm::vec3(0.1)));
         if (textures[i].shininess != 0) {
-          shader->SetFloat("material.shininess", textures[i].shininess);
+          shader->SetFloat("material.shininess", glm::min(textures[i].shininess, 16.0f));
         }
       } else {
         hasTexture = true;

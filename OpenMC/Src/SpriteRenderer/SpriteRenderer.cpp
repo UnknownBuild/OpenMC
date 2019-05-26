@@ -16,23 +16,27 @@ SpriteRenderer::~SpriteRenderer() {
   glDeleteVertexArrays(1, &this->quadVAO);
 }
 
-void SpriteRenderer::SetLight(glm::vec3 color, glm::vec3 direction, glm::vec3 viewPostion) {
+// 设置定向光源
+void SpriteRenderer::SetLight(glm::vec3 direction) {
   this->objectShader->Use();
-  this->objectShader->SetVector3f("dirLight.color", color);
   this->objectShader->SetVector3f("dirLight.direction", direction);
-  this->objectShader->SetVector3f("viewPos", viewPostion);
+  this->objectShader->SetVector3f("dirLight.ambient", glm::vec3(0.1f));
+  this->objectShader->SetVector3f("dirLight.diffuse", glm::vec3(0.2f, 0.1f, 0.3f));
+  this->objectShader->SetVector3f("dirLight.specular", glm::vec3(0.1f));
 }
 
-void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view) {
+void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion) {
   this->objectShader->Use();
   this->objectShader->SetMatrix4("projection", projection);
   this->objectShader->SetMatrix4("view", view);
+  this->objectShader->SetVector3f("viewPos", viewPostion);
 }
 
 void SpriteRenderer::SetWindowSize(int w, int h) {
   this->fontShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
 }
 
+// 渲染带纹理的立方体
 void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec3 position, glm::vec3 size, GLfloat rotate, glm::vec3 color) {
   this->objectShader->Use();
   glm::mat4 model = glm::mat4(1.0f);
@@ -44,14 +48,13 @@ void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec3 position, glm::vec
   this->objectShader->SetMatrix4("model", model);
   this->objectShader->SetInteger("hasTexture", true);
   this->objectShader->SetInteger("hasColor", true);
-  this->objectShader->SetInteger("material.diffuse", 0);
-  this->objectShader->SetInteger("material.shininess", 32);
-  this->objectShader->SetVector3f("strength", glm::vec3(0.3, 0.8, 0.4));
+  this->objectShader->SetInteger("material.diffuse", 0); // 漫反射贴图
+  this->objectShader->SetInteger("material.specular", 0); // 镜面反射贴图
+  this->objectShader->SetInteger("material.shininess", 32); // 镜面反射率
+  this->objectShader->SetInteger("pointCount", 0); // 点光源个数
 
   // Render textured quad
-  this->objectShader->SetVector3f("dirLight.ambient", color);
-  this->objectShader->SetVector3f("dirLight.diffuse", color);
-  this->objectShader->SetVector3f("dirLight.specular", color);
+  this->objectShader->SetVector3f("material.color", color);
 
   glActiveTexture(GL_TEXTURE0);
   texture.Bind();
@@ -61,16 +64,15 @@ void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec3 position, glm::vec
   glBindVertexArray(0);
 }
 
-void SpriteRenderer::DrawSprite(Model& modelObj, glm::vec3 position, glm::vec3 size, GLfloat rotate, glm::vec3 value) {
+void SpriteRenderer::DrawSprite(Model& modelObj, glm::vec3 position, glm::vec3 size, GLfloat rotate) {
   this->objectShader->Use();
-  
+
   glm::mat4 model = glm::mat4(1.0f);
   model = glm::translate(model, position);
   model = glm::rotate(model, rotate, glm::vec3(0.0f, 1.0f, 0.0f));
   model = glm::scale(model, size);
 
   this->objectShader->SetMatrix4("model", model);
-  this->objectShader->SetVector3f("strength", value);
   modelObj.Draw(this->objectShader);
 }
 
@@ -190,4 +192,65 @@ void SpriteRenderer::RenderText(std::string text, glm::vec2 postion, GLfloat sca
   }
   glBindVertexArray(0);
   glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+float DIS_VALUE[] = {
+    7	,   1.0,    0.7	,   1.8     ,
+    13	,   1.0,    0.35,   0.44    ,
+    20	,   1.0,    0.22,   0.20    ,
+    32	,   1.0,    0.14,   0.07    ,
+    50	,   1.0,    0.09,   0.032   ,
+    65	,   1.0,    0.07,   0.017   ,
+    100	,   1.0,    0.045,  0.0075  ,
+    160	,   1.0,    0.027,  0.0028  ,
+    200	,   1.0,    0.022,  0.0019  ,
+    325	,   1.0,    0.014,  0.0007  ,
+    600	,   1.0,    0.007,  0.0002  ,
+    3250,   1.0,    0.0014, 0.000007
+};
+
+// 添加点光源
+void SpriteRenderer::AddPointLight(glm::vec3 pos, glm::vec3 a, glm::vec3 d, glm::vec3 s, float dis) {
+    if (this->pointCount >= 10) return; // 点光源上限
+
+    this->pointLight[this->pointCount].position = pos;
+    this->pointLight[this->pointCount].ambient = a;
+    this->pointLight[this->pointCount].diffuse = d;
+    this->pointLight[this->pointCount].specular = s;
+
+    this->pointLight[this->pointCount].constant = 1.0;
+    this->pointLight[this->pointCount].linear = 0.0;
+    this->pointLight[this->pointCount].quadratic = 0.0;
+
+    for (int i = 0; i < 12; i++) {
+        if (dis < DIS_VALUE[i * 4]) {
+            this->pointLight[this->pointCount].constant = DIS_VALUE[i * 4 + 1];
+            this->pointLight[this->pointCount].linear = DIS_VALUE[i * 4 + 2];
+            this->pointLight[this->pointCount].quadratic = DIS_VALUE[i * 4 + 3];
+            break;
+        }
+    }
+
+    this->objectShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].constant").c_str(),
+        this->pointLight[this->pointCount].constant);
+    this->objectShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].linear").c_str(),
+        this->pointLight[this->pointCount].linear);
+    this->objectShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].quadratic").c_str(),
+        this->pointLight[this->pointCount].quadratic);
+    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].position").c_str(),
+        this->pointLight[this->pointCount].position);
+    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].ambient").c_str(),
+        this->pointLight[this->pointCount].ambient);
+    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].diffuse").c_str(),
+        this->pointLight[this->pointCount].diffuse);
+    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].specular").c_str(),
+        this->pointLight[this->pointCount].specular);
+
+    this->pointCount++;
+    this->objectShader->SetInteger("pointCount", this->pointCount);
+}
+// 清除点光源
+void SpriteRenderer::ClearPointLight() {
+    this->pointCount = 0;
+    this->objectShader->SetInteger("pointCount", this->pointCount);
 }

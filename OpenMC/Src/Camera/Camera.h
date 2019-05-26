@@ -9,8 +9,8 @@
 // 默认参数
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 2.5f;
-const float SENSITIVITY = 0.04f;
+const float SPEED = 10.0f;
+const float SENSITIVITY = 0.05f;
 const float ZOOM = 45.0f;
 
 enum CameraKey { KEY_CHANGE };
@@ -51,6 +51,8 @@ public:
     void TransitionTo(glm::vec3 target, float p);
 
 private:
+
+    void setAngle();
     GLFWwindow* window;
     glm::vec3 oldPostion;
     bool keys[100];

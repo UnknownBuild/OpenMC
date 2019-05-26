@@ -1,6 +1,21 @@
 ﻿#pragma once
 #include "../ResourceManager/ResourceManager.h"
 
+struct PointList {
+    int id;
+
+    glm::vec3 position;
+
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
+
 class SpriteRenderer {
  public:
   SpriteRenderer();
@@ -13,15 +28,18 @@ class SpriteRenderer {
   // 渲染模型
   void DrawSprite(Model& model, glm::vec3 position,
                   glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f),
-                  GLfloat rotate = 0.0f,
-                  glm::vec3 value = glm::vec3(0.4, 1, 0.3));
+                  GLfloat rotate = 0.0f);
   // 渲染文本
   void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
                   glm::vec3 color = glm::vec3(1,1,1));
   // 设置参数
-  void SetView(glm::mat4 projection, glm::mat4 view);
+  void SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion);
   // 设置平行光源
-  void SetLight(glm::vec3 color, glm::vec3 direction, glm::vec3 viewPostion);
+  void SetLight(glm::vec3 direction);
+  // 添加点光源
+  void AddPointLight(glm::vec3 pos, glm::vec3 a, glm::vec3 d, glm::vec3 s, float dis);
+  // 清除点光源
+  void ClearPointLight();
   // 更改渲染范围
   void SetWindowSize(int w, int h);
  private:
@@ -29,4 +47,6 @@ class SpriteRenderer {
   Shader* objectShader;
   Shader* fontShader;
   unsigned int quadVAO;
+  PointList pointLight[10];
+  int pointCount;
 };

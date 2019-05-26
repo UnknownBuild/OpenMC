@@ -62,18 +62,28 @@ int main() {
 
         // test begin
      
-        Renderer->SetLight(glm::vec3(1, 0.8, 0.9), glm::vec3(-3, -10, 0), camera->Position);
+        Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
+
+        Renderer->ClearPointLight();
+
+        Renderer->AddPointLight(glm::vec3(3, 8, 3), glm::vec3(0.3), glm::vec3(1, 0, 0), glm::vec3(0.3, 0, 0), 100);
+
+        Renderer->AddPointLight(glm::vec3(-3, 8, 3), glm::vec3(0.3), glm::vec3(0, 1, 0), glm::vec3(0, 0.3, 0), 100);
+
+        Renderer->AddPointLight(glm::vec3(3, 8, -3), glm::vec3(0.3), glm::vec3(0, 0, 1), glm::vec3(0, 0, 0.3), 100);
+
+        Renderer->AddPointLight(glm::vec3(-3, 8, -3), glm::vec3(0.3), glm::vec3(1, 1, 0), glm::vec3(0.3, 0.3, 0), 100);
 
         Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), 800.0f / 600.0f, 0.1f, 100.0f),
-          camera->GetViewMatrix());
+          camera->GetViewMatrix(), camera->Position);
 
         Renderer->RenderText("NB ShowShow", glm::vec2(30, 30), 1.0);
 
         Renderer->DrawSprite(ResourceManager::GetModel("garden"), glm::vec3(0, -4, 0));
 
-        Renderer->DrawSprite(ResourceManager::GetModel("table"), glm::vec3(0, 4, 0));
+        Renderer->DrawSprite(ResourceManager::GetModel("table"), glm::vec3(0, -1, 0));
 
-        Renderer->DrawSprite(ResourceManager::GetTexture("face"), glm::vec3(4, 4, 0));
+        // Renderer->DrawSprite(ResourceManager::GetTexture("face"), glm::vec3(4, 4, 0));
 
         // test end
 

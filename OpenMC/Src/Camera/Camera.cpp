@@ -1,7 +1,7 @@
 ﻿#include"Camera.h"
+#define M_PI       3.14159265358979323846
 
 static Camera* CameraInst;
-
 
 Camera::Camera(GLFWwindow* window) {
     CameraInst = this;
@@ -23,11 +23,7 @@ Camera::Camera(GLFWwindow* window) {
 }
 
 glm::mat4 Camera::GetViewMatrix() {
-    if (this->freedomView) {
-        return glm::lookAt(Position, Position + Front, Up);
-    } else {
-        return glm::lookAt(Position, Look, Up);
-    }
+    return glm::lookAt(Position, Position + Front, Up);
 }
 
 void Camera::Update() {
@@ -37,13 +33,27 @@ void Camera::Update() {
 
 void Camera::SetLookPostion(glm::vec3 pos, glm::vec3 look) {
     this->Position = pos;
-    this->Look = look;
+    this->Front = look - this->Position;
+    this->setAngle();
+        
 }
 
 void Camera::SetViewPostion(glm::vec3 pos, glm::vec3 front, glm::vec3 up) {
     this->Position = pos;
     this->Front = front;
     this->Up = up;
+    this->setAngle();
+}
+
+// 设置摄像机角度
+void Camera::setAngle() {
+    glm::vec3 front = glm::normalize(this->Front);
+    this->Yaw = atan2(front.z, front.x);
+    this->Yaw = ((this->Yaw) / M_PI) * 180.0f;
+    this->Pitch = asin(front.y);
+    this->Pitch = ((this->Pitch) / M_PI) * 180.0f;
+    if (this->Pitch > 89.0f) this->Pitch = 89.0f;
+    if (this->Pitch < -89.0f) this->Pitch = -89.0f;
 }
 
 void Camera::TransitionTo(glm::vec3 target, float p) {
@@ -104,10 +114,13 @@ void Camera::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
         CameraInst->lastX = xpos;
         CameraInst->lastY = ypos;
         CameraInst->firstMouse = false;
+        // printf("first: %lf, %lf\n", xpos, ypos);
     }
 
     float xoffset = xpos - CameraInst->lastX;
     float yoffset = CameraInst->lastY - ypos;
+    // printf("move: %lf, %lf\n", xpos, ypos);
+    // printf("offset: %f, %f\n", xoffset, yoffset);
 
     CameraInst->lastX = xpos;
     CameraInst->lastY = ypos;
@@ -118,10 +131,8 @@ void Camera::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     CameraInst->Yaw += xoffset;
     CameraInst->Pitch += yoffset;
 
-    if (CameraInst->Pitch > 89.0f)
-        CameraInst->Pitch = 89.0f;
-    if (CameraInst->Pitch < -89.0f)
-        CameraInst->Pitch = -89.0f;
+    if (CameraInst->Pitch > 89.0f) CameraInst->Pitch = 89.0f;
+    if (CameraInst->Pitch < -89.0f) CameraInst->Pitch = -89.0f;
 
     glm::vec3 front;
     front.x = cos(glm::radians(CameraInst->Yaw)) * cos(glm::radians(CameraInst->Pitch));
