@@ -36,9 +36,9 @@ SpriteRenderer::~SpriteRenderer() {
 void SpriteRenderer::SetLight(glm::vec3 direction) {
   this->objectShader->Use();
   this->objectShader->SetVector3f("dirLight.direction", direction);
-  this->objectShader->SetVector3f("dirLight.ambient", glm::vec3(0.5f));
-  this->objectShader->SetVector3f("dirLight.diffuse", glm::vec3(0.7f));
-  this->objectShader->SetVector3f("dirLight.specular", glm::vec3(0.4f));
+  this->objectShader->SetVector3f("dirLight.ambient", glm::vec3(0.3f));
+  this->objectShader->SetVector3f("dirLight.diffuse", glm::vec3(0.65f));
+  this->objectShader->SetVector3f("dirLight.specular", glm::vec3(0.2f));
 }
 
 void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion) {

@@ -20,6 +20,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     GLFWwindow* window = Singleton<Window>::GetInstance()->Create("OpenMC", 800, 600, false);
     if (window == NULL) {
@@ -74,6 +75,10 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // 多重缓冲
+    glEnable(GL_MULTISAMPLE);
+    // Gamma 校正
+    // glEnable(GL_FRAMEBUFFER_SRGB);
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         camera->Update();
@@ -92,7 +97,15 @@ int main() {
 
         Renderer->ClearPointLight();
 
-        //Renderer->AddPointLight(glm::vec3(3, 8, 3), glm::vec3(0.3), glm::vec3(1, 0, 0), glm::vec3(0.3, 0, 0), 100);
+        // 渲染火把
+        Texture2D torch = ResourceManager::GetTexture("torch");
+        Renderer->DrawBlock(torch, glm::vec3(5, 1, -3));
+        Renderer->AddPointLight(glm::vec3(5, 1, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
+
+
+
+        Renderer->DrawBlock(torch, glm::vec3(-3, 1, 5));
+        Renderer->AddPointLight(glm::vec3(-3, 1, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0.7), glm::vec3(0.3, 0, 0.3), 100);
 
         //Renderer->AddPointLight(glm::vec3(-3, 8, 3), glm::vec3(0.3), glm::vec3(0, 1, 0), glm::vec3(0, 0.3, 0), 100);
 
@@ -114,7 +127,7 @@ int main() {
 
         // 渲染草方块
         Texture2D grass = ResourceManager::GetTexture("grass");
-        glm::vec3 topColor = glm::vec3(0.5, 0.8, 0.4);
+        glm::vec3 topColor = glm::vec3(0.567, 0.732, 0.366);
         glm::vec3 bottomColor = glm::vec3(0.6, 0.45, 0.37);
         Renderer->DrawBlock(grass, topColor, bottomColor, glm::vec3(0, 0, 0));
         Renderer->DrawBlock(grass, topColor, bottomColor, glm::vec3(1, 0, 1));
@@ -122,6 +135,12 @@ int main() {
         Renderer->DrawBlock(grass, topColor, bottomColor, glm::vec3(2, 0, 1));
         Renderer->DrawBlock(grass, topColor, bottomColor, glm::vec3(3, 0, 2));
         Renderer->DrawBlock(grass, topColor, bottomColor, glm::vec3(3, 0, 1));
+
+        for (int i = -10; i < 10; i++) {
+            for (int j = -10; j < 10; j++) {
+                Renderer->DrawBlock(grass, topColor, bottomColor, glm::vec3(i, -1, j));
+            }
+        }
 
         // 渲染圆石
         glm::vec3 stoneColor = glm::vec3(0.8);
@@ -145,12 +164,41 @@ int main() {
         Renderer->DrawBlock(oak_planks, glm::vec3(-3, 1, 4));
         Renderer->DrawBlock(oak_planks, glm::vec3(-4, 0, 4));
 
+        Renderer->DrawBlock(oak_planks, glm::vec3(-4, 0, -3));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-4, 1, -3));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-4, 2, -3));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-3, 0, -3));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-3, 1, -3));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-3, 2, -3));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-5, 0, -3));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-5, 1, -3));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-5, 2, -3));
+
+        Renderer->DrawBlock(oak_planks, glm::vec3(-4, 0, -2));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-4, 2, -2));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-3, 0, -2));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-3, 1, -2));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-3, 2, -2));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-5, 0, -2));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-5, 1, -2));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-5, 2, -2));
+
+        Renderer->DrawBlock(oak_planks, glm::vec3(-4, 0, -1));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-4, 2, -1));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-3, 0, -1));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-3, 1, -1));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-3, 2, -1));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-5, 0, -1));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-5, 1, -1));
+        Renderer->DrawBlock(oak_planks, glm::vec3(-5, 2, -1));
+
         // 渲染岩石
         Texture2D stone = ResourceManager::GetTexture("stone");
         Renderer->DrawBlock(stone, glm::vec3(3, 0, -3));
         Renderer->DrawBlock(stone, glm::vec3(3, 0, -4));
         Renderer->DrawBlock(stone, glm::vec3(3, 1, -4));
         Renderer->DrawBlock(stone, glm::vec3(4, 0, -4));
+
 
         // 渲染工作台
         Texture2D tabel_top = ResourceManager::GetTexture("tabel_top");
