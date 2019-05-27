@@ -33,15 +33,15 @@ void Camera::Update() {
 
 void Camera::SetLookPostion(glm::vec3 pos, glm::vec3 look) {
     this->Position = pos;
-    this->Front = look - this->Position;
+    this->Front = glm::normalize(look - this->Position);
     this->setAngle();
         
 }
 
 void Camera::SetViewPostion(glm::vec3 pos, glm::vec3 front, glm::vec3 up) {
     this->Position = pos;
-    this->Front = front;
-    this->Up = up;
+    this->Front = glm::normalize(front);
+    this->Up = glm::normalize(up);
     this->setAngle();
 }
 

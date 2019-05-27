@@ -22,8 +22,8 @@ Shader& ResourceManager::GetShader(std::string name) {
   return Shaders[name];
 }
 
-Texture2D& ResourceManager::LoadTexture(const GLchar* file, GLboolean alpha, std::string name) {
-  Textures[name] = loadTextureFromFile(file, alpha);
+Texture2D& ResourceManager::LoadTexture(const GLchar* file, std::string name) {
+  Textures[name] = loadTextureFromFile(file);
   return Textures[name];
 }
 
@@ -72,12 +72,8 @@ Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLc
   return shader;
 }
 
-Texture2D ResourceManager::loadTextureFromFile(const GLchar * file, GLboolean alpha) {
+Texture2D ResourceManager::loadTextureFromFile(const GLchar * file) {
   Texture2D texture;
-  if (alpha) {
-    texture.Internal_Format = GL_RGBA;
-    texture.Image_Format = GL_RGBA;
-  }
   int width, height, nrChannels;
   unsigned char* image = stbi_load(file, &width, &height, &nrChannels, 0);
   if (image) {
@@ -92,6 +88,38 @@ Texture2D ResourceManager::loadTextureFromFile(const GLchar * file, GLboolean al
   stbi_image_free(image);
   return texture;
 }
+
+unsigned int ResourceManager::LoadCubemap(vector<std::string> faces) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+            );
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    return textureID;
+}
+
 
 
 Model ResourceManager::loadModelFromFile(const GLchar* file) {
