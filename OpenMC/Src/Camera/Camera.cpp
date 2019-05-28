@@ -35,7 +35,6 @@ void Camera::SetLookPostion(glm::vec3 pos, glm::vec3 look) {
     this->Position = pos;
     this->Front = glm::normalize(look - this->Position);
     this->setAngle();
-        
 }
 
 void Camera::SetViewPostion(glm::vec3 pos, glm::vec3 front, glm::vec3 up) {
