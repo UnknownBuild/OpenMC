@@ -102,7 +102,7 @@ void SpriteRenderer::DrawBlock(Texture2D& top, Texture2D& side, Texture2D& botto
 }
 
 // 渲染噪声纹理方块
-void SpriteRenderer::DrawBlock(glm::vec3 color, glm::vec3 position[], int count) {
+void SpriteRenderer::DrawBlock(glm::vec4 color, glm::vec3 position[], int count) {
     count = count > 1024 ? 1024 : count; // 最大单次渲染个数
     this->setBlockShader();
 
@@ -111,7 +111,7 @@ void SpriteRenderer::DrawBlock(glm::vec3 color, glm::vec3 position[], int count)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     this->blockShader->SetInteger("hasColor", true);
-    this->blockShader->SetVector3f("material.color", color); // glm::vec3(0.5, 0.8, 0.4)
+    this->blockShader->SetVector4f("material.color", color); // glm::vec3(0.5, 0.8, 0.4)
 
     glActiveTexture(GL_TEXTURE0);
 
@@ -122,7 +122,6 @@ void SpriteRenderer::DrawBlock(glm::vec3 color, glm::vec3 position[], int count)
     glBindVertexArray(this->topVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-
     glBindVertexArray(this->bottomVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
@@ -131,7 +130,7 @@ void SpriteRenderer::DrawBlock(glm::vec3 color, glm::vec3 position[], int count)
 }
 
 // 渲染上下噪声纹理方块
-void SpriteRenderer::DrawBlock(Texture2D& texture, glm::vec3 top, glm::vec3 bottom, glm::vec3 position[], int count) {
+void SpriteRenderer::DrawBlock(Texture2D& texture, glm::vec4 top, glm::vec4 bottom, glm::vec3 position[], int count) {
     count = count > 1024 ? 1024 : count; // 最大单次渲染个数
     this->setBlockShader();
 
@@ -147,11 +146,11 @@ void SpriteRenderer::DrawBlock(Texture2D& texture, glm::vec3 top, glm::vec3 bott
 
     this->noise->Bind();
     this->blockShader->SetInteger("hasColor", true);
-    this->blockShader->SetVector3f("material.color", top);
+    this->blockShader->SetVector4f("material.color", top);
     glBindVertexArray(this->topVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-    this->blockShader->SetVector3f("material.color", bottom);
+    this->blockShader->SetVector4f("material.color", bottom);
     glBindVertexArray(this->bottomVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
@@ -443,9 +442,9 @@ void SpriteRenderer::initRenderData() {
     glBindVertexArray(0);
 }
 
-void SpriteRenderer::RenderText(std::string text, glm::vec2 position, GLfloat scale, glm::vec3 color) {
+void SpriteRenderer::RenderText(std::string text, glm::vec2 position, GLfloat scale, glm::vec4 color) {
     flatShader->Use();
-    flatShader->SetVector3f("textColor", color);
+    flatShader->SetVector4f("textColor", color);
     flatShader->SetInteger("text", 0);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(ResourceManager::fontVAO);
@@ -551,10 +550,10 @@ void SpriteRenderer::RenderSkyBox() {
     glDepthFunc(GL_LESS);
 }
 // 渲染2D纹理
-void SpriteRenderer::DrawTexture(Texture2D& texture, glm::vec2 position, float scale, glm::vec3 color) {
+void SpriteRenderer::DrawTexture(Texture2D& texture, glm::vec2 position, float scale, glm::vec4 color) {
 
     this->flatShader->Use();
-    flatShader->SetVector3f("textColor", color);
+    flatShader->SetVector4f("textColor", color);
     flatShader->SetInteger("text", 0);
 
     glBindVertexArray(this->flatVAO);

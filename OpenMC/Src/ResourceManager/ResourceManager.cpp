@@ -22,8 +22,8 @@ Shader& ResourceManager::GetShader(std::string name) {
   return Shaders[name];
 }
 
-Texture2D& ResourceManager::LoadTexture(const GLchar* file, std::string name) {
-  Textures[name] = loadTextureFromFile(file);
+Texture2D& ResourceManager::LoadTexture(const GLchar* file, std::string name, bool alpha) {
+  Textures[name] = loadTextureFromFile(file, alpha);
   return Textures[name];
 }
 
@@ -77,17 +77,20 @@ Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLc
   return shader;
 }
 
-Texture2D ResourceManager::loadTextureFromFile(const GLchar * file) {
+Texture2D ResourceManager::loadTextureFromFile(const GLchar * file, bool alpha) {
   Texture2D texture;
   int width, height, nrChannels;
   unsigned char* image = stbi_load(file, &width, &height, &nrChannels, 0);
   if (image) {
     GLenum format = GL_RED;
-    if (nrChannels == 3)
-      format = GL_RGB;
+    if (alpha)
+        format = GL_RGBA;
+    else if (nrChannels == 3)
+        format = GL_RGB;
     else if (nrChannels == 4)
-      format = GL_RGBA;
+        format = GL_RGBA;
     texture.Image_Format = format;
+    texture.Internal_Format = format;
   }
   texture.Generate(width, height, image);
   stbi_image_free(image);

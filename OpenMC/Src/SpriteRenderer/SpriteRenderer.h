@@ -32,12 +32,12 @@ class SpriteRenderer {
   // 渲染方块
   void DrawBlock(Texture2D& top, Texture2D& side, Texture2D& bottom, glm::vec3 position[], int count);
   void DrawBlock(Texture2D& texture, glm::vec3 position[], int count);
-  void DrawBlock(Texture2D& texture, glm::vec3 top, glm::vec3 bottom, glm::vec3 position[], int count);
-  void DrawBlock(glm::vec3 color, glm::vec3 position[], int count);
+  void DrawBlock(Texture2D& texture, glm::vec4 top, glm::vec4 bottom, glm::vec3 position[], int count);
+  void DrawBlock(glm::vec4 color, glm::vec3 position[], int count);
 
   // 渲染文本
   void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
-                  glm::vec3 color = glm::vec3(1,1,1));
+                  glm::vec4 color = glm::vec4(1));
   // 设置参数
   void SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion);
   // 设置平行光源
@@ -51,7 +51,7 @@ class SpriteRenderer {
   // 渲染天空盒
   void RenderSkyBox();
   // 渲染2D纹理
-  void DrawTexture(Texture2D& texture, glm::vec2 position, float scale = 1.0, glm::vec3 color = glm::vec3(1));
+  void DrawTexture(Texture2D& texture, glm::vec2 position, float scale = 1.0, glm::vec4 color = glm::vec4(1));
 
  private:
   void initRenderData();

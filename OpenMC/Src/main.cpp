@@ -61,6 +61,7 @@ int main() {
     ResourceManager::LoadTexture("Resources/Textures/blocks/sand.png", "sand");
 
     ResourceManager::LoadTexture("Resources/Textures/blocks/torch.png", "torch");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/glass.png", "glass");
   
     // 初始化渲染管理器
     SpriteRenderer* Renderer = new SpriteRenderer();
@@ -124,14 +125,13 @@ int main() {
         glm::vec3 torchPosition[] = {
             glm::vec3(5, 1, -3),
             glm::vec3(-3, 1, 5)
-
         };
-        Renderer->DrawBlock(torch, glm::vec3(1), glm::vec3(1), torchPosition, 2);
+        Renderer->DrawBlock(torch, glm::vec4(0), glm::vec4(0), torchPosition, 2);
 
         // 渲染草方块
         Texture2D grass = ResourceManager::GetTexture("grass");
-        glm::vec3 topColor = glm::vec3(0.567, 0.732, 0.366);
-        glm::vec3 bottomColor = glm::vec3(0.6, 0.45, 0.37);
+        glm::vec4 topColor = glm::vec4(0.567, 0.732, 0.366, 1);
+        glm::vec4 bottomColor = glm::vec4(0.6, 0.45, 0.37, 1);
         glm::vec3 grassPosition[500] = {
             glm::vec3(1, 0, 1),
             glm::vec3(2, 0, 2),
@@ -148,7 +148,7 @@ int main() {
         Renderer->DrawBlock(grass, topColor, bottomColor, grassPosition, grassCount);
 
         //// 渲染圆石
-        glm::vec3 stoneColor = glm::vec3(0.8);
+        glm::vec4 stoneColor = glm::vec4(0.8, 0.8, 0.8, 1);
         glm::vec3 stonePosition[] = {
             glm::vec3(3, 0, 3),
             glm::vec3(3, 0, 4),
@@ -204,8 +204,6 @@ int main() {
 
         Renderer->DrawBlock(oak_planks, oakPostions, 29);
 
-
-
         //// 渲染岩石
         Texture2D stone = ResourceManager::GetTexture("stone");
         glm::vec3 stonePosition2[] = {
@@ -215,6 +213,16 @@ int main() {
             glm::vec3(4, 0, -4),
         };
         Renderer->DrawBlock(stone, stonePosition2, 4);
+
+        //// 渲染玻璃
+        Texture2D glass = ResourceManager::GetTexture("glass");
+        glm::vec3 glassPosition[] = {
+            glm::vec3(7, 0, -3),
+            glm::vec3(7, 0, -4),
+            glm::vec3(7, 1, -4),
+            glm::vec3(8, 0, -4),
+        };
+        Renderer->DrawBlock(glass, glassPosition, 4);
 
 
         //// 渲染工作台
