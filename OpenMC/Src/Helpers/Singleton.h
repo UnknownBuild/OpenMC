@@ -1,5 +1,4 @@
-#ifndef __SINGLETON_H__
-#define __SINGLETON_H__
+﻿#pragma
 
 template <class T>
 class Singleton final {
@@ -12,5 +11,3 @@ public:
 private:
     Singleton() {}
 };
-
-#endif

@@ -1,0 +1,12 @@
+[
+  {
+    "id": 0,
+    "name": "air",
+    "type": 0
+  },
+  {
+    "id": 1,
+    "name": "stone",
+    "type": 1
+  }
+]

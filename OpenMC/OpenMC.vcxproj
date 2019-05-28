@@ -72,7 +72,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)ImGui\Src;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)ImGui\Src;$(SolutionDir)OpenMC\Src;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)ImGui\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -130,12 +130,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\Camera\Camera.cpp" />
+    <ClCompile Include="Src\Helpers\Config.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\ResourceManager\ResourceManager.cpp" />
     <ClCompile Include="Src\SpriteRenderer\SpriteRenderer.cpp" />
+    <ClCompile Include="Src\World\Database\BlockManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Camera\Camera.h" />
+    <ClInclude Include="Src\Helpers\Config.h" />
+    <ClInclude Include="Src\Helpers\EnvPath.h" />
     <ClInclude Include="Src\Helpers\Singleton.h" />
     <ClInclude Include="Src\Helpers\UtilTool.h" />
     <ClInclude Include="Src\ResourceManager\Mesh.h" />
@@ -143,8 +147,19 @@
     <ClInclude Include="Src\ResourceManager\ResourceManager.h" />
     <ClInclude Include="Src\ResourceManager\Shader.h" />
     <ClInclude Include="Src\ResourceManager\Texture.h" />
+    <ClInclude Include="Src\Scenes\Scene.h" />
+    <ClInclude Include="Src\Scenes\SceneGame.h" />
+    <ClInclude Include="Src\Scenes\SceneMenu.h" />
     <ClInclude Include="Src\SpriteRenderer\SpriteRenderer.h" />
+    <ClInclude Include="Src\Systems\Input.h" />
     <ClInclude Include="Src\Systems\Window.h" />
+    <ClInclude Include="Src\World\Database\BlockData.h" />
+    <ClInclude Include="Src\World\Database\BlockManager.h" />
+    <ClInclude Include="Src\World\Types\Block.h" />
+    <ClInclude Include="Src\World\Types\Chunk.h" />
+    <ClInclude Include="Src\World\Types\Region.h" />
+    <ClInclude Include="Src\World\Types\RenderChunk.h" />
+    <ClInclude Include="Src\World\World.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GLSL\Font.fs.glsl" />
