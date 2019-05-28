@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <glad/glad.h>
+#include <vector>
 
 class Texture2D {
 public:
@@ -13,8 +14,7 @@ public:
   unsigned int Filter_Min;
   unsigned int Filter_Max;
   Texture2D()
-    : Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB), Wrap_S(GL_MIRRORED_REPEAT), Wrap_T(GL_MIRRORED_REPEAT), Filter_Min(GL_NEAREST), Filter_Max(GL_NEAREST)
-  {
+    : Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB), Wrap_S(GL_MIRRORED_REPEAT), Wrap_T(GL_MIRRORED_REPEAT), Filter_Min(GL_NEAREST), Filter_Max(GL_NEAREST) {
     glGenTextures(1, &this->ID);
   }
 
@@ -33,8 +33,8 @@ public:
     // Unbind texture
     glBindTexture(GL_TEXTURE_2D, 0);
   };
-    
+
   void Bind() const {
-    glBindTexture(GL_TEXTURE_2D, this->ID);
+     glBindTexture(GL_TEXTURE_2D, this->ID);
   };
 };

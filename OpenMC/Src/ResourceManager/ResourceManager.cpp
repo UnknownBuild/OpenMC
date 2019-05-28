@@ -27,6 +27,11 @@ Texture2D& ResourceManager::LoadTexture(const GLchar* file, std::string name) {
   return Textures[name];
 }
 
+Texture2D& ResourceManager::LoadTexture(vector<std::string> file, std::string name) {
+    Textures[name] = loadCubemap(file);
+    return Textures[name];
+}
+
 Texture2D& ResourceManager::GetTexture(std::string name) {
   return Textures[name];
 }
@@ -89,10 +94,10 @@ Texture2D ResourceManager::loadTextureFromFile(const GLchar * file) {
   return texture;
 }
 
-unsigned int ResourceManager::LoadCubemap(vector<std::string> faces) {
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+Texture2D ResourceManager::loadCubemap(vector<std::string> faces) {
+    Texture2D texture;
+    glGenTextures(1, &texture.ID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture.ID);
 
     int width, height, nrChannels;
     for (unsigned int i = 0; i < faces.size(); i++)
@@ -116,8 +121,7 @@ unsigned int ResourceManager::LoadCubemap(vector<std::string> faces) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    return textureID;
+    return texture;
 }
 
 

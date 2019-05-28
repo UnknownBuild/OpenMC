@@ -30,17 +30,18 @@ public:
   static Shader&   LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, std::string name);
   static Shader&   GetShader(std::string name);
   static Texture2D& LoadTexture(const GLchar* file, std::string name);
+  static Texture2D& LoadTexture(vector<std::string> file, std::string name);
   static Texture2D& GetTexture(std::string name);
   static Model& LoadModel(const GLchar* file, std::string name);
   static Model& GetModel(std::string name);
   static void InitFont(const GLchar* path);
   static void Clear();
 
-  static unsigned int LoadCubemap(vector<std::string> faces);
 private:
   ResourceManager() {}
   static Shader    loadShaderFromFile(const GLchar* vShaderFile, 
                                       const GLchar* fShaderFile);
+  static Texture2D loadCubemap(vector<std::string> faces);
   static Texture2D loadTextureFromFile(const GLchar* file);
   static Model     loadModelFromFile(const GLchar* file);
 };

@@ -119,12 +119,6 @@ int main() {
 
         Renderer->RenderText("NB ShowShow", glm::vec2(30, 30), 1.0);
 
-        // Renderer->DrawSprite(ResourceManager::GetModel("garden"), glm::vec3(0, -4, 0));
-
-        // Renderer->DrawSprite(ResourceManager::GetModel("table"), glm::vec3(0, -10, 0));
-
-        // Renderer->DrawSprite(ResourceManager::GetTexture("face"), glm::vec3(4, 4, 0), glm::vec3(0.6));
-
         // 渲染火把
         Texture2D torch = ResourceManager::GetTexture("torch");
         glm::vec3 torchPosition[] = {
@@ -132,7 +126,7 @@ int main() {
             glm::vec3(-3, 1, 5)
 
         };
-        Renderer->DrawBlock(torch, torchPosition, 2);
+        Renderer->DrawBlock(torch, glm::vec3(1), glm::vec3(1), torchPosition, 2);
 
         // 渲染草方块
         Texture2D grass = ResourceManager::GetTexture("grass");
@@ -231,8 +225,11 @@ int main() {
             glm::vec3(3, 3, 3),
         };
         Renderer->DrawBlock(tabel_top, tabel_side, oak_planks, tablePosition, 2);
-        
 
+
+        // 渲染2D纹理
+        Renderer->DrawTexture(tabel_top, glm::vec2(100, 100), 10);
+        
         {
             ImGui::Begin("Application", NULL, ImGuiWindowFlags_AlwaysAutoResize);
             ImGui::SliderFloat("testColorX", &testColor.x, 0, 1);
@@ -245,7 +242,7 @@ int main() {
 
         ImGui::Render();
 
-        Renderer->RenderSky();
+        Renderer->RenderSkyBox();
 
         int display_w, display_h;
         glfwMakeContextCurrent(window);

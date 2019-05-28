@@ -48,23 +48,36 @@ class SpriteRenderer {
   void ClearPointLight();
   // 更改渲染范围
   void SetWindowSize(int w, int h);
-
-  void RenderSky();
+  // 渲染天空盒
+  void RenderSkyBox();
+  // 渲染2D纹理
+  void DrawTexture(Texture2D& texture, glm::vec2 position, float scale = 1.0, glm::vec3 color = glm::vec3(1));
 
  private:
   void initRenderData();
   void setBlockShader();
+
+  // 着色器
   Shader* objectShader;
   Shader* blockShader;
   Shader* skyShader;
-  Shader* fontShader;
+  Shader* flatShader;
+
+  // 纹理
   Texture2D* noise;
-  unsigned int skyTexture;
+  Texture2D* skyBox;
+
+  // VAO
   unsigned int quadVAO;
-  unsigned int topFace;
-  unsigned int bottomFace;
   unsigned int skyboxVAO;
+  unsigned int topVAO;
+  unsigned int bottomVAO;
+  unsigned int flatVAO;
+
   unsigned int instanceVBO;
+  unsigned int flatVBO;
+
+  // 点光源
   PointList pointLight[10];
   int pointCount;
 };

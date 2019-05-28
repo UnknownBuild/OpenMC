@@ -6,8 +6,8 @@ SpriteRenderer::SpriteRenderer() {
         "GLSL/Object.fs.glsl", "object");
     this->blockShader = &ResourceManager::LoadShader("GLSL/Block.vs.glsl",
         "GLSL/Block.fs.glsl", "block");
-    this->fontShader = &ResourceManager::LoadShader("GLSL/Font.vs.glsl",
-        "GLSL/Font.fs.glsl", "font");
+    this->flatShader = &ResourceManager::LoadShader("GLSL/2D.vs.glsl",
+        "GLSL/2D.fs.glsl", "font");
     this->skyShader = &ResourceManager::LoadShader("GLSL/Sky.vs.glsl",
         "GLSL/Sky.fs.glsl", "sky");
     // 初始化字体
@@ -17,8 +17,7 @@ SpriteRenderer::SpriteRenderer() {
     // 初始化噪声纹理
     this->noise = &ResourceManager::LoadTexture("Resources/Textures/blocks/grass_block_top.png", "noise");
     // 初始化天空盒
-    vector<std::string> faces
-    {
+    vector<std::string> faces {
         "Resources/Textures/sky/cloudtop_ft.jpg",
         "Resources/Textures/sky/cloudtop_bk.jpg",
         "Resources/Textures/sky/cloudtop_up.jpg",
@@ -27,7 +26,7 @@ SpriteRenderer::SpriteRenderer() {
         "Resources/Textures/sky/cloudtop_lf.jpg",
 
     };
-    this->skyTexture = ResourceManager::LoadCubemap(faces);
+    this->skyBox = &ResourceManager::LoadTexture(faces, "skybox");
 }
 
 SpriteRenderer::~SpriteRenderer() {
@@ -56,7 +55,7 @@ void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 vie
 }
 
 void SpriteRenderer::SetWindowSize(int w, int h) {
-    this->fontShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
+    this->flatShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
 }
 
 // 渲染单纹理方块
@@ -92,11 +91,11 @@ void SpriteRenderer::DrawBlock(Texture2D& top, Texture2D& side, Texture2D& botto
     glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
 
     top.Bind();
-    glBindVertexArray(this->topFace);
+    glBindVertexArray(this->topVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
     bottom.Bind();
-    glBindVertexArray(this->bottomFace);
+    glBindVertexArray(this->bottomVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
     glBindVertexArray(0);
@@ -120,11 +119,11 @@ void SpriteRenderer::DrawBlock(glm::vec3 color, glm::vec3 position[], int count)
     glBindVertexArray(this->quadVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
 
-    glBindVertexArray(this->topFace);
+    glBindVertexArray(this->topVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
 
-    glBindVertexArray(this->bottomFace);
+    glBindVertexArray(this->bottomVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
     glBindVertexArray(0);
@@ -149,11 +148,11 @@ void SpriteRenderer::DrawBlock(Texture2D& texture, glm::vec3 top, glm::vec3 bott
     this->noise->Bind();
     this->blockShader->SetInteger("hasColor", true);
     this->blockShader->SetVector3f("material.color", top);
-    glBindVertexArray(this->topFace);
+    glBindVertexArray(this->topVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
     this->blockShader->SetVector3f("material.color", bottom);
-    glBindVertexArray(this->bottomFace);
+    glBindVertexArray(this->bottomVAO);
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
     glBindVertexArray(0);
@@ -218,7 +217,6 @@ void SpriteRenderer::initRenderData() {
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1024, NULL, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 
     float vertices[] = {
         // 后面
@@ -313,11 +311,11 @@ void SpriteRenderer::initRenderData() {
 
     unsigned int indicesTop[] = { 0, 1, 2, 2, 3, 0 };
 
-    glGenVertexArrays(1, &this->topFace);
+    glGenVertexArrays(1, &this->topVAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    glBindVertexArray(this->topFace);
+    glBindVertexArray(this->topVAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(verticesTop), verticesTop, GL_STATIC_DRAW);
@@ -351,11 +349,11 @@ void SpriteRenderer::initRenderData() {
 
     unsigned int indicesBottom[] = { 0, 1, 2, 2, 3, 0};
 
-    glGenVertexArrays(1, &this->bottomFace);
+    glGenVertexArrays(1, &this->bottomVAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    glBindVertexArray(this->bottomFace);
+    glBindVertexArray(this->bottomVAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(verticesBottom), verticesBottom, GL_STATIC_DRAW);
@@ -433,41 +431,49 @@ void SpriteRenderer::initRenderData() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-
-
+    // 2D渲染
+    glGenVertexArrays(1, &this->flatVAO);
+    glGenBuffers(1, &this->flatVBO);
+    glBindVertexArray(this->flatVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, this->flatVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
-void SpriteRenderer::RenderText(std::string text, glm::vec2 postion, GLfloat scale, glm::vec3 color) {
-    fontShader->Use();
-    fontShader->SetVector3f("textColor", color);
-    fontShader->SetInteger("text", 0);
+void SpriteRenderer::RenderText(std::string text, glm::vec2 position, GLfloat scale, glm::vec3 color) {
+    flatShader->Use();
+    flatShader->SetVector3f("textColor", color);
+    flatShader->SetInteger("text", 0);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(ResourceManager::fontVAO);
 
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++) {
-    Character ch = ResourceManager::Characters[*c];
+        Character ch = ResourceManager::Characters[*c];
 
-    GLfloat xpos = postion.x + ch.Bearing.x * scale;
-    GLfloat ypos = postion.y - (ch.Size.y - ch.Bearing.y) * scale;
+        GLfloat xpos = position.x + ch.Bearing.x * scale;
+        GLfloat ypos = position.y - (ch.Size.y - ch.Bearing.y) * scale;
 
-    GLfloat w = ch.Size.x * scale;
-    GLfloat h = ch.Size.y * scale;
-    GLfloat vertices[6][4] = {
-        { xpos,     ypos + h,   0.0, 0.0 },
-        { xpos,     ypos,       0.0, 1.0 },
-        { xpos + w, ypos,       1.0, 1.0 },
+        GLfloat w = ch.Size.x * scale;
+        GLfloat h = ch.Size.y * scale;
+        GLfloat vertices[6][4] = {
+            { xpos,     ypos + h,   0.0, 0.0 },
+            { xpos,     ypos,       0.0, 1.0 },
+            { xpos + w, ypos,       1.0, 1.0 },
 
-        { xpos,     ypos + h,   0.0, 0.0 },
-        { xpos + w, ypos,       1.0, 1.0 },
-        { xpos + w, ypos + h,   1.0, 0.0 }
-    };
-    glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-    glBindBuffer(GL_ARRAY_BUFFER, ResourceManager::fontVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    postion.x += (ch.Advance >> 6) * scale;
+            { xpos,     ypos + h,   0.0, 0.0 },
+            { xpos + w, ypos,       1.0, 1.0 },
+            { xpos + w, ypos + h,   1.0, 0.0 }
+        };
+        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+        glBindBuffer(GL_ARRAY_BUFFER, ResourceManager::fontVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        position.x += (ch.Advance >> 6) * scale;
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -533,14 +539,49 @@ void SpriteRenderer::ClearPointLight() {
     this->pointCount = 0;
     this->objectShader->SetInteger("pointCount", this->pointCount);
 }
-
-void SpriteRenderer::RenderSky() {
+// 渲染天空盒
+void SpriteRenderer::RenderSkyBox() {
     glDepthFunc(GL_LEQUAL);
     this->skyShader->Use();
     glBindVertexArray(skyboxVAO);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, this->skyTexture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, this->skyBox->ID);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
     glDepthFunc(GL_LESS);
+}
+// 渲染2D纹理
+void SpriteRenderer::DrawTexture(Texture2D& texture, glm::vec2 position, float scale, glm::vec3 color) {
+
+    this->flatShader->Use();
+    flatShader->SetVector3f("textColor", color);
+    flatShader->SetInteger("text", 0);
+
+    glBindVertexArray(this->flatVAO);
+
+    float xpos = position.x;
+    float ypos = position.y;
+
+    GLfloat w = texture.Width * scale;
+    GLfloat h = texture.Height * scale;
+
+    float vertices[6][4] = {
+        { xpos,     ypos + h,   0.0, 0.0 }, // 左上角
+        { xpos,     ypos,       0.0, 1.0 }, // 左下角
+        { xpos + w, ypos,       1.0, 1.0 }, // 右下角
+
+        { xpos,     ypos + h,   0.0, 0.0 }, // 左上角
+        { xpos + w, ypos,       1.0, 1.0 }, // 右下角
+        { xpos + w, ypos + h,   1.0, 0.0 }  // 右上角 
+    };
+    glActiveTexture(GL_TEXTURE0);
+    texture.Bind();
+    glBindBuffer(GL_ARRAY_BUFFER, this->flatVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 }
