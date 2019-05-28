@@ -27,6 +27,18 @@
     <Filter Include="Src\Systems">
       <UniqueIdentifier>{3bf9f254-0f69-4f21-b960-64e618720f09}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\World">
+      <UniqueIdentifier>{e636432c-a100-4b3d-9485-d3262785e47f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\World\Types">
+      <UniqueIdentifier>{66f0e690-263d-42ae-8b4c-ed9fdcf126f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\World\Database">
+      <UniqueIdentifier>{362d1901-5ba1-4c79-a624-c6fbed0ce944}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Scenes">
+      <UniqueIdentifier>{c1171ad1-fc95-424a-b1c5-bb0db983607a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\main.cpp">
@@ -40,6 +52,12 @@
     </ClCompile>
     <ClCompile Include="Src\SpriteRenderer\SpriteRenderer.cpp">
       <Filter>Src\SpriteRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\World\Database\BlockManager.cpp">
+      <Filter>Src\World\Database</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Helpers\Config.cpp">
+      <Filter>Src\Helpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -72,6 +90,45 @@
     </ClInclude>
     <ClInclude Include="Src\SpriteRenderer\SpriteRenderer.h">
       <Filter>Src\SpriteRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\World.h">
+      <Filter>Src\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Types\Block.h">
+      <Filter>Src\World\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Types\Chunk.h">
+      <Filter>Src\World\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Types\RenderChunk.h">
+      <Filter>Src\World\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Types\Region.h">
+      <Filter>Src\World\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Database\BlockManager.h">
+      <Filter>Src\World\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Database\BlockData.h">
+      <Filter>Src\World\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Helpers\EnvPath.h">
+      <Filter>Src\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scenes\Scene.h">
+      <Filter>Src\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scenes\SceneMenu.h">
+      <Filter>Src\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scenes\SceneGame.h">
+      <Filter>Src\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Helpers\Config.h">
+      <Filter>Src\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Systems\Input.h">
+      <Filter>Src\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

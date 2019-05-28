@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "Helpers/Config.h"
 #include "Helpers/Singleton.h"
 #include "Systems/Window.h"
 // test
@@ -10,6 +11,7 @@
 #include "ResourceManager/ResourceManager.h"
 #include "SpriteRenderer/SpriteRenderer.h"
 #include "Camera/Camera.h"
+#include "World/Database/BlockManager.h"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -22,7 +24,10 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-    GLFWwindow* window = Singleton<Window>::GetInstance()->Create("OpenMC", 800, 600, false);
+    Config* config = Singleton<Config>::GetInstance();
+    config->Load();
+
+    GLFWwindow* window = Singleton<Window>::GetInstance()->Create("OpenMC", config->Width, config->Height, config->IsFullScreen);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -39,6 +44,7 @@ int main() {
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 
     // test begin
+    Singleton<BlockManager>::GetInstance()->Load();
     // 初始化模型
     // ResourceManager::LoadModel("Resources/Models/Garden/Garden.obj", "garden");
     // ResourceManager::LoadModel("Resources/Models/Table/Table.obj", "table");
