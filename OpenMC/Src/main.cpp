@@ -30,8 +30,8 @@ int main() {
     window->InitImGui();
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-    sceneManager->Goto(new SceneMenu());
-    // sceneManager->Goto(NULL);
+    // sceneManager->Goto(new SceneMenu());
+    sceneManager->Goto(NULL);
     sceneManager->Run(window);
 
     // test begin
@@ -96,10 +96,11 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        auto size = window->GetWindowSize();
         //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, window->GetWidth(), window->GetHeight());
-        Renderer->SetWindowSize(window->GetWidth(), window->GetHeight());
+        glViewport(0, 0, size.first, size.second);
+        Renderer->SetWindowSize(size.first, size.second);
 
         // test begin
 
@@ -111,7 +112,7 @@ int main() {
 
         Renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
 
-        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), window->GetWidth() / (float) window->GetHeight(), 0.1f, 100.0f),
+        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 100.0f),
             camera->GetViewMatrix(), camera->Position);
 
         Renderer->RenderText("NB ShowShow", glm::vec2(30, 30), 1.0);
