@@ -60,7 +60,8 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
 }
 
 // 通用渲染方法
-void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, const initializer_list<glm::vec4>& colors, int type, const glm::vec3* position, int count) {
+void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, const initializer_list<glm::vec4>& colors,
+    int type, const glm::vec3* position, int count, int dir) {
     count = count > 1024 ? 1024 : count; // 最大单次渲染个数
     this->blockShader->Use();
     this->objectShader->SetMatrix4("model", glm::mat4(1.0f));
@@ -76,8 +77,13 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
 
     glActiveTexture(GL_TEXTURE0);
 
+    glm::mat4 model = glm::mat4(1.0);
     switch (type) {
     case 0: // 单纹理方块
+        if (colors.size() > 0) {
+            this->blockShader->SetInteger("hasColor", true);
+            this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        }
         textures.begin()[0].Bind();
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0, count);
@@ -126,6 +132,10 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         break;
     case 4: // 中心交叉纹理
         textures.begin()[0].Bind();
+        if (colors.size() > 0) {
+            this->blockShader->SetInteger("hasColor", true);
+            this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        }
         glBindVertexArray(this->entityVAO1);
         glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
         break;
@@ -133,6 +143,14 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         textures.begin()[0].Bind();
         glBindVertexArray(this->entityVAO2);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+        glBindVertexArray(this->topVAO);
+        model = glm::translate(model, glm::vec3(0, -0.375, 0));
+        model = glm::scale(model, glm::vec3(0.125, 1, 0.125));
+        this->blockShader->SetMatrix4("model", model);
+        this->blockShader->SetInteger("hasColor", true);
+        this->blockShader->SetInteger("hasTexture", false);
+        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case 6: // 火焰
         textures.begin()[0].Bind();
@@ -160,6 +178,91 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         textures.begin()[5].Bind();
         glBindVertexArray(this->bottomVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 8: // 具有方向的方块 （前、侧边、上下）
+        model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0,1,0));
+        this->blockShader->SetMatrix4("model", model);
+        textures.begin()[0].Bind();
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        textures.begin()[1].Bind();
+        glBindVertexArray(this->backVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        textures.begin()[1].Bind();
+        glBindVertexArray(this->leftVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        textures.begin()[1].Bind();
+        glBindVertexArray(this->rightVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        textures.begin()[2].Bind();
+        glBindVertexArray(this->topVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        textures.begin()[2].Bind();
+        glBindVertexArray(this->bottomVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 9: // 双层单面（门:上下）
+        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
+        model = glm::scale(model, glm::vec3(1, 1, 0.125));
+
+        // 前后
+        textures.begin()[1].Bind();
+        this->blockShader->SetMatrix4("model", model);
+        this->blockShader->SetInteger("hasColor", false);
+        this->blockShader->SetInteger("hasTexture", true);
+        glBindVertexArray(this->entityVAO4);
+        glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
+        // 四周
+        this->blockShader->SetInteger("hasColor", true);
+        this->blockShader->SetInteger("hasTexture", false);
+        glBindVertexArray(this->entityVAO5);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+
+        model = glm::translate(model, glm::vec3(0, 1, 0));
+        this->blockShader->SetMatrix4("model", model);
+        this->blockShader->SetInteger("hasColor", false);
+        this->blockShader->SetInteger("hasTexture", true);
+        textures.begin()[0].Bind();
+        glBindVertexArray(this->entityVAO4);
+        glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
+
+        this->blockShader->SetInteger("hasColor", true);
+        this->blockShader->SetInteger("hasTexture", false);
+        glBindVertexArray(this->entityVAO5);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 10: // 渲染染色玻璃 前后、周边贴图、方向
+        this->blockShader->SetInteger("hasColor", true);
+        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
+        model = glm::scale(model, glm::vec3(1, 1, 0.125));
+        // 前后
+        textures.begin()[0].Bind();
+        this->blockShader->SetMatrix4("model", model);
+        this->blockShader->SetInteger("hasTexture", true);
+        glBindVertexArray(this->entityVAO4);
+        glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
+        // 四周
+        this->blockShader->SetInteger("hasTexture", false);
+        glBindVertexArray(this->entityVAO5);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 11: // 水面
+        this->blockShader->SetInteger("hasColor", true);
+        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
+        model = glm::translate(model, glm::vec3(0, -0.125, 0));
+
+        textures.begin()[0].Bind();
+        this->blockShader->SetMatrix4("model", model);
+        glBindVertexArray(this->topVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        break;
+
+
+
     default:
         break;
     }
@@ -295,7 +398,7 @@ void SpriteRenderer::initRenderData() {
         0.5f, -0.5f,  -0.0625f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
         0.5f,  0.5f,  -0.0625f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
         -0.5f,  0.5f, -0.0625f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
-        // 正面           
+        // 正面
         -0.5f, -0.5f,  0.0625f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
         0.5f, -0.5f,   0.0625f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
         0.5f,  0.5f,   0.0625f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
@@ -314,7 +417,6 @@ void SpriteRenderer::initRenderData() {
 
     this->entityVAO2 = this->makeVAO(verticesEntity2, sizeof(verticesEntity2), indicesQuad, 24 * sizeof(unsigned int));
 
-
     // 顶部交叉
     float verticesEntity3[] = {
         // 后面
@@ -322,7 +424,7 @@ void SpriteRenderer::initRenderData() {
         0.5f, -0.5f,  -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
         0.5f,  0.5f,  0.2f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
         -0.5f,  0.5f, 0.2f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
-        // 正面           
+        // 正面
         -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
         0.5f, -0.5f,   0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
         0.5f,  0.5f,   -0.2f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
@@ -340,6 +442,47 @@ void SpriteRenderer::initRenderData() {
     };
 
     this->entityVAO3 = this->makeVAO(verticesEntity3, sizeof(verticesEntity3), indicesQuad, 24 * sizeof(unsigned int));
+
+
+    float verticesEntity4[] = {
+        // 正面
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
+        // 后面
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 右下角
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 左下角
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 左上角
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 右上角
+    };
+    this->entityVAO4 = this->makeVAO(verticesEntity4, sizeof(verticesEntity4), indicesQuad, 12 * sizeof(unsigned int));
+
+
+    float verticesEntity5[] = {
+        // 左边
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        // 右边
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
+        // 下面
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // 左下角
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // 右下角
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // 右上角
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // 左上角
+        // 上面
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f, // 左上角
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f  // 左下角
+    };
+
+    this->entityVAO5 = this->makeVAO(verticesEntity5, sizeof(verticesEntity5), indicesQuad, 24 * sizeof(unsigned int));
 
     // 天空盒
     float skyboxVertices[] = {
@@ -571,7 +714,7 @@ void SpriteRenderer::DrawTexture(Texture2D& texture, glm::vec2 position, float s
 
         { xpos,     ypos + h,   0.0, 0.0 }, // 左上角
         { xpos + w, ypos,       1.0, 1.0 }, // 右下角
-        { xpos + w, ypos + h,   1.0, 0.0 }  // 右上角 
+        { xpos + w, ypos + h,   1.0, 0.0 }  // 右上角
     };
     glActiveTexture(GL_TEXTURE0);
     texture.Bind();

@@ -31,7 +31,8 @@ class SpriteRenderer {
                   glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f),
                   GLfloat rotate = 0.0f);
   // 渲染方块
-  void DrawBlock(const initializer_list<Texture2D>& textures, const initializer_list<glm::vec4>& colors, int type, const glm::vec3* position, int count);
+  void DrawBlock(const initializer_list<Texture2D>& textures, const initializer_list<glm::vec4>& colors,
+      int type, const glm::vec3* position, int count, int dir = 0);
 
   // 渲染文本
   void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
@@ -74,7 +75,9 @@ class SpriteRenderer {
   unsigned int entityVAO1;
   unsigned int entityVAO2;
   unsigned int entityVAO3;
-
+  unsigned int entityVAO4;
+  unsigned int entityVAO5;
+   
   unsigned int instanceVBO;
   unsigned int flatVBO;
 
