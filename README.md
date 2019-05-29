@@ -14,10 +14,10 @@ A simple game like Minecraft built by OpenGL.
 运行源码需要安装 Vcpkg。
 
 ```bash
-git clone https://github.com/Microsoft/vcpkg.git
-cd vcpkg
-.\bootstrap-vcpkg.bat
-.\vcpkg integrate install --triplet x64-windows
+$ git clone https://github.com/Microsoft/vcpkg.git
+$ cd vcpkg
+$ .\bootstrap-vcpkg.bat
+$ .\vcpkg integrate install --triplet x64-windows
 ```
 
 然后设置`VCPKG_ROOT`环境变量，为 Vcpkg 所在目录。
@@ -25,7 +25,7 @@ cd vcpkg
 修改 GLAD 的默认 portfile，改为使用 Core 版本和指定 API 为 4.6。
 
 ```bash
-vcpkg edit glad
+$ vcpkg edit glad
 ```
 
 ```cmake
@@ -48,7 +48,7 @@ vcpkg_configure_cmake(
 安装依赖库。
 
 ```bash
-vcpkg install glfw3:x64-windows glad:x64-windows glm:x64-windows imgui:x64-windows assimp:x64-windows stb:x64-windows freetype:x64-windows
+$ vcpkg install glfw3:x64-windows glad:x64-windows glm:x64-windows imgui:x64-windows assimp:x64-windows stb:x64-windows freetype:x64-windows rapidjson:x64-windows
 ```
 
 使用 Visual Studio 启动该仓库内的解决方案，运行即可。
@@ -83,3 +83,4 @@ Available architecture triplets:
   <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static</VcpkgTriplet>
 </PropertyGroup>
 ```
+

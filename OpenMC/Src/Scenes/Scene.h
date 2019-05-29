@@ -1,11 +1,13 @@
 ﻿#pragma once
+#include "../Systems/Graphics.h"
 #include "../Systems/Window.h"
 
 class Scene {
 public:
-    virtual void Main(Window* window) final {
+    void Main(Window* window) {
         Start();
         while (!window->IsClose() && !sceneChanging) {
+            Singleton<Graphics>::GetInstance()->Update();
             Update();
         }
         Terminate();
