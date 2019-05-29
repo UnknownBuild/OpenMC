@@ -27,6 +27,7 @@ SpriteRenderer::SpriteRenderer() {
 
     };
     this->skyBox = &ResourceManager::LoadTexture(faces, "skybox");
+
 }
 
 SpriteRenderer::~SpriteRenderer() {
@@ -58,106 +59,9 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
     this->flatShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
 }
 
-// 渲染单纹理方块
-void SpriteRenderer::DrawBlock(Texture2D& texture, glm::vec3 position[], int count) {
+// 通用渲染方法
+void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, const initializer_list<glm::vec4>& colors, int type, const glm::vec3* position, int count) {
     count = count > 1024 ? 1024 : count; // 最大单次渲染个数
-    this->setBlockShader();
-
-    glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glActiveTexture(GL_TEXTURE0);
-    texture.Bind();
-
-    glBindVertexArray(this->quadVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0, count);
-    glBindVertexArray(0);
-}
-
-// 渲染三纹理方块
-void SpriteRenderer::DrawBlock(Texture2D& top, Texture2D& side, Texture2D& bottom, glm::vec3 position[], int count) {
-    count = count > 1024 ? 1024 : count; // 最大单次渲染个数
-    this->setBlockShader();
-
-    glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glActiveTexture(GL_TEXTURE0);
-    side.Bind();
-
-    glBindVertexArray(this->quadVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
-
-    top.Bind();
-    glBindVertexArray(this->topVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-
-    bottom.Bind();
-    glBindVertexArray(this->bottomVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-
-    glBindVertexArray(0);
-}
-
-// 渲染噪声纹理方块
-void SpriteRenderer::DrawBlock(glm::vec4 color, glm::vec3 position[], int count) {
-    count = count > 1024 ? 1024 : count; // 最大单次渲染个数
-    this->setBlockShader();
-
-    glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    this->blockShader->SetInteger("hasColor", true);
-    this->blockShader->SetVector4f("material.color", color); // glm::vec3(0.5, 0.8, 0.4)
-
-    glActiveTexture(GL_TEXTURE0);
-
-    this->noise->Bind();
-    glBindVertexArray(this->quadVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
-
-    glBindVertexArray(this->topVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-
-    glBindVertexArray(this->bottomVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-
-    glBindVertexArray(0);
-
-}
-
-// 渲染上下噪声纹理方块
-void SpriteRenderer::DrawBlock(Texture2D& texture, glm::vec4 top, glm::vec4 bottom, glm::vec3 position[], int count) {
-    count = count > 1024 ? 1024 : count; // 最大单次渲染个数
-    this->setBlockShader();
-
-    glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glActiveTexture(GL_TEXTURE0);
-
-    texture.Bind();
-    glBindVertexArray(this->quadVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
-
-    this->noise->Bind();
-    this->blockShader->SetInteger("hasColor", true);
-    this->blockShader->SetVector4f("material.color", top);
-    glBindVertexArray(this->topVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-
-    this->blockShader->SetVector4f("material.color", bottom);
-    glBindVertexArray(this->bottomVAO);
-    glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-
-    glBindVertexArray(0);
-}
-
-void SpriteRenderer::setBlockShader() {
     this->blockShader->Use();
     this->objectShader->SetMatrix4("model", glm::mat4(1.0f));
     this->objectShader->SetInteger("hasTexture", true);
@@ -165,6 +69,101 @@ void SpriteRenderer::setBlockShader() {
     this->objectShader->SetInteger("material.diffuse", 0); // 漫反射贴图
     this->objectShader->SetInteger("material.specular", 0); // 镜面反射贴图
     this->objectShader->SetFloat("material.shininess", 32); // 镜面反射率
+
+    glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glActiveTexture(GL_TEXTURE0);
+
+    switch (type) {
+    case 0: // 单纹理方块
+        textures.begin()[0].Bind();
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 1: // 三纹理方块(上、四周、下)
+        textures.begin()[1].Bind();
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+
+        textures.begin()[0].Bind();
+        glBindVertexArray(this->topVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        textures.begin()[2].Bind();
+        glBindVertexArray(this->bottomVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 2:// 噪声 + 颜色
+        this->blockShader->SetInteger("hasColor", true);
+        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+
+        this->noise->Bind();
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+
+        glBindVertexArray(this->topVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        glBindVertexArray(this->bottomVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 3: // 上下噪声，四周纹理
+        textures.begin()[0].Bind();
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+
+        this->noise->Bind();
+        this->blockShader->SetInteger("hasColor", true);
+        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        glBindVertexArray(this->topVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        this->blockShader->SetVector4f("material.color", colors.begin()[1]);
+        glBindVertexArray(this->bottomVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 4: // 中心交叉纹理
+        textures.begin()[0].Bind();
+        glBindVertexArray(this->entityVAO1);
+        glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 5: // 火把
+        textures.begin()[0].Bind();
+        glBindVertexArray(this->entityVAO2);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 6: // 火焰
+        textures.begin()[0].Bind();
+        glBindVertexArray(this->entityVAO3);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+        break;
+    case 7: // 六面自定义方块 (前后左右上下)
+        textures.begin()[0].Bind();
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        textures.begin()[1].Bind();
+        glBindVertexArray(this->backVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        textures.begin()[2].Bind();
+        glBindVertexArray(this->leftVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        textures.begin()[3].Bind();
+        glBindVertexArray(this->rightVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        textures.begin()[4].Bind();
+        glBindVertexArray(this->topVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        textures.begin()[5].Bind();
+        glBindVertexArray(this->bottomVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+    default:
+        break;
+    }
+    glBindVertexArray(0);
 }
 
 // 渲染带纹理的立方体
@@ -217,17 +216,17 @@ void SpriteRenderer::initRenderData() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1024, NULL, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    float vertices[] = {
-        // 后面
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 右下角
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
+    float verticesQuad[] = {
         // 正面
         -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
         -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
+        // 后面
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 右下角
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
         // 左边
         -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
@@ -238,143 +237,109 @@ void SpriteRenderer::initRenderData() {
         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
-            // 下面
+        // 下面
         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // 左下角
         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // 右下角
         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // 右上角
         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // 左上角
-            // 上面
+        // 上面
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f, // 左上角
         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // 右上角
         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // 右下角
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f  // 左下角
     };
 
-    unsigned int indices[] = {
-        0, 1, 2,
-        2, 3, 0,
-
-        4, 5, 6,
-        6, 7, 4,
-
-        8, 9, 10,
-        10, 11, 8,
-
-        12, 13, 14,
-        14, 15, 12,
-
-        16, 17, 18,
-        18, 19, 16,
-
-        20, 21, 22,
-        22, 23, 20
+    unsigned int indicesQuad[] = {
+        0, 1, 2, 2, 3, 0,
+        4, 5, 6, 6, 7, 4,
+        8, 9, 10, 10, 11, 8,
+        12, 13, 14, 14, 15, 12,
+        16, 17, 18, 18, 19, 16,
+        20, 21, 22, 22, 23, 20
     };
 
-    GLuint VBO, EBO;
-    glGenVertexArrays(1, &this->quadVAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(this->quadVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-    glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-    glVertexAttribDivisor(3, 1);
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-
-    // 顶部
-    float verticesTop[] = {
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f, // 左上角
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // 右上角
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // 右下角
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f  // 左下角
-    };
-
-    unsigned int indicesTop[] = { 0, 1, 2, 2, 3, 0 };
-
-    glGenVertexArrays(1, &this->topVAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(this->topVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesTop), verticesTop, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicesTop), indicesTop, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-    glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-    glVertexAttribDivisor(3, 1);
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
+    // 立方体/正面
+    this->quadVAO = this->makeVAO(verticesQuad, sizeof(verticesQuad), indicesQuad, sizeof(indicesQuad));
+    // 后面
+    this->backVAO = this->makeVAO(&verticesQuad[8 * 4 * 1], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
+    // 左面
+    this->leftVAO = this->makeVAO(&verticesQuad[8 * 4 * 2], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
+    // 右面
+    this->rightVAO = this->makeVAO(&verticesQuad[8 * 4 * 3], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
     // 底部
-    float verticesBottom[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // 左下角
-        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // 右下角
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // 右上角
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // 左上角
+    this->bottomVAO = this->makeVAO(&verticesQuad[8 * 4 * 4], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
+    // 顶部
+    this->topVAO = this->makeVAO(&verticesQuad[8 * 4 * 5], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
+
+
+    // 中心交叉
+    float verticesEntity1[] = {
+        // 后面
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 右下角
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 右下角
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 右上角
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
+        // 正面
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 左下角
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 左上角
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
     };
 
-    unsigned int indicesBottom[] = { 0, 1, 2, 2, 3, 0};
+    this->entityVAO1 = this->makeVAO(verticesEntity1, sizeof(verticesEntity1), indicesQuad, 12 * sizeof(unsigned int));
 
-    glGenVertexArrays(1, &this->bottomVAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    // 火把
+    float verticesEntity2[] = {
+        // 后面
+        -0.5f, -0.5f, -0.0625f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 右下角
+        0.5f, -0.5f,  -0.0625f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
+        0.5f,  0.5f,  -0.0625f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
+        -0.5f,  0.5f, -0.0625f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
+        // 正面           
+        -0.5f, -0.5f,  0.0625f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
+        0.5f, -0.5f,   0.0625f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
+        0.5f,  0.5f,   0.0625f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
+        -0.5f,  0.5f,  0.0625f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
+        // 左边
+        -0.0625f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        -0.0625f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
+        -0.0625f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
+        -0.0625f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        // 右边
+        0.0625f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
+        0.0625f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        0.0625f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        0.0625f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
+    };
 
-    glBindVertexArray(this->bottomVAO);
+    this->entityVAO2 = this->makeVAO(verticesEntity2, sizeof(verticesEntity2), indicesQuad, 24 * sizeof(unsigned int));
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesBottom), verticesBottom, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicesBottom), indicesBottom, GL_STATIC_DRAW);
+    // 顶部交叉
+    float verticesEntity3[] = {
+        // 后面
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 右下角
+        0.5f, -0.5f,  -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
+        0.5f,  0.5f,  0.2f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
+        -0.5f,  0.5f, 0.2f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
+        // 正面           
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
+        0.5f, -0.5f,   0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
+        0.5f,  0.5f,   -0.2f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
+        -0.5f,  0.5f,  -0.2f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
+        // 左边
+        0.2f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        0.2f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        // 右边
+        -0.2f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
+        -0.2f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
+    };
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-    glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-    glVertexAttribDivisor(3, 1);
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    this->entityVAO3 = this->makeVAO(verticesEntity3, sizeof(verticesEntity3), indicesQuad, 24 * sizeof(unsigned int));
 
     // 天空盒
     float skyboxVertices[] = {
@@ -430,6 +395,7 @@ void SpriteRenderer::initRenderData() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+
     // 2D渲染
     glGenVertexArrays(1, &this->flatVAO);
     glGenBuffers(1, &this->flatVBO);
@@ -440,6 +406,40 @@ void SpriteRenderer::initRenderData() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+
+unsigned int SpriteRenderer::makeVAO(float* vertices, int verticesLen, unsigned int* indices, int indicesLen) {
+    unsigned VAO, VBO, EBO;
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, verticesLen, vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesLen, indices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+    glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glVertexAttribDivisor(3, 1);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    return VAO;
 }
 
 void SpriteRenderer::RenderText(std::string text, glm::vec2 position, GLfloat scale, glm::vec4 color) {
