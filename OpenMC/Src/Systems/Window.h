@@ -1,8 +1,10 @@
-#ifndef __WINDOW_H__
-#define __WINDOW_H__
-
+﻿#pragma once
 #include <string>
 #include <GLFW/glfw3.h>
+
+#ifdef _MSC_VER
+#undef CreateWindow
+#endif
 
 class Window final {
 public:
@@ -10,23 +12,25 @@ public:
         if (window) glfwDestroyWindow(window);
     }
 
-    GLFWwindow* Create(std::string title, unsigned int width, unsigned int height, bool isFullScreen = false) {
-        this->isFullScreen = isFullScreen;
-        GLFWmonitor* monitor = isFullScreen ? glfwGetPrimaryMonitor() : NULL;
-        return glfwCreateWindow(width, height, title.c_str(), monitor, NULL);
-    }
+    void CreateWindow(std::string title, unsigned int width, unsigned int height, bool isFullScreen = false);
+    void DestroyImGui();
+    void DestroyWindow();
+    void Dialog(std::string title, std::string text);
+    unsigned int GetHeight();
+    unsigned int GetWidth();
+    void InitGLAD();
+    void InitGLFW();
+    void InitImGui();
+    bool IsClose();
+    bool IsFullScreen();
 
-    GLFWwindow* Get() {
+    GLFWwindow* GetWindow() {
         return window;
-    }
-
-    bool IsFullScreen() {
-        return isFullScreen;
     }
 
 private:
     GLFWwindow* window = NULL;
+    unsigned int width;
+    unsigned int height;
     bool isFullScreen;
 };
-
-#endif

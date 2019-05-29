@@ -59,6 +59,15 @@
     <ClCompile Include="Src\Helpers\Config.cpp">
       <Filter>Src\Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Systems\Window.cpp">
+      <Filter>Src\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scenes\SceneManager.cpp">
+      <Filter>Src\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scenes\SceneMenu.cpp">
+      <Filter>Src\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">
@@ -129,6 +138,9 @@
     </ClInclude>
     <ClInclude Include="Src\Systems\Input.h">
       <Filter>Src\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scenes\SceneManager.h">
+      <Filter>Src\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
