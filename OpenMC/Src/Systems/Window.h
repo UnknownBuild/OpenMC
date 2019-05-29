@@ -8,16 +8,11 @@
 
 class Window final {
 public:
-    ~Window() {
-        if (window) glfwDestroyWindow(window);
-    }
-
     void CreateWindow(std::string title, unsigned int width, unsigned int height, bool isFullScreen = false);
     void DestroyImGui();
     void DestroyWindow();
     void Dialog(std::string title, std::string text);
-    unsigned int GetHeight();
-    unsigned int GetWidth();
+    std::pair<unsigned int, unsigned int> GetWindowSize();
     void InitGLAD();
     void InitGLFW();
     void InitImGui();
@@ -30,7 +25,5 @@ public:
 
 private:
     GLFWwindow* window = NULL;
-    unsigned int width;
-    unsigned int height;
     bool isFullScreen;
 };

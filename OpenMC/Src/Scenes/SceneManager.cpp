@@ -17,6 +17,7 @@ void SceneManager::Run(Window* window) {
             for (auto& s : destroyScenes) {
                 delete s;
             }
+            destroyScenes.clear();
         }
         scene->Main(window);
     }
