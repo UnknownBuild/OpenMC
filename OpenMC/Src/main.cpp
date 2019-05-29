@@ -30,7 +30,7 @@ int main() {
     window->InitImGui();
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-    sceneManager->Goto(new SceneMenu());
+    sceneManager->Goto(NULL);
     sceneManager->Run(window);
 
     // test begin
@@ -48,6 +48,11 @@ int main() {
     ResourceManager::LoadTexture("Resources/Textures/blocks/crafting_table_top.png", "tabel_top");
     ResourceManager::LoadTexture("Resources/Textures/blocks/crafting_table_front.png", "tabel_front");
 
+    ResourceManager::LoadTexture("Resources/Textures/blocks/furnace_front.png", "furnace_front");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/furnace_front_on.png", "furnace_front_on");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/furnace_side.png", "furnace_side");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/furnace_top.png", "furnace_top");
+
 
     ResourceManager::LoadTexture("Resources/Textures/blocks/cracked_stone_bricks.png", "stone");
     ResourceManager::LoadTexture("Resources/Textures/blocks/sand.png", "sand");
@@ -59,7 +64,6 @@ int main() {
 
     // 初始化渲染管理器
     SpriteRenderer* Renderer = new SpriteRenderer();
-    Renderer->SetWindowSize(800, 600);
     // 初始化摄像头
     Camera* camera = new Camera(window->GetWindow());
     camera->SetLookPostion(glm::vec3(5, 5, 10));
@@ -93,7 +97,8 @@ int main() {
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, 800, 600);
+        glViewport(0, 0, window->GetWidth(), window->GetHeight());
+        Renderer->SetWindowSize(window->GetWidth(), window->GetHeight());
 
         // test begin
 
@@ -105,13 +110,7 @@ int main() {
 
         Renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
 
-        //Renderer->AddPointLight(glm::vec3(-3, 8, 3), glm::vec3(0.3), glm::vec3(0, 1, 0), glm::vec3(0, 0.3, 0), 100);
-
-        //Renderer->AddPointLight(glm::vec3(3, 8, -3), glm::vec3(0.3), glm::vec3(0, 0, 1), glm::vec3(0, 0, 0.3), 100);
-
-        //Renderer->AddPointLight(glm::vec3(-3, 8, -3), glm::vec3(0.3), glm::vec3(1, 1, 0), glm::vec3(0.3, 0.3, 0), 100);
-
-        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), 800.0f / 600.0f, 0.1f, 100.0f),
+        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), window->GetWidth() / (float) window->GetHeight(), 0.1f, 100.0f),
             camera->GetViewMatrix(), camera->Position);
 
         Renderer->RenderText("NB ShowShow", glm::vec2(30, 30), 1.0);
@@ -129,7 +128,7 @@ int main() {
         Renderer->DrawBlock({ torchTexture[frame] }, {}, 6, firePosition, 1);
 
         // 渲染草方块
-        glm::vec3 grassPosition[500] = {
+        glm::vec3 grassPosition[1000] = {
             glm::vec3(1, 0, 1),
             glm::vec3(2, 0, 2),
             glm::vec3(2, 0, 1),
@@ -137,8 +136,8 @@ int main() {
             glm::vec3(3, 0, 1),
         };
         int grassCount = 5;
-        for (int i = -10; i < 10; i++) {
-            for (int j = -10; j < 10; j++) {
+        for (int i = -15; i < 15; i++) {
+            for (int j = -15; j < 15; j++) {
                 grassPosition[grassCount++] = glm::vec3(i, -1, j);
             }
         }
@@ -227,7 +226,6 @@ int main() {
         //// 渲染工作台
         glm::vec3 tablePosition[] = {
             glm::vec3(0, 1, 0),
-            glm::vec3(3, 3, 3),
         };
         Renderer->DrawBlock({
             ResourceManager::GetTexture("tabel_front"),
@@ -238,6 +236,21 @@ int main() {
             ResourceManager::GetTexture("oak_planks"),
             }, {},
             7, tablePosition, 2);
+
+        //// 渲染火炉
+        glm::vec3 furnacePosition[] = {
+            glm::vec3(3, 2, 3),
+        };
+        Renderer->DrawBlock({
+            ResourceManager::GetTexture("furnace_front_on"),
+            ResourceManager::GetTexture("furnace_side"),
+            ResourceManager::GetTexture("furnace_side"),
+            ResourceManager::GetTexture("furnace_side"),
+            ResourceManager::GetTexture("furnace_top"),
+            ResourceManager::GetTexture("furnace_top"),
+            }, {},
+            7, furnacePosition, 2);
+
 
 
         // 渲染2D纹理
@@ -268,7 +281,7 @@ int main() {
 
         static bool flag;
         if (!flag) {
-            Singleton<Window>::GetInstance()->Dialog("Hello Zhenly", "A error occurs.");
+            // Singleton<Window>::GetInstance()->Dialog("Hello Zhenly", "A error occurs.");
             flag = true;
         }
     }

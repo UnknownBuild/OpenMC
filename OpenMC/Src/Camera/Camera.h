@@ -51,7 +51,6 @@ public:
     void TransitionTo(glm::vec3 target, float p);
 
 private:
-
     void setAngle();
     GLFWwindow* window;
     glm::vec3 oldPostion;
