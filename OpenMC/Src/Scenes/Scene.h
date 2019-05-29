@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "../Helpers/Singleton.h"
 #include "../Systems/Graphics.h"
 #include "../Systems/Window.h"
 
