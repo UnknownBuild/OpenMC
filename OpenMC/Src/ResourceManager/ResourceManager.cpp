@@ -97,6 +97,28 @@ Texture2D ResourceManager::loadTextureFromFile(const GLchar * file, bool alpha) 
   return texture;
 }
 
+Texture2D* ResourceManager::LoadTextureSplit(const GLchar* file, int count) {
+    Texture2D* textures = new Texture2D[count];
+    int width, height, nrChannels;
+    unsigned char* image = stbi_load(file, &width, &height, &nrChannels, 0);
+
+    int sWidth = width;
+    int sHeight = height / count;
+
+    GLenum format = GL_RED;
+    if (nrChannels == 3)
+        format = GL_RGB;
+    else if (nrChannels == 4)
+        format = GL_RGBA;
+    for (int i = 0; i < count; i++) {
+        textures[i].Image_Format = format;
+        textures[i].Internal_Format = format;
+        textures[i].Generate(sWidth, sHeight, image + (nrChannels * sWidth * sHeight) * i);
+    }
+    stbi_image_free(image);
+    return textures;
+}
+
 Texture2D ResourceManager::loadCubemap(vector<std::string> faces) {
     Texture2D texture;
     glGenTextures(1, &texture.ID);

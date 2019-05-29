@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include <initializer_list>
 #include "../ResourceManager/ResourceManager.h"
-
+using std::initializer_list;
 struct PointList {
     int id;
 
@@ -30,14 +31,15 @@ class SpriteRenderer {
                   glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f),
                   GLfloat rotate = 0.0f);
   // 渲染方块
-  void DrawBlock(Texture2D& top, Texture2D& side, Texture2D& bottom, glm::vec3 position[], int count);
-  void DrawBlock(Texture2D& texture, glm::vec3 position[], int count);
-  void DrawBlock(Texture2D& texture, glm::vec4 top, glm::vec4 bottom, glm::vec3 position[], int count);
-  void DrawBlock(glm::vec4 color, glm::vec3 position[], int count);
+  void DrawBlock(const initializer_list<Texture2D>& textures, const initializer_list<glm::vec4>& colors, int type, const glm::vec3* position, int count);
 
   // 渲染文本
   void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
                   glm::vec4 color = glm::vec4(1));
+  // 渲染天空盒
+  void RenderSkyBox();
+  // 渲染2D纹理
+  void DrawTexture(Texture2D& texture, glm::vec2 position, float scale = 1.0, glm::vec4 color = glm::vec4(1));
   // 设置参数
   void SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion);
   // 设置平行光源
@@ -48,14 +50,10 @@ class SpriteRenderer {
   void ClearPointLight();
   // 更改渲染范围
   void SetWindowSize(int w, int h);
-  // 渲染天空盒
-  void RenderSkyBox();
-  // 渲染2D纹理
-  void DrawTexture(Texture2D& texture, glm::vec2 position, float scale = 1.0, glm::vec4 color = glm::vec4(1));
 
  private:
   void initRenderData();
-  void setBlockShader();
+  unsigned int makeVAO(float *vertices, int verticesLen, unsigned int *indices, int indicesLen);
 
   // 着色器
   Shader* objectShader;
@@ -69,10 +67,13 @@ class SpriteRenderer {
 
   // VAO
   unsigned int quadVAO;
+  unsigned int backVAO, leftVAO, rightVAO, topVAO, bottomVAO;
   unsigned int skyboxVAO;
-  unsigned int topVAO;
-  unsigned int bottomVAO;
   unsigned int flatVAO;
+
+  unsigned int entityVAO1;
+  unsigned int entityVAO2;
+  unsigned int entityVAO3;
 
   unsigned int instanceVBO;
   unsigned int flatVBO;
