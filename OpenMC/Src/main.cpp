@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "Scenes/SceneManager.h"
+#include "Scenes/SceneMenu.h"
 #include "Helpers/Config.h"
 #include "Helpers/Singleton.h"
 #include "Systems/Window.h"
@@ -18,30 +20,18 @@
 #include <imgui_impl_opengl3.h>
 
 int main() {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
-
     Config* config = Singleton<Config>::GetInstance();
     config->Load();
 
-    GLFWwindow* window = Singleton<Window>::GetInstance()->Create("OpenMC", config->Width, config->Height, config->IsFullScreen);
-    if (window == NULL) {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // V-Sync
+    Window* window = Singleton<Window>::GetInstance();
+    window->InitGLFW();
+    window->CreateWindow("OpenMC", config->Width, config->Height, config->IsFullScreen);
+    window->InitGLAD();
+    window->InitImGui();
 
-    if (!gladLoadGL()) {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+    SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+    sceneManager->Goto(new SceneMenu());
+    sceneManager->Run(window);
 
     // test begin
     Singleton<BlockManager>::GetInstance()->Load();
@@ -67,17 +57,11 @@ int main() {
     SpriteRenderer* Renderer = new SpriteRenderer();
     Renderer->SetWindowSize(800, 600);
     // 初始化摄像头
-    Camera* camera = new Camera(window);
+    Camera* camera = new Camera(window->GetWindow());
     camera->SetLookPostion(glm::vec3(5, 5, 10));
 
     glm::vec3 testColor = glm::vec3(0.5, 0.5 ,0.5);
     // test end
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(NULL);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -86,7 +70,7 @@ int main() {
     glEnable(GL_MULTISAMPLE);
     // Gamma 校正
     // glEnable(GL_FRAMEBUFFER_SRGB);
-    while (!glfwWindowShouldClose(window)) {
+    while (!window->IsClose()) {
         glfwPollEvents();
         camera->Update();
 
@@ -253,18 +237,20 @@ int main() {
         Renderer->RenderSkyBox();
 
         int display_w, display_h;
-        glfwMakeContextCurrent(window);
-        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glfwMakeContextCurrent(window->GetWindow());
+        glfwGetFramebufferSize(window->GetWindow(), &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwMakeContextCurrent(window);
-        glfwSwapBuffers(window);
-    }
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+        glfwMakeContextCurrent(window->GetWindow());
+        glfwSwapBuffers(window->GetWindow());
 
-    glfwDestroyWindow(window);
-    glfwTerminate();
+        static bool flag;
+        if (!flag) {
+            Singleton<Window>::GetInstance()->Dialog("Hello Zhenly", "A error occurs.");
+            flag = true;
+        }
+    }
+    window->DestroyImGui();
+    window->DestroyWindow();
 }
