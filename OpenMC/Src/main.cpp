@@ -30,7 +30,8 @@ int main() {
     window->InitImGui();
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-    sceneManager->Goto(NULL);
+    sceneManager->Goto(new SceneMenu());
+    // sceneManager->Goto(NULL);
     sceneManager->Run(window);
 
     // test begin
@@ -95,7 +96,7 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, window->GetWidth(), window->GetHeight());
         Renderer->SetWindowSize(window->GetWidth(), window->GetHeight());

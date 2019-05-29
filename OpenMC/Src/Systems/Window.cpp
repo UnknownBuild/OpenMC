@@ -11,8 +11,6 @@ void Window::CreateWindow(std::string title, unsigned int width, unsigned int he
         Dialog("Error", "Cannot create GLFW window twice.");
         return;
     }
-    this->width = width;
-    this->height = height;
     this->isFullScreen = isFullScreen;
     GLFWmonitor* monitor = isFullScreen ? glfwGetPrimaryMonitor() : NULL;
     window = glfwCreateWindow(width, height, title.c_str(), monitor, NULL);
@@ -41,12 +39,10 @@ void Window::Dialog(std::string title, std::string text) {
     MessageBox(NULL, text.c_str(), title.c_str(), MB_OK | MB_ICONEXCLAMATION);
 }
 
-unsigned int Window::GetHeight() {
-    return height;
-}
-
-unsigned int Window::GetWidth() {
-    return width;
+std::pair<unsigned int, unsigned int> Window::GetWindowSize() {
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    return { width, height };
 }
 
 void Window::InitGLAD() {
