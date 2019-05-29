@@ -68,6 +68,9 @@
     <ClCompile Include="Src\Scenes\SceneMenu.cpp">
       <Filter>Src\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Systems\Graphics.cpp">
+      <Filter>Src\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">
@@ -141,6 +144,9 @@
     </ClInclude>
     <ClInclude Include="Src\Scenes\SceneManager.h">
       <Filter>Src\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Systems\Graphics.h">
+      <Filter>Src\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
