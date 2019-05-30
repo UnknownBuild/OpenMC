@@ -148,13 +148,13 @@ int main() {
         glm::vec3 torchPosition[] = {
             glm::vec3(5, 0, -3)
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("torch") }, { glm::vec4(1.0, 0.5, 0.2, 1.0) }, 5, torchPosition, 2);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("torch") }, { glm::vec4(1.0, 0.5, 0.2, 1.0) }, RenderType::TorchTexture, torchPosition, 2);
 
         // 渲染火
         glm::vec3 firePosition[] = {
             glm::vec3(-3, 0, 5)
         };
-        Renderer->DrawBlock({ torchTexture[frame / 5] }, {}, 6, firePosition, 1);
+        Renderer->DrawBlock({ torchTexture[frame / 5] }, {}, RenderType::FireTexture, firePosition, 1);
 
         // 渲染草方块
         glm::vec3 grassPosition[1000] = {
@@ -186,7 +186,7 @@ int main() {
             }
         }
         Renderer->DrawBlock({ ResourceManager::GetTexture("grass"), ResourceManager::GetTexture("grass_top") },
-            { glm::vec4(0.567, 0.732, 0.366, 1) ,  glm::vec4(0.6, 0.45, 0.37, 1) }, 3, grassPosition, grassCount);
+            { glm::vec4(0.567, 0.732, 0.366, 1) ,  glm::vec4(0.6, 0.45, 0.37, 1) }, RenderType::SideTexture, grassPosition, grassCount);
 
         // 渲染水面
         glm::vec3 waterPosition[] = {
@@ -195,7 +195,7 @@ int main() {
             glm::vec3(7, 0, 8),
             glm::vec3(7, 0, 9),
         };
-        Renderer->DrawBlock({ waterTexture[frame / 5] }, {glm::vec4(0.26, 0.38 ,0.45, 0.35)}, 11, waterPosition, 4);
+        Renderer->DrawBlock({ waterTexture[frame / 5] }, {glm::vec4(0.26, 0.38 ,0.45, 0.35)}, RenderType::LiquidTexture, waterPosition, 4);
 
 
         //// 渲染圆石
@@ -205,14 +205,14 @@ int main() {
             glm::vec3(3, 1, 4),
             glm::vec3(4, 0, 4),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("grass_top") }, { glm::vec4(0.8, 0.8, 0.8, 1) }, 2, stonePosition, 4);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("grass_top") }, { glm::vec4(0.8, 0.8, 0.8, 1) }, RenderType::NoiseTexture, stonePosition, 4);
 
         //// 渲染蒲公英
         glm::vec3 dandelionPosition[] = {
             glm::vec3(-1, 0, -1),
             glm::vec3(-2, 0, 0),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("dandelion") }, { glm::vec4(1) }, 4, dandelionPosition, 4);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("dandelion") }, { glm::vec4(1) }, RenderType::CenterCrossTexture, dandelionPosition, 4);
 
         //// 渲染草
         glm::vec3 grassTopPosition[] = {
@@ -222,7 +222,7 @@ int main() {
             glm::vec3(1, 0, 8),
             glm::vec3(2, 0, 8),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("grassTop") }, {glm::vec4(0.62, 0.92, 0.4, 1)}, 4, grassTopPosition, 3);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("grassTop") }, {glm::vec4(0.62, 0.92, 0.4, 1)}, RenderType::CenterCrossTexture, grassTopPosition, 3);
 
         //// 渲染沙子
         glm::vec3 sandPosition[] = {
@@ -231,7 +231,7 @@ int main() {
             glm::vec3(1, 1, 0),
             glm::vec3(2, 0, 0),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("sand") }, {}, 0, sandPosition, 4);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("sand") }, {}, RenderType::OneTexture, sandPosition, 4);
 
         // 渲染橡木
         glm::vec3 oakPostions[] = {
@@ -265,7 +265,7 @@ int main() {
             glm::vec3(-5, 1, -1),
             glm::vec3(-5, 2, -1),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("oak_planks") }, {},0, oakPostions, 29);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("oak_planks") }, {}, RenderType::OneTexture, oakPostions, 29);
 
         //// 渲染岩石
         glm::vec3 stonePosition2[] = {
@@ -274,7 +274,7 @@ int main() {
             glm::vec3(3, 1, -4),
             glm::vec3(4, 0, -4),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("stone") }, {}, 0, stonePosition2, 4);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("stone") }, {}, RenderType::OneTexture, stonePosition2, 4);
 
 
         
@@ -285,7 +285,7 @@ int main() {
             glm::vec3(7, 1, -4),
             glm::vec3(8, 0, -4),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("glass") }, {}, 0, glassPosition, 4);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("glass") }, {}, RenderType::OneTexture, glassPosition, 4);
 
 
         //// 渲染工作台
@@ -300,7 +300,7 @@ int main() {
             ResourceManager::GetTexture("tabel_top"),
             ResourceManager::GetTexture("oak_planks"),
             }, {},
-            7, tablePosition, 2);
+            RenderType::CustomTexture, tablePosition, 2);
 
         //// 渲染火炉
         glm::vec3 furnacePosition[] = {
@@ -311,7 +311,7 @@ int main() {
             ResourceManager::GetTexture("furnace_side"),
             ResourceManager::GetTexture("furnace_top"),
             }, {},
-            8, furnacePosition, 2, 2);
+            RenderType::DirCustomTexture, furnacePosition, 2, 2);
 
         //// 渲染树干
         glm::vec3 oakPosition[] = {
@@ -325,7 +325,7 @@ int main() {
             ResourceManager::GetTexture("oak_log"),
             ResourceManager::GetTexture("oak_log_top"),
             }, {},
-            8, oakPosition, 4, 0);
+            RenderType::ThreeTexture, oakPosition, 4);
 
 
         //// 渲染树叶
@@ -344,7 +344,7 @@ int main() {
             glm::vec3(0, 5, 10),
             glm::vec3(1, 5, 8),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("oak_leaves") }, { glm::vec4(0.5, 0.67, 0.43, 1) }, 0, leavePosition, 13);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("oak_leaves") }, { glm::vec4(0.5, 0.67, 0.43, 1) }, RenderType::OneTexture, leavePosition, 13);
 
 
         // 渲染门
@@ -355,7 +355,7 @@ int main() {
             ResourceManager::GetTexture("iron_door_top"),
             ResourceManager::GetTexture("iron_door_bottom")
             }, { glm::vec4(0.675, 0.691, 0.675, 1.0) },
-            9, doorPosition, 2, 1);
+            RenderType::DoorTexture, doorPosition, 2, 1);
 
         // 渲染门
         glm::vec3 oakDoorPosition[] = {
@@ -365,7 +365,7 @@ int main() {
             ResourceManager::GetTexture("oak_door_top"),
             ResourceManager::GetTexture("oak_door_bottom")
             }, { glm::vec4(0.53, 0.38, 0.18, 1.0) },
-            9, oakDoorPosition, 2, 0);
+            RenderType::DoorTexture, oakDoorPosition, 2, 0);
 
         // 渲染玻璃
         glm::vec3 colorGlassPosition[] = {
@@ -375,7 +375,7 @@ int main() {
         Renderer->DrawBlock({
             ResourceManager::GetTexture("blue_stained_glass")
             }, { glm::vec4(0.2, 0.5,0.7, 0.35) },
-            10, colorGlassPosition, 2, 0);
+            RenderType::GlassTexture, colorGlassPosition, 2, 0);
 
         // 渲染2D纹理
         Renderer->DrawTexture(ResourceManager::GetTexture("tabel_top"), glm::vec2(100, 100), 10);

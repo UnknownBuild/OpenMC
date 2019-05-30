@@ -1,7 +1,10 @@
 ﻿#pragma once
 #include <initializer_list>
 #include "../ResourceManager/ResourceManager.h"
+#include "../World/Database/BlockData.h"
+
 using std::initializer_list;
+
 struct PointList {
     int id;
 
@@ -31,9 +34,8 @@ class SpriteRenderer {
                   glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f),
                   GLfloat rotate = 0.0f);
   // 渲染方块
-  void DrawBlock(const initializer_list<Texture2D>& textures, const initializer_list<glm::vec4>& colors,
-      int type, const glm::vec3* position, int count, int dir = 0);
-
+  void DrawBlock(const initializer_list<Texture2D>& textures, const initializer_list<glm::vec4>& colors, RenderType type, const glm::vec3* position, int count, int dir = 0);
+   
   // 渲染文本
   void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
                   glm::vec4 color = glm::vec4(1));
