@@ -22,7 +22,7 @@ enum class BlockType : uint8_t {
 };
 
 enum class RenderType : uint8_t {
-    OneTexture = 0,         // 单纹理方块
+    None = 0,              // 不渲染
     ThreeTexture = 1,       // 三纹理方块(上、四周、下)
     NoiseTexture = 2,       // 噪声 + 颜色
     SideTexture = 3,        // 上下噪声，四周纹理
@@ -34,7 +34,7 @@ enum class RenderType : uint8_t {
     DoorTexture = 9,        // 门
     GlassTexture = 10,      // 玻璃
     LiquidTexture = 11,     // 液体表面
-    None = 12,              // 不渲染
+    OneTexture = 12,         // 单纹理方块
 };
 
 class BlockData final {
