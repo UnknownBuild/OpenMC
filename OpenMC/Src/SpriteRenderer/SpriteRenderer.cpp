@@ -105,7 +105,7 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         this->blockShader->SetInteger("hasColor", true);
         this->blockShader->SetVector4f("material.color", colors.begin()[0]);
 
-        this->noise->Bind();
+        textures.begin()[0].Bind();
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
 
@@ -120,7 +120,7 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
 
-        this->noise->Bind();
+        textures.begin()[1].Bind();
         this->blockShader->SetInteger("hasColor", true);
         this->blockShader->SetVector4f("material.color", colors.begin()[0]);
         glBindVertexArray(this->topVAO);
@@ -245,6 +245,8 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         glBindVertexArray(this->entityVAO4);
         glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
         // 四周
+        this->blockShader->SetVector4f("material.color",
+            glm::vec4(colors.begin()[0].x, colors.begin()[0].y, colors.begin()[0].z, 0.2));
         this->blockShader->SetInteger("hasTexture", false);
         glBindVertexArray(this->entityVAO5);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);

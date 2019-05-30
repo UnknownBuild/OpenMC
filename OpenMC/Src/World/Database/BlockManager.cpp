@@ -43,7 +43,10 @@ bool BlockManager::Load() {
             } else if (member.name == "name") {
                 blocks[id].Name = member.value.GetString();
             } else if (member.name == "type") {
-                blocks[id].Type = static_cast<BlockType>(member.value.GetInt());
+                // blocks[id].Type = static_cast<BlockType>(member.value.GetInt());
+            }
+            else if (member.name == "textures") {
+                // blocks[id].Textures = member.value.GetArray()
             }
         }
     }

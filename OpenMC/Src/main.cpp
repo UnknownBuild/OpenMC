@@ -120,7 +120,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, size.first, size.second);
         Renderer->SetWindowSize(size.first, size.second);
-
+        // 渲染天空盒
         Renderer->RenderSkyBox();
 
         // test begin
@@ -179,7 +179,7 @@ int main() {
                 grassPosition[grassCount++] = glm::vec3(i, -1, j);
             }
         }
-        Renderer->DrawBlock({ ResourceManager::GetTexture("grass") },
+        Renderer->DrawBlock({ ResourceManager::GetTexture("grass"), ResourceManager::GetTexture("grass_top") },
             { glm::vec4(0.567, 0.732, 0.366, 1) ,  glm::vec4(0.6, 0.45, 0.37, 1) }, 3, grassPosition, grassCount);
 
         // 渲染水面
@@ -189,7 +189,7 @@ int main() {
             glm::vec3(7, 0, 8),
             glm::vec3(7, 0, 9),
         };
-        Renderer->DrawBlock({ waterTexture[frame / 5] }, {glm::vec4(0.26,0.38,0.45, 0.35)}, 11, waterPosition, 4);
+        Renderer->DrawBlock({ waterTexture[frame / 5] }, {glm::vec4(0.26, 0.38 ,0.45, 0.35)}, 11, waterPosition, 4);
 
 
         //// 渲染圆石
@@ -199,7 +199,7 @@ int main() {
             glm::vec3(3, 1, 4),
             glm::vec3(4, 0, 4),
         };
-        Renderer->DrawBlock({}, { glm::vec4(0.8, 0.8, 0.8, 1) }, 2, stonePosition, 4);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("grass_top") }, { glm::vec4(0.8, 0.8, 0.8, 1) }, 2, stonePosition, 4);
 
         //// 渲染蒲公英
         glm::vec3 dandelionPosition[] = {
@@ -368,7 +368,7 @@ int main() {
         };
         Renderer->DrawBlock({
             ResourceManager::GetTexture("blue_stained_glass")
-            }, { glm::vec4(1,1,1, 0.1) },
+            }, { glm::vec4(0.2, 0.5,0.7, 0.35) },
             10, colorGlassPosition, 2, 0);
 
         // 渲染2D纹理

@@ -2,11 +2,17 @@
   {
     "id": 0,
     "name": "air",
-    "type": 0
+    "type": 0,
+    "render": 11,
+    "textures": [],
+    "colors": []
   },
   {
     "id": 1,
-    "name": "stone",
-    "type": 1
+    "name": "grass",
+    "type": 0,
+    "render": 11,
+    "textures": ["grass_block_side", "grass_top"],
+    "colors": [""]
   }
 ]
