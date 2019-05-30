@@ -121,6 +121,8 @@ int main() {
         glViewport(0, 0, size.first, size.second);
         Renderer->SetWindowSize(size.first, size.second);
 
+        Renderer->RenderSkyBox();
+
         // test begin
 
         Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
@@ -383,8 +385,6 @@ int main() {
         // test end
 
         ImGui::Render();
-
-        Renderer->RenderSkyBox();
 
         int display_w, display_h;
         glfwMakeContextCurrent(window->GetWindow());
