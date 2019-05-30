@@ -137,6 +137,7 @@
     <ClCompile Include="Src\Scenes\SceneMenu.cpp" />
     <ClCompile Include="Src\SpriteRenderer\SpriteRenderer.cpp" />
     <ClCompile Include="Src\Systems\Graphics.cpp" />
+    <ClCompile Include="Src\Systems\Input.cpp" />
     <ClCompile Include="Src\Systems\Window.cpp" />
     <ClCompile Include="Src\World\Database\BlockManager.cpp" />
   </ItemGroup>
@@ -172,6 +173,7 @@
     <None Include="GLSL\Font.vs.glsl" />
     <None Include="GLSL\Object.fs.glsl" />
     <None Include="GLSL\Object.vs.glsl" />
+    <None Include="Resources\Assets\blocks.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
