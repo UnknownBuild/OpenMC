@@ -47,6 +47,7 @@ void Camera::SetViewPostion(glm::vec3 pos, glm::vec3 front, glm::vec3 up) {
 // 设置摄像机角度
 void Camera::setAngle() {
     glm::vec3 front = glm::normalize(this->Front);
+    this->Right = glm::normalize(glm::cross(this->Front, this->WorldUp));
     this->Yaw = atan2(front.z, front.x);
     this->Yaw = ((this->Yaw) / M_PI) * 180.0f;
     this->Pitch = asin(front.y);
@@ -87,6 +88,12 @@ void Camera::processInput() {
             Position += Up * velocity;
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
             Position -= Up * velocity;
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            Position += Up * velocity;
+        if (glfwGetKey(window,GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+            Position -= Up * velocity;
+
+    
     }
     // 切换模式
     if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS) {
@@ -107,7 +114,7 @@ void Camera::processInput() {
     }
 }
 
-void Camera::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
+void Camera::MouseCallback(double xpos, double ypos) {
     if (!CameraInst->freedomView) return;
     if (CameraInst->firstMouse) {
         CameraInst->lastX = xpos;
@@ -142,7 +149,7 @@ void Camera::MouseCallback(GLFWwindow* window, double xpos, double ypos) {
     CameraInst->Up = glm::normalize(glm::cross(CameraInst->Right, CameraInst->Front));
 }
 
-void Camera::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+void Camera::ScrollCallback( double xoffset, double yoffset) {
     if (!CameraInst->freedomView) return;
     if (CameraInst->Zoom >= 1.0f && CameraInst->Zoom <= 45.0f)
         CameraInst->Zoom -= yoffset;

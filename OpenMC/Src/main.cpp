@@ -46,11 +46,17 @@ int main() {
     window->InitGLAD();
     window->InitImGui();
 
+    // 初始化摄像头
+    Camera* camera = new Camera(window->GetWindow());
+    camera->SetLookPostion(glm::vec3(5, 5, 10));
+
     Input<0>* input = Singleton<Input<0>>::GetInstance();
     Input<0>::OnCursorPosChanged += cursorPosCallbackA;
     Input<0>::OnCursorPosChanged += cursorPosCallbackB;
+    Input<0>::OnCursorPosChanged += camera->MouseCallback;
     Input<0>::OnMouseButtonClick += mouseButtonCallbackA;
-    Input<0>::OnScrollChanged += scrollCallbackA; 
+    Input<0>::OnScrollChanged += scrollCallbackA;
+    Input<0>::OnScrollChanged += camera->ScrollCallback;
     input->Bind(window);
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
@@ -126,9 +132,6 @@ int main() {
 
     // 初始化渲染管理器
     SpriteRenderer* Renderer = new SpriteRenderer();
-    // 初始化摄像头
-    Camera* camera = new Camera(window->GetWindow());
-    camera->SetLookPostion(glm::vec3(5, 5, 10));
 
     glm::vec3 testColor = glm::vec3(0.5, 0.5 ,0.5);
 
@@ -407,7 +410,7 @@ int main() {
             ResourceManager::GetTexture("cactus_side"),
             ResourceManager::GetTexture("cactus_bottom"),
             }, {
-                glm::vec4(0.0, 0.625, 0.0, 1.0)
+                glm::vec4(0.0, 0.0625, 0.0, 1.0)
             },
             RenderType::OffsetTexture, cactusPosition, 5);
 
