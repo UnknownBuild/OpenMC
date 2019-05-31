@@ -7,6 +7,7 @@
 #include "Scenes/SceneMenu.h"
 #include "Helpers/Config.h"
 #include "Helpers/Singleton.h"
+#include "Systems/Input.h"
 #include "Systems/Window.h"
 // test
 #include <glm/glm.hpp>
@@ -19,8 +20,12 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-void scrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
+void cursorPosCallbackA(double xOffset, double yOffset) {
     std::cout << "Hello" << std::endl;
+}
+
+void cursorPosCallbackB(double xOffset, double yOffset) {
+    std::cout << "Hi" << std::endl;
 }
 
 int main() {
@@ -33,12 +38,15 @@ int main() {
     window->InitGLAD();
     window->InitImGui();
 
+    Input<0>* input = Singleton<Input<0>>::GetInstance();
+    Input<0>::OnCursorPosChanged += cursorPosCallbackA;
+    Input<0>::OnCursorPosChanged += cursorPosCallbackB;
+    input->Bind(window);
+
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
     // sceneManager->Goto(new SceneMenu());
     sceneManager->Goto(NULL);
     sceneManager->Run(window);
-
-    glfwSetScrollCallback(window->GetWindow(), scrollCallback);
 
     // test begin
     Singleton<BlockManager>::GetInstance()->Load();

@@ -18,8 +18,8 @@ Camera::Camera(GLFWwindow* window) {
     this->freedomView = false;
 
     this->window = window;
-    glfwSetCursorPosCallback(window, this->MouseCallback);
-    glfwSetScrollCallback(window, this->ScrollCallback);
+    // glfwSetCursorPosCallback(window, this->MouseCallback);
+    // glfwSetScrollCallback(window, this->ScrollCallback);
 }
 
 glm::mat4 Camera::GetViewMatrix() {
