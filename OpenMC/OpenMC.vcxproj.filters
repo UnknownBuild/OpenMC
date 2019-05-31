@@ -71,6 +71,9 @@
     <ClCompile Include="Src\Systems\Graphics.cpp">
       <Filter>Src\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Systems\Input.cpp">
+      <Filter>Src\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">
@@ -161,6 +164,9 @@
     </None>
     <None Include="GLSL\Object.vs.glsl">
       <Filter>GLSL</Filter>
+    </None>
+    <None Include="Resources\Assets\blocks.json">
+      <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
 </Project>

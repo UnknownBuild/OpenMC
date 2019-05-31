@@ -19,6 +19,10 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+void scrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
+    std::cout << "Hello" << std::endl;
+}
+
 int main() {
     Config* config = Singleton<Config>::GetInstance();
     config->Load();
@@ -33,6 +37,8 @@ int main() {
     // sceneManager->Goto(new SceneMenu());
     sceneManager->Goto(NULL);
     sceneManager->Run(window);
+
+    glfwSetScrollCallback(window->GetWindow(), scrollCallback);
 
     // test begin
     Singleton<BlockManager>::GetInstance()->Load();
