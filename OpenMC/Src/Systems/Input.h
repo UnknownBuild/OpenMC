@@ -30,9 +30,13 @@ public:
     static void Bind(Window* window) {
         window->SetCursorPosCallback(&Input::cursorPosCallback);
         // TODO
+        window->SetMouseButtonCallback(&Input::mouseButtonCallback);
+        window->SetScrollCallback(&Input::scrollCallback);
     }
 
     static Callback<CursorPosChangedEvent> OnCursorPosChanged;
+    static Callback<MouseButtonClickEvent> OnMouseButtonClick;
+    static Callback<ScrollChangedEvent> OnScrollChanged;
 
 private:
     static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
@@ -40,9 +44,21 @@ private:
             c(xpos, ypos);
         }
     }
-    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+        for (auto& c : OnMouseButtonClick.Get()) {
+            c(button, action, mods);
+        }
+    }
+    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+        for (auto& c : OnScrollChanged.Get()) {
+            c(xoffset, yoffset);
+        }
+    }
 };
 
 template<unsigned int ID>
 Callback<CursorPosChangedEvent> Input<ID>::OnCursorPosChanged;
+template<unsigned int ID>
+Callback<MouseButtonClickEvent> Input<ID>::OnMouseButtonClick;
+template<unsigned int ID>
+Callback<ScrollChangedEvent> Input<ID>::OnScrollChanged;
