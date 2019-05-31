@@ -50,7 +50,7 @@ int main() {
     Input<0>::OnCursorPosChanged += cursorPosCallbackA;
     Input<0>::OnCursorPosChanged += cursorPosCallbackB;
     Input<0>::OnMouseButtonClick += mouseButtonCallbackA;
-    Input<0>::OnScrollChanged += scrollCallbackA;
+    Input<0>::OnScrollChanged += scrollCallbackA; 
     input->Bind(window);
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
