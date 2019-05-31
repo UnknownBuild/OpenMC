@@ -71,9 +71,6 @@
     <ClCompile Include="Src\Systems\Graphics.cpp">
       <Filter>Src\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Systems\Input.cpp">
-      <Filter>Src\Systems</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">

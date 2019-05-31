@@ -1,13 +1,15 @@
 ﻿#pragma once
+#include <functional>
 #include <vector>
+
 #include "Window.h"
 
 template<class T>
 class Callback final {
 public:
-    T& operator +=(T callback) {
+    Callback& operator +=(T callback) {
         callbacks.push_back(callback);
-        return this;
+        return *this;
     }
 
     std::vector<T>& Get() {
@@ -18,14 +20,29 @@ private:
     std::vector<T> callbacks;
 };
 
+typedef std::function<void(double, double)> CursorPosChangedEvent;
+typedef std::function<void(int, int, int)> MouseButtonClickEvent;
+typedef std::function<void(double, double)> ScrollChangedEvent;
+
+template<unsigned int ID>
 class Input final {
 public:
-    Window::CursorPosCallback GetCursorPosCallback();
-    Window::MouseButtonCallback GetMouseButtonCallback();
-    Window::ScrollCallback GetScrollCallback();
+    static void Bind(Window* window) {
+        window->SetCursorPosCallback(&Input::cursorPosCallback);
+        // TODO
+    }
 
-    Callback<Window::CursorPosCallback> OnCursorPosChanged;
+    static Callback<CursorPosChangedEvent> OnCursorPosChanged;
 
 private:
-    double mousePosX, mousePosY;
+    static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+        for (auto& c : OnCursorPosChanged.Get()) {
+            c(xpos, ypos);
+        }
+    }
+    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 };
+
+template<unsigned int ID>
+Callback<CursorPosChangedEvent> Input<ID>::OnCursorPosChanged;
