@@ -24,7 +24,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{A583950D-A70C-404B-BDB4-3E683624C63D}</ProjectGuid>
     <RootNamespace>OpenMC</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -43,7 +43,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -133,6 +133,7 @@
     <ClCompile Include="Src\Camera\Camera.cpp" />
     <ClCompile Include="Src\Helpers\Config.cpp" />
     <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\Math\PerlinNoise.cpp" />
     <ClCompile Include="Src\ResourceManager\ResourceManager.cpp" />
     <ClCompile Include="Src\Scenes\SceneManager.cpp" />
     <ClCompile Include="Src\Scenes\SceneMenu.cpp" />
@@ -140,6 +141,7 @@
     <ClCompile Include="Src\Systems\Graphics.cpp" />
     <ClCompile Include="Src\Systems\Window.cpp" />
     <ClCompile Include="Src\World\Database\BlockManager.cpp" />
+    <ClCompile Include="Src\World\Map\MapGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Camera\Camera.h" />
@@ -147,6 +149,8 @@
     <ClInclude Include="Src\Helpers\EnvPath.h" />
     <ClInclude Include="Src\Helpers\Singleton.h" />
     <ClInclude Include="Src\Helpers\UtilTool.h" />
+    <ClInclude Include="Src\Math\Noise.h" />
+    <ClInclude Include="Src\Math\PerlinNoise.h" />
     <ClInclude Include="Src\ResourceManager\Mesh.h" />
     <ClInclude Include="Src\ResourceManager\Model.h" />
     <ClInclude Include="Src\ResourceManager\ResourceManager.h" />
@@ -160,8 +164,12 @@
     <ClInclude Include="Src\Systems\Graphics.h" />
     <ClInclude Include="Src\Systems\Input.h" />
     <ClInclude Include="Src\Systems\Window.h" />
+    <ClInclude Include="Src\World\Characters\Character.h" />
+    <ClInclude Include="Src\World\Characters\Player.h" />
     <ClInclude Include="Src\World\Database\BlockData.h" />
     <ClInclude Include="Src\World\Database\BlockManager.h" />
+    <ClInclude Include="Src\World\Map\MapGenerator.h" />
+    <ClInclude Include="Src\World\Map\MapManager.h" />
     <ClInclude Include="Src\World\Types\Block.h" />
     <ClInclude Include="Src\World\Types\Chunk.h" />
     <ClInclude Include="Src\World\Types\Region.h" />

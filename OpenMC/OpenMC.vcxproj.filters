@@ -39,6 +39,15 @@
     <Filter Include="Src\Scenes">
       <UniqueIdentifier>{c1171ad1-fc95-424a-b1c5-bb0db983607a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\World\Characters">
+      <UniqueIdentifier>{8f554d0a-d693-4f21-9f9b-3f9593d7de71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\World\Map">
+      <UniqueIdentifier>{165c7c27-e7b2-4e92-afc8-c0ee896deafb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Math">
+      <UniqueIdentifier>{9ef60024-8ed6-4228-a325-cb3c427361b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\main.cpp">
@@ -70,6 +79,12 @@
     </ClCompile>
     <ClCompile Include="Src\Systems\Graphics.cpp">
       <Filter>Src\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\World\Map\MapGenerator.cpp">
+      <Filter>Src\World\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Math\PerlinNoise.cpp">
+      <Filter>Src\Math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +162,24 @@
     </ClInclude>
     <ClInclude Include="Src\Systems\Graphics.h">
       <Filter>Src\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Characters\Character.h">
+      <Filter>Src\World\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Characters\Player.h">
+      <Filter>Src\World\Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Map\MapManager.h">
+      <Filter>Src\World\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\World\Map\MapGenerator.h">
+      <Filter>Src\World\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Math\Noise.h">
+      <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Math\PerlinNoise.h">
+      <Filter>Src\Math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
