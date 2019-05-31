@@ -32,7 +32,7 @@ SpriteRenderer::SpriteRenderer() {
 void SpriteRenderer::DrawBlock(BlockId id, const glm::vec3* position, int count, int dir, int frame) {
     BlockData block = Singleton<BlockManager>::GetInstance()->GetBlockData(id);
     if (frame != 0 && block.Animation != 0) {
-        frame = (frame / block.Animation) % block.Animation;
+        frame = (frame / block.Animation) % block.Textures.size();
     }
     this->DrawBlock(block.Textures, block.Colors, block.Render, position, count, dir, frame);
 }
@@ -70,7 +70,7 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
 // 通用渲染方法
 void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<glm::vec4>& colors,
     RenderType type, const glm::vec3* position, int count, int dir, int iTexture) {
-    count = count > 1024 ? 1024 : count; // 最大单次渲染个数
+    count = count > 10240 ? 10240 : count; // 最大单次渲染个数
     this->blockShader->Use();
     this->objectShader->SetMatrix4("model", glm::mat4(1.0f));
     this->objectShader->SetInteger("hasTexture", true);
@@ -366,7 +366,7 @@ void SpriteRenderer::initRenderData() {
     // 实例化数组
     glGenBuffers(1, &instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1024, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 10240, NULL, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     float verticesQuad[] = {
