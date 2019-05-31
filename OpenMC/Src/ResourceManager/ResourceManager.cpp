@@ -97,8 +97,8 @@ Texture2D ResourceManager::loadTextureFromFile(const GLchar * file, bool alpha) 
   return texture;
 }
 
-Texture2D* ResourceManager::LoadTextureSplit(const GLchar* file, int count) {
-    Texture2D* textures = new Texture2D[count];
+vector<Texture2D> ResourceManager::LoadTextureSplit(const GLchar* file, int count) {
+    vector<Texture2D> textures;
     int width, height, nrChannels;
     unsigned char* image = stbi_load(file, &width, &height, &nrChannels, 0);
 
@@ -111,9 +111,11 @@ Texture2D* ResourceManager::LoadTextureSplit(const GLchar* file, int count) {
     else if (nrChannels == 4)
         format = GL_RGBA;
     for (int i = 0; i < count; i++) {
-        textures[i].Image_Format = format;
-        textures[i].Internal_Format = format;
-        textures[i].Generate(sWidth, sHeight, image + (nrChannels * sWidth * sHeight) * i);
+        Texture2D texture;
+        texture.Image_Format = format;
+        texture.Internal_Format = format;
+        texture.Generate(sWidth, sHeight, image + (nrChannels * sWidth * sHeight) * i);
+        textures.push_back(texture);
     }
     stbi_image_free(image);
     return textures;

@@ -132,11 +132,11 @@ int main() {
 
     glm::vec3 testColor = glm::vec3(0.5, 0.5 ,0.5);
 
-    Texture2D* torchTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/fire_0.png", 32);
+    vector<Texture2D> torchTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/fire_0.png", 32);
 
-    Texture2D* waterTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/water_still.png", 32);
+    vector<Texture2D> waterTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/water_still.png", 32);
     // 海晶灯
-    Texture2D* sea_lanternTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/sea_lantern.png", 5);
+    vector<Texture2D> sea_lanternTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/sea_lantern.png", 5);
 
     int frame = 0;
 
