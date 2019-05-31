@@ -84,6 +84,9 @@ int main() {
 
     ResourceManager::LoadTexture("Resources/Textures/blocks/dandelion.png", "dandelion");
 
+    // brown蘑菇
+    ResourceManager::LoadTexture("Resources/Textures/blocks/brown_mushroom.png", "brown_mushroom");
+    
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_top.png", "iron_door_top");
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_bottom.png", "iron_door_bottom");
 
@@ -92,6 +95,18 @@ int main() {
 
     ResourceManager::LoadTexture("Resources/Textures/blocks/blue_stained_glass.png", "blue_stained_glass");
     ResourceManager::LoadTexture("Resources/Textures/blocks/blue_stained_glass_pane_top.png", "blue_stained_glass_pane_top");
+
+    // 仙人掌
+    ResourceManager::LoadTexture("Resources/Textures/blocks/cactus_side.png", "cactus_side");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/cactus_top.png", "cactus_top");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/cactus_bottom.png", "cactus_bottom");
+    // 蛋糕
+    ResourceManager::LoadTexture("Resources/Textures/blocks/cake_bottom.png", "cake_bottom");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/cake_inner.png", "cake_inner");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/cake_side.png", "cake_side");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/cake_top.png", "cake_top");
+
+
 
     // 初始化渲染管理器
     SpriteRenderer* Renderer = new SpriteRenderer();
@@ -104,6 +119,8 @@ int main() {
     Texture2D* torchTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/fire_0.png", 32);
 
     Texture2D* waterTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/water_still.png", 32);
+    // 海晶灯
+    Texture2D* sea_lanternTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/sea_lantern.png", 5);
 
     int frame = 0;
 
@@ -196,6 +213,7 @@ int main() {
         Renderer->DrawBlock({ ResourceManager::GetTexture("grass"), ResourceManager::GetTexture("grass_top") },
             { glm::vec4(0.567, 0.732, 0.366, 1) ,  glm::vec4(0.6, 0.45, 0.37, 1) }, RenderType::SideTexture, grassPosition, grassCount);
 
+
         // 渲染水面
         glm::vec3 waterPosition[] = {
             glm::vec3(6, 0, 8),
@@ -203,7 +221,14 @@ int main() {
             glm::vec3(7, 0, 8),
             glm::vec3(7, 0, 9),
         };
-        Renderer->DrawBlock({ waterTexture[frame / 5] }, {glm::vec4(0.26, 0.38 ,0.45, 0.35)}, RenderType::LiquidTexture, waterPosition, 4);
+        Renderer->DrawBlock({ waterTexture[frame/5] }, {glm::vec4(0.26, 0.38 ,0.45, 0.35)}, RenderType::LiquidTexture, waterPosition, 4);
+
+        // 渲染海晶灯
+        glm::vec3 sea_lanternPosition[] = {
+            glm::vec3(10, 0, 12),
+            glm::vec3(10, 1, 12),
+        };
+        Renderer->DrawBlock({ sea_lanternTexture[(frame / 5) % 5] }, { }, RenderType::OneTexture, sea_lanternPosition, 2);
 
 
         //// 渲染圆石
@@ -220,7 +245,14 @@ int main() {
             glm::vec3(-1, 0, -1),
             glm::vec3(-2, 0, 0),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("dandelion") }, { glm::vec4(1) }, RenderType::CenterCrossTexture, dandelionPosition, 4);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("dandelion") }, { glm::vec4(1) }, RenderType::CenterCrossTexture, dandelionPosition, 2);
+
+        //// 渲染蘑菇
+        glm::vec3 brown_mushroomPosition[] = {
+            glm::vec3(12, 0, 10),
+            glm::vec3(12, 0, 10),
+        };
+        Renderer->DrawBlock({ ResourceManager::GetTexture("brown_mushroom") }, { glm::vec4(1) }, RenderType::CenterCrossTexture, brown_mushroomPosition, 2);
 
         //// 渲染草
         glm::vec3 grassTopPosition[] = {
@@ -285,7 +317,6 @@ int main() {
         Renderer->DrawBlock({ ResourceManager::GetTexture("stone") }, {}, RenderType::OneTexture, stonePosition2, 4);
 
 
-        
         //// 渲染玻璃
         glm::vec3 glassPosition[] = {
             glm::vec3(7, 0, -3),
@@ -321,6 +352,7 @@ int main() {
             }, {},
             RenderType::DirCustomTexture, furnacePosition, 2, 2);
 
+  
         //// 渲染树干
         glm::vec3 oakPosition[] = {
             glm::vec3(0, 0, 9),
@@ -334,6 +366,23 @@ int main() {
             ResourceManager::GetTexture("oak_log_top"),
             }, {},
             RenderType::ThreeTexture, oakPosition, 4);
+
+        // 渲染仙人掌
+        glm::vec3 cactusPosition[] = {
+            glm::vec3(10, 0, 10),
+            glm::vec3(10, 1, 10),
+            glm::vec3(10, 2, 10),
+            glm::vec3(10, 3, 10),
+            glm::vec3(10, 4, 10),
+        };
+        Renderer->DrawBlock({
+            ResourceManager::GetTexture("cactus_top"),
+            ResourceManager::GetTexture("cactus_side"),
+            ResourceManager::GetTexture("cactus_bottom"),
+            }, {
+                glm::vec4(0.0, 0.625, 0.0, 1.0)
+            },
+            RenderType::OffsetTexture, cactusPosition, 5);
 
 
         //// 渲染树叶
@@ -353,7 +402,7 @@ int main() {
             glm::vec3(1, 5, 8),
         };
         Renderer->DrawBlock({ ResourceManager::GetTexture("oak_leaves") }, { glm::vec4(0.5, 0.67, 0.43, 1) }, RenderType::OneTexture, leavePosition, 13);
-
+     
 
         // 渲染门
         glm::vec3 doorPosition[] = {
