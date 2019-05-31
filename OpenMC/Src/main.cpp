@@ -78,6 +78,12 @@ int main() {
 
     // brown蘑菇
     ResourceManager::LoadTexture("Resources/Textures/blocks/brown_mushroom.png", "brown_mushroom");
+    // blue flower
+    ResourceManager::LoadTexture("Resources/Textures/blocks/blue_orchid.png", "blue_orchid");
+    // horn_coral
+    ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral.png", "horn_coral");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_block.png", "horn_coral_block");
+    ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_fan.png", "horn_coral_fan");
     
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_top.png", "iron_door_top");
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_bottom.png", "iron_door_bottom");
@@ -242,9 +248,20 @@ int main() {
         //// 渲染蘑菇
         glm::vec3 brown_mushroomPosition[] = {
             glm::vec3(12, 0, 10),
-            glm::vec3(12, 0, 10),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("brown_mushroom") }, { glm::vec4(1) }, RenderType::CenterCrossTexture, brown_mushroomPosition, 2);
+        Renderer->DrawBlock({ ResourceManager::GetTexture("brown_mushroom") }, { glm::vec4(1) }, RenderType::CenterCrossTexture, brown_mushroomPosition, 1);
+
+        //// 渲染 blue flower
+        glm::vec3 blue_orchidPosition[] = {
+            glm::vec3(12, 0, 11),
+        };
+        Renderer->DrawBlock({ ResourceManager::GetTexture("blue_orchid") }, { glm::vec4(1) }, RenderType::CenterCrossTexture, blue_orchidPosition, 1);
+
+        //// 渲染 horn_coral
+        glm::vec3 horn_coralPosition[] = {
+            glm::vec3(12, 0, 12),
+        };
+        Renderer->DrawBlock({ ResourceManager::GetTexture("horn_coral") }, { glm::vec4(1) }, RenderType::CenterCrossTexture, horn_coralPosition, 1);
 
         //// 渲染草
         glm::vec3 grassTopPosition[] = {
