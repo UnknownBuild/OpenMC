@@ -15,8 +15,6 @@ SpriteRenderer::SpriteRenderer() {
     ResourceManager::InitFont("Resources/Fonts/RAVIE.TTF");
     // 初始化立方体
     this->initRenderData();
-    // 初始化噪声纹理
-    this->noise = &ResourceManager::LoadTexture("Resources/Textures/blocks/grass_block_top.png", "noise");
     // 初始化天空盒
     vector<std::string> faces {
         "Resources/Textures/sky/cloudtop_ft.jpg",
@@ -28,7 +26,15 @@ SpriteRenderer::SpriteRenderer() {
 
     };
     this->skyBox = &ResourceManager::LoadTexture(faces, "skybox");
+}
 
+
+void SpriteRenderer::DrawBlock(BlockId id, const glm::vec3* position, int count, int dir, int frame) {
+    BlockData block = Singleton<BlockManager>::GetInstance()->GetBlockData(id);
+    if (frame != 0 && block.Animation != 0) {
+        frame = (frame / block.Animation) % block.Textures.size();
+    }
+    this->DrawBlock(block.Textures, block.Colors, block.Render, position, count, dir, frame);
 }
 
 SpriteRenderer::~SpriteRenderer() {
@@ -60,10 +66,11 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
     this->flatShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
 }
 
+
 // 通用渲染方法
-void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, const initializer_list<glm::vec4>& colors,
-    RenderType type, const glm::vec3* position, int count, int dir) {
-    count = count > 1024 ? 1024 : count; // 最大单次渲染个数
+void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<glm::vec4>& colors,
+    RenderType type, const glm::vec3* position, int count, int dir, int iTexture) {
+    count = count > 10240 ? 10240 : count; // 最大单次渲染个数
     this->blockShader->Use();
     this->objectShader->SetMatrix4("model", glm::mat4(1.0f));
     this->objectShader->SetInteger("hasTexture", true);
@@ -76,6 +83,11 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    vector<Texture2D> textures = _textures;
+    if (iTexture != 0) {
+        textures[0] = textures[iTexture];
+    }
+
     glActiveTexture(GL_TEXTURE0);
 
     glm::mat4 model = glm::mat4(1.0);
@@ -83,30 +95,30 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
     case RenderType::OneTexture: // 单纹理方块
         if (colors.size() > 0) {
             this->blockShader->SetInteger("hasColor", true);
-            this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+            this->blockShader->SetVector4f("material.color", colors[0]);
         }
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::ThreeTexture: // 三纹理方块(上、四周、下)
-        textures.begin()[1].Bind();
+        textures[1].Bind();
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
 
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         glBindVertexArray(this->topVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-        textures.begin()[2].Bind();
+        textures[2].Bind();
         glBindVertexArray(this->bottomVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::NoiseTexture:// 噪声 + 颜色
         this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        this->blockShader->SetVector4f("material.color", colors[0]);
 
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
 
@@ -117,31 +129,31 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::SideTexture: // 上下噪声，四周纹理
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
 
-        textures.begin()[1].Bind();
+        textures[1].Bind();
         this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        this->blockShader->SetVector4f("material.color", colors[0]);
         glBindVertexArray(this->topVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-        this->blockShader->SetVector4f("material.color", colors.begin()[1]);
+        this->blockShader->SetVector4f("material.color", colors[1]);
         glBindVertexArray(this->bottomVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::CenterCrossTexture: // 中心交叉纹理
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         if (colors.size() > 0) {
             this->blockShader->SetInteger("hasColor", true);
-            this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+            this->blockShader->SetVector4f("material.color", colors[0]);
         }
         glBindVertexArray(this->entityVAO1);
         glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::TorchTexture: // 火把
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         glBindVertexArray(this->entityVAO2);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
         glBindVertexArray(this->topVAO);
@@ -150,66 +162,66 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         this->blockShader->SetMatrix4("model", model);
         this->blockShader->SetInteger("hasColor", true);
         this->blockShader->SetInteger("hasTexture", false);
-        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        this->blockShader->SetVector4f("material.color", colors[0]);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::FireTexture: // 火焰
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         glBindVertexArray(this->entityVAO3);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::CustomTexture: // 六面自定义方块 (前后左右上下)
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-        textures.begin()[1].Bind();
+        textures[1].Bind();
         glBindVertexArray(this->backVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-        textures.begin()[2].Bind();
+        textures[2].Bind();
         glBindVertexArray(this->leftVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-        textures.begin()[3].Bind();
+        textures[3].Bind();
         glBindVertexArray(this->rightVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-        textures.begin()[4].Bind();
+        textures[4].Bind();
         glBindVertexArray(this->topVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-        textures.begin()[5].Bind();
+        textures[5].Bind();
         glBindVertexArray(this->bottomVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::DirCustomTexture: // 具有方向的方块 （前、侧边、上下）
         model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         this->blockShader->SetMatrix4("model", model);
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-        textures.begin()[1].Bind();
+        textures[1].Bind();
         glBindVertexArray(this->backVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-        textures.begin()[1].Bind();
+        textures[1].Bind();
         glBindVertexArray(this->leftVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-        textures.begin()[1].Bind();
+        textures[1].Bind();
         glBindVertexArray(this->rightVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-        textures.begin()[2].Bind();
+        textures[2].Bind();
         glBindVertexArray(this->topVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
-        textures.begin()[2].Bind();
+        textures[2].Bind();
         glBindVertexArray(this->bottomVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::DoorTexture: // 双层单面（门:上下）
-        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        this->blockShader->SetVector4f("material.color", colors[0]);
         model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         model = glm::scale(model, glm::vec3(1, 1, 0.125));
 
         // 前后
-        textures.begin()[1].Bind();
+        textures[1].Bind();
         this->blockShader->SetMatrix4("model", model);
         this->blockShader->SetInteger("hasColor", false);
         this->blockShader->SetInteger("hasTexture", true);
@@ -225,7 +237,7 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         this->blockShader->SetMatrix4("model", model);
         this->blockShader->SetInteger("hasColor", false);
         this->blockShader->SetInteger("hasTexture", true);
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         glBindVertexArray(this->entityVAO4);
         glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
 
@@ -236,63 +248,63 @@ void SpriteRenderer::DrawBlock(const initializer_list<Texture2D>& textures, cons
         break;
     case RenderType::GlassTexture: // 渲染染色玻璃 前后、周边贴图、方向
         this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        this->blockShader->SetVector4f("material.color", colors[0]);
         model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         model = glm::scale(model, glm::vec3(1, 1, 0.125));
         // 前后
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         this->blockShader->SetMatrix4("model", model);
         this->blockShader->SetInteger("hasTexture", true);
         glBindVertexArray(this->entityVAO4);
         glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
         // 四周
         this->blockShader->SetVector4f("material.color",
-            glm::vec4(colors.begin()[0].x, colors.begin()[0].y, colors.begin()[0].z, 0.2));
+            glm::vec4(colors[0].x, colors[0].y, colors[0].z, 0.2));
         this->blockShader->SetInteger("hasTexture", false);
         glBindVertexArray(this->entityVAO5);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::LiquidTexture: // 水面
         this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetVector4f("material.color", colors.begin()[0]);
+        this->blockShader->SetVector4f("material.color", colors[0]);
         model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         model = glm::translate(model, glm::vec3(0, -0.125, 0));
 
-        textures.begin()[0].Bind();
+        textures[0].Bind();
         this->blockShader->SetMatrix4("model", model);
         glBindVertexArray(this->topVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::OffsetTexture: // 偏移纹理(上、四周、下)，平移幅度(上、四周、下)
-        textures.begin()[0].Bind();
-        model = glm::translate(glm::mat4(1.0), glm::vec3(0, colors.begin()[0].x, 0));
+        textures[0].Bind();
+        model = glm::translate(glm::mat4(1.0), glm::vec3(0, colors[0].x, 0));
         this->blockShader->SetMatrix4("model", model);
         glBindVertexArray(this->topVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-        textures.begin()[1].Bind();
-        model = glm::translate(glm::mat4(1.0), glm::vec3(colors.begin()[0].y, 0, 0));
+        textures[1].Bind();
+        model = glm::translate(glm::mat4(1.0), glm::vec3(colors[0].y, 0, 0));
         this->blockShader->SetMatrix4("model", model);
         glBindVertexArray(this->leftVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-        model = glm::translate(glm::mat4(1.0), glm::vec3(-colors.begin()[0].y, 0, 0));
+        model = glm::translate(glm::mat4(1.0), glm::vec3(-colors[0].y, 0, 0));
         this->blockShader->SetMatrix4("model", model);
         glBindVertexArray(this->rightVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-        model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, -colors.begin()[0].y));
+        model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, -colors[0].y));
         this->blockShader->SetMatrix4("model", model);
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-        model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, colors.begin()[0].y));
+        model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, colors[0].y));
         this->blockShader->SetMatrix4("model", model);
         glBindVertexArray(this->backVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-        textures.begin()[2].Bind();
-        model = glm::translate(glm::mat4(1.0), glm::vec3(0, colors.begin()[0].z, 0));
+        textures[2].Bind();
+        model = glm::translate(glm::mat4(1.0), glm::vec3(0, colors[0].z, 0));
         this->blockShader->SetMatrix4("model", model);
         glBindVertexArray(this->bottomVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
@@ -354,7 +366,7 @@ void SpriteRenderer::initRenderData() {
     // 实例化数组
     glGenBuffers(1, &instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 1024, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 10240, NULL, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     float verticesQuad[] = {

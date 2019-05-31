@@ -12,7 +12,8 @@ enum class BlockId : uint8_t {
     Grass = 2,
     Dirt = 3,
     CobbleStone = 4,
-    Bedrock = 7
+    Bedrock = 7,
+    Fire = 51
 };
 
 enum class BlockType : uint8_t {
@@ -43,8 +44,10 @@ class BlockData final {
 public:
     BlockId Id;
     std::string Name;
-    RenderType Type;                    // 渲染类型
-    std::vector<std::string> Textures;  // 材质
+    BlockType Type;
+    RenderType Render;                  // 渲染类型
+    std::vector<Texture2D> Textures;  // 材质
     std::vector<glm::vec4> Colors;      // 颜色
-    uint8_t light;                      // 自身亮度
+    uint8_t Light;                      // 自身亮度
+    uint8_t Animation;                  // 动画速度 (0-5)
 };
