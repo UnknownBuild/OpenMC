@@ -40,9 +40,9 @@ public:
     // 获取视图矩阵
     glm::mat4 GetViewMatrix();
     // 处理鼠标移动
-    static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
+    static void MouseCallback(double xpos, double ypos);
     // 处理滚轮滚动
-    static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    static void ScrollCallback(double xoffset, double yoffset);
     // 设置固定视角
     void SetLookPostion(glm::vec3 pos, glm::vec3 look = glm::vec3(0, 0, 0));
     // 设置自由视角
