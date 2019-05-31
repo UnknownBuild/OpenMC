@@ -85,6 +85,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
 
     vector<Texture2D> textures = _textures;
     if (iTexture != 0) {
+        if (textures.size() < iTexture) return;
         textures[0] = textures[iTexture];
     }
 
