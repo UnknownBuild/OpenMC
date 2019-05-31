@@ -12,6 +12,7 @@ enum class BlockId : uint8_t {
     Grass = 2,
     Dirt = 3,
     CobbleStone = 4,
+    Bedrock = 7
 };
 
 enum class BlockType : uint8_t {
