@@ -84,6 +84,8 @@ int main() {
     ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral.png", "horn_coral");
     ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_block.png", "horn_coral_block");
     ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_fan.png", "horn_coral_fan");
+    // brain_coral_fan
+    ResourceManager::LoadTexture("Resources/Textures/blocks/brain_coral_fan.png", "brain_coral_fan");
     
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_top.png", "iron_door_top");
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_bottom.png", "iron_door_bottom");
@@ -273,6 +275,17 @@ int main() {
         };
         Renderer->DrawBlock({ ResourceManager::GetTexture("grassTop") }, {glm::vec4(0.62, 0.92, 0.4, 1)}, RenderType::CenterCrossTexture, grassTopPosition, 3);
 
+        //// 渲染 brain_coral_fan
+        glm::vec3 brain_coral_fanPosition[] = {
+            glm::vec3(12, 0, 8),
+        };
+        Renderer->DrawBlock({ ResourceManager::GetTexture("brain_coral_fan") }, { glm::vec4(1.00, 0.624, 0.595, 1) }, RenderType::CenterCrossTexture, brain_coral_fanPosition, 1);
+        //// 渲染 horn_coral_fan
+        glm::vec3 horn_coral_fanPosition[] = {
+            glm::vec3(12, 0, 7),
+        };
+        Renderer->DrawBlock({ ResourceManager::GetTexture("horn_coral_fan") }, { glm::vec4(0.62, 0.92, 0.4, 1) }, RenderType::CenterCrossTexture, horn_coral_fanPosition, 1);
+
         //// 渲染沙子
         glm::vec3 sandPosition[] = {
             glm::vec3(1, 0, -2),
@@ -389,9 +402,22 @@ int main() {
             ResourceManager::GetTexture("cactus_side"),
             ResourceManager::GetTexture("cactus_bottom"),
             }, {
-                glm::vec4(0.0, 0.625, 0.0, 1.0)
+                glm::vec4(0.0, 0.0625, 0.0, 0.0)
             },
             RenderType::OffsetTexture, cactusPosition, 5);
+
+        // 蛋糕
+        glm::vec3 cakePosition[] = {
+            glm::vec3(12, 0, 9),
+        };
+        Renderer->DrawBlock({
+            ResourceManager::GetTexture("cake_top"),
+            ResourceManager::GetTexture("cake_side"),
+            ResourceManager::GetTexture("cake_bottom"),
+            }, {
+                glm::vec4(-0.5, 0.0625, 0.0, 0.0)
+            },
+            RenderType::OffsetTexture, cakePosition, 1);
 
 
         //// 渲染树叶
