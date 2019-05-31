@@ -29,7 +29,6 @@ class Input final {
 public:
     static void Bind(Window* window) {
         window->SetCursorPosCallback(&Input::cursorPosCallback);
-        // TODO
         window->SetMouseButtonCallback(&Input::mouseButtonCallback);
         window->SetScrollCallback(&Input::scrollCallback);
     }

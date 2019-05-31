@@ -9,4 +9,3 @@ PerlinNoise::PerlinNoise(int seed) {
         p[i + 256] = p[i] = distribution(generator);
     }
 }
-6

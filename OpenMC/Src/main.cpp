@@ -29,11 +29,11 @@ void cursorPosCallbackB(double xOffset, double yOffset) {
 }
 
 void mouseButtonCallbackA(int button, int action, int mods) {
-    std::cout << "Fuck" << std::endl;
+    std::cout << "mouse button A" << std::endl;
 }
 
 void scrollCallbackA(double xoffset, double yoffset) {
-    std::cout << "Bitch" << std::endl;
+    std::cout << "scroll A" << std::endl;
 }
 
 int main() {
