@@ -28,6 +28,14 @@ void cursorPosCallbackB(double xOffset, double yOffset) {
     std::cout << "Hi" << std::endl;
 }
 
+void mouseButtonCallbackA(int button, int action, int mods) {
+    std::cout << "Fuck" << std::endl;
+}
+
+void scrollCallbackA(double xoffset, double yoffset) {
+    std::cout << "Bitch" << std::endl;
+}
+
 int main() {
     Config* config = Singleton<Config>::GetInstance();
     config->Load();
@@ -41,6 +49,8 @@ int main() {
     Input<0>* input = Singleton<Input<0>>::GetInstance();
     Input<0>::OnCursorPosChanged += cursorPosCallbackA;
     Input<0>::OnCursorPosChanged += cursorPosCallbackB;
+    Input<0>::OnMouseButtonClick += mouseButtonCallbackA;
+    Input<0>::OnScrollChanged += scrollCallbackA;
     input->Bind(window);
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
