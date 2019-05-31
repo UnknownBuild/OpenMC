@@ -11,6 +11,7 @@
 #include "Systems/Window.h"
 // test
 #include <glm/glm.hpp>
+#include "World/Map/MapGenerator.h"
 #include "ResourceManager/ResourceManager.h"
 #include "SpriteRenderer/SpriteRenderer.h"
 #include "Camera/Camera.h"
@@ -58,6 +59,9 @@ int main() {
     Input<0>::OnScrollChanged += scrollCallbackA;
     Input<0>::OnScrollChanged += camera->ScrollCallback;
     input->Bind(window);
+
+    MapGenerator gen(10086);
+    Chunk* chunk = gen.GenChunk(0, 0);
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
     // sceneManager->Goto(new SceneMenu());

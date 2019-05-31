@@ -10,9 +10,10 @@ enum class BlockId : uint8_t {
     Air = 0,
     Stone = 1,
     Grass = 2,
-    Fire = 3,
-    Dirt = 4,
-    CobbleStone = 5,
+    Dirt = 3,
+    CobbleStone = 4,
+    Bedrock = 7,
+    Fire = 51
 };
 
 enum class BlockType : uint8_t {
