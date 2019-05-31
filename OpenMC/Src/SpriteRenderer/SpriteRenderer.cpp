@@ -15,8 +15,6 @@ SpriteRenderer::SpriteRenderer() {
     ResourceManager::InitFont("Resources/Fonts/RAVIE.TTF");
     // 初始化立方体
     this->initRenderData();
-    // 初始化噪声纹理
-    this->noise = &ResourceManager::LoadTexture("Resources/Textures/blocks/grass_block_top.png", "noise");
     // 初始化天空盒
     vector<std::string> faces {
         "Resources/Textures/sky/cloudtop_ft.jpg",
@@ -29,6 +27,27 @@ SpriteRenderer::SpriteRenderer() {
     };
     this->skyBox = &ResourceManager::LoadTexture(faces, "skybox");
 
+}
+
+//void SpriteRenderer::InitBlock(const vector<BlockData>& blocks) {
+//    for (auto block : blocks) {
+//        // 预加载贴图
+//        vector<Texture2D> textures;
+//        for (auto texture : block.Textures) {
+//            if (texture[0] == '*') { // 需要分割的贴图
+//                textures = ResourceManager::LoadSplitTexture(EnvPath::TextureDir + texture.substr(1), texture);
+//                break;
+//            } else {
+//              textures.push_back(ResourceManager::LoadTexture(EnvPath::TextureDir + texture, texture));
+//            }
+//        }
+//    }
+//}
+
+
+void SpriteRenderer::DrawBlock(BlockId id, const glm::vec3* position, int count, int dir, int frame) {
+   /* BlockData block =  this->blocks[id];
+    DrawBlock(, block.Colors, position, count, dir);*/
 }
 
 SpriteRenderer::~SpriteRenderer() {
@@ -60,9 +79,10 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
     this->flatShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
 }
 
+
 // 通用渲染方法
-void SpriteRenderer::DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
-    RenderType type, const glm::vec3* position, int count, int data) {
+void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<glm::vec4>& colors,
+    RenderType type, const glm::vec3* position, int count, int dir, int frame) {
     count = count > 1024 ? 1024 : count; // 最大单次渲染个数
     this->blockShader->Use();
     this->objectShader->SetMatrix4("model", glm::mat4(1.0f));
@@ -75,6 +95,11 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& textures, const vector<g
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    vector<Texture2D> textures = _textures;
+    if (frame != 0) {
+        textures[0] = textures[frame];
+    }
 
     glActiveTexture(GL_TEXTURE0);
 
@@ -181,7 +206,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& textures, const vector<g
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::DirCustomTexture: // 具有方向的方块 （前、侧边、上下）
-        model = glm::rotate(model, glm::radians(90.0f * data), glm::vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         this->blockShader->SetMatrix4("model", model);
         textures[0].Bind();
         glBindVertexArray(this->quadVAO);
@@ -205,7 +230,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& textures, const vector<g
         break;
     case RenderType::DoorTexture: // 双层单面（门:上下）
         this->blockShader->SetVector4f("material.color", colors[0]);
-        model = glm::rotate(model, glm::radians(90.0f * data), glm::vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         model = glm::scale(model, glm::vec3(1, 1, 0.125));
 
         // 前后
@@ -237,7 +262,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& textures, const vector<g
     case RenderType::GlassTexture: // 渲染染色玻璃 前后、周边贴图、方向
         this->blockShader->SetInteger("hasColor", true);
         this->blockShader->SetVector4f("material.color", colors[0]);
-        model = glm::rotate(model, glm::radians(90.0f * data), glm::vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         model = glm::scale(model, glm::vec3(1, 1, 0.125));
         // 前后
         textures[0].Bind();
@@ -255,7 +280,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& textures, const vector<g
     case RenderType::LiquidTexture: // 水面
         this->blockShader->SetInteger("hasColor", true);
         this->blockShader->SetVector4f("material.color", colors[0]);
-        model = glm::rotate(model, glm::radians(90.0f * data), glm::vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         model = glm::translate(model, glm::vec3(0, -0.125, 0));
 
         textures[0].Bind();

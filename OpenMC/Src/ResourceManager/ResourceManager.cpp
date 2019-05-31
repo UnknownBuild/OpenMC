@@ -8,6 +8,7 @@
 #include <stb_image.h>
 
 std::map<std::string, Texture2D>    ResourceManager::Textures;
+std::map<std::string, vector<Texture2D>>    ResourceManager::MultiTextures;
 std::map<std::string, Shader>       ResourceManager::Shaders;
 std::map<std::string, Model>        ResourceManager::Models;
 std::map<GLchar, Character>         ResourceManager::Characters;
@@ -22,8 +23,8 @@ Shader& ResourceManager::GetShader(std::string name) {
   return Shaders[name];
 }
 
-Texture2D& ResourceManager::LoadTexture(const GLchar* file, std::string name, bool alpha) {
-  Textures[name] = loadTextureFromFile(file, alpha);
+Texture2D& ResourceManager::LoadTexture(std::string file, std::string name, bool alpha) {
+  Textures[name] = loadTextureFromFile(file.c_str(), alpha);
   return Textures[name];
 }
 
@@ -42,6 +43,15 @@ Model& ResourceManager::LoadModel(const GLchar* file, std::string name) {
 }
 Model& ResourceManager::GetModel(std::string name) {
   return Models[name];
+}
+
+vector<Texture2D>& ResourceManager::GetSplitTexture(std::string name) {
+    return MultiTextures[name];
+}
+
+vector<Texture2D>& ResourceManager::LoadSplitTexture(std::string file, std::string name) {
+    MultiTextures[name] = loadSplitTexture(file.c_str());
+    return MultiTextures[name];
 }
 
 void ResourceManager::Clear(){
@@ -97,13 +107,14 @@ Texture2D ResourceManager::loadTextureFromFile(const GLchar * file, bool alpha) 
   return texture;
 }
 
-vector<Texture2D> ResourceManager::LoadTextureSplit(const GLchar* file, int count) {
+vector<Texture2D> ResourceManager::loadSplitTexture(const GLchar* file) {
     vector<Texture2D> textures;
     int width, height, nrChannels;
     unsigned char* image = stbi_load(file, &width, &height, &nrChannels, 0);
 
-    int sWidth = width;
-    int sHeight = height / count;
+    int sWidth = 16;
+    int sHeight = 16;
+    int count = height / sHeight;
 
     GLenum format = GL_RED;
     if (nrChannels == 3)

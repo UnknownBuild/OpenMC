@@ -135,11 +135,11 @@ int main() {
 
     glm::vec3 testColor = glm::vec3(0.5, 0.5 ,0.5);
 
-    vector<Texture2D> torchTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/fire_0.png", 32);
+    vector<Texture2D> torchTexture = ResourceManager::LoadSplitTexture("Resources/Textures/blocks/fire_0.png", "fire");
 
-    vector<Texture2D> waterTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/water_still.png", 32);
+    vector<Texture2D> waterTexture = ResourceManager::LoadSplitTexture("Resources/Textures/blocks/water_still.png", "water");
     // 海晶灯
-    vector<Texture2D> sea_lanternTexture = ResourceManager::LoadTextureSplit("Resources/Textures/blocks/sea_lantern.png", 5);
+    vector<Texture2D> sea_lanternTexture = ResourceManager::LoadSplitTexture("Resources/Textures/blocks/sea_lantern.png", "sea_lantern");
 
     int frame = 0;
 
@@ -198,7 +198,7 @@ int main() {
         glm::vec3 firePosition[] = {
             glm::vec3(-3, 0, 5)
         };
-        Renderer->DrawBlock({ torchTexture[frame / 5] }, {}, RenderType::FireTexture, firePosition, 1);
+        Renderer->DrawBlock(torchTexture, {}, RenderType::FireTexture, firePosition, 1, 0, frame / 5);
 
         // 渲染草方块
         glm::vec3 grassPosition[1000] = {
@@ -240,14 +240,14 @@ int main() {
             glm::vec3(7, 0, 8),
             glm::vec3(7, 0, 9),
         };
-        Renderer->DrawBlock({ waterTexture[frame/5] }, {glm::vec4(0.26, 0.38 ,0.45, 0.35)}, RenderType::LiquidTexture, waterPosition, 4);
+        Renderer->DrawBlock( waterTexture, {glm::vec4(0.26, 0.38 ,0.45, 0.35)}, RenderType::LiquidTexture, waterPosition, 4, 0, frame / 5);
 
         // 渲染海晶灯
         glm::vec3 sea_lanternPosition[] = {
             glm::vec3(10, 0, 12),
             glm::vec3(10, 1, 12),
         };
-        Renderer->DrawBlock({ sea_lanternTexture[(frame / 5) % 5] }, { }, RenderType::OneTexture, sea_lanternPosition, 2);
+        Renderer->DrawBlock(sea_lanternTexture, { }, RenderType::OneTexture, sea_lanternPosition, 2, 0, (frame / 5) % 5);
 
 
         //// 渲染圆石

@@ -26,13 +26,15 @@ public:
   static std::map<std::string, Texture2D> Textures;
   static std::map<std::string, Model> 		Models;
   static std::map<GLchar, Character> 			Characters;
+  static std::map<std::string, vector<Texture2D>>    MultiTextures;
   static unsigned int 										fontVAO, fontVBO;
   static Shader&   LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, std::string name);
   static Shader&   GetShader(std::string name);
-  static Texture2D& LoadTexture(const GLchar* file, std::string name, bool alpha = true);
-  static vector<Texture2D> LoadTextureSplit(const GLchar* file, int count);
+  static Texture2D& LoadTexture(std::string file, std::string name, bool alpha = true);
   static Texture2D& LoadTexture(vector<std::string> file, std::string name);
   static Texture2D& GetTexture(std::string name);
+  static vector<Texture2D>& GetSplitTexture(std::string name);
+  static vector<Texture2D>& LoadSplitTexture(std::string file, std::string name);
   static Model& LoadModel(const GLchar* file, std::string name);
   static Model& GetModel(std::string name);
   static void InitFont(const GLchar* path);
@@ -45,4 +47,5 @@ private:
   static Texture2D loadCubemap(vector<std::string> faces);
   static Texture2D loadTextureFromFile(const GLchar* file, bool alpha);
   static Model     loadModelFromFile(const GLchar* file);
+  static vector<Texture2D> loadSplitTexture(const GLchar* file);
 };
