@@ -76,3 +76,15 @@ bool Window::IsClose() {
 bool Window::IsFullScreen() {
     return isFullScreen;
 }
+
+void Window::SetCursorPosCallback(CursorPosCallback callback) {
+    glfwSetCursorPosCallback(window, callback);
+}
+
+void Window::SetMouseButtonCallback(MouseButtonCallback callback) {
+    glfwSetMouseButtonCallback(window, callback);
+}
+
+void Window::SetScrollCallback(ScrollCallback callback) {
+    glfwSetScrollCallback(window, callback);
+}

@@ -24,7 +24,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{A583950D-A70C-404B-BDB4-3E683624C63D}</ProjectGuid>
     <RootNamespace>OpenMC</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -43,7 +43,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -137,6 +137,7 @@
     <ClCompile Include="Src\Scenes\SceneMenu.cpp" />
     <ClCompile Include="Src\SpriteRenderer\SpriteRenderer.cpp" />
     <ClCompile Include="Src\Systems\Graphics.cpp" />
+    <ClCompile Include="Src\Systems\Input.cpp" />
     <ClCompile Include="Src\Systems\Window.cpp" />
     <ClCompile Include="Src\World\Database\BlockManager.cpp" />
   </ItemGroup>
@@ -172,6 +173,7 @@
     <None Include="GLSL\Font.vs.glsl" />
     <None Include="GLSL\Object.fs.glsl" />
     <None Include="GLSL\Object.vs.glsl" />
+    <None Include="Resources\Assets\blocks.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -8,6 +8,10 @@
 
 class Window final {
 public:
+    typedef void (*CursorPosCallback) (GLFWwindow*, double, double);
+    typedef void (*MouseButtonCallback) (GLFWwindow*, int, int, int);
+    typedef void (*ScrollCallback) (GLFWwindow*, double, double);
+
     void CreateWindow(std::string title, unsigned int width, unsigned int height, bool isFullScreen = false);
     void DestroyImGui();
     void DestroyWindow();
@@ -18,6 +22,10 @@ public:
     void InitImGui();
     bool IsClose();
     bool IsFullScreen();
+    void SetCursorPosCallback(CursorPosCallback callback);
+    void SetMouseButtonCallback(MouseButtonCallback callback);
+    void SetScrollCallback(ScrollCallback callback);
+
 
     GLFWwindow* GetWindow() {
         return window;
