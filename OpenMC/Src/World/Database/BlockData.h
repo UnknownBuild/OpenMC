@@ -42,8 +42,11 @@ class BlockData final {
 public:
     BlockId Id;
     std::string Name;
-    RenderType Type;                    // 渲染类型
+    BlockType Type;
+    RenderType Render;                    // 渲染类型
     std::vector<std::string> Textures;  // 材质
     std::vector<glm::vec4> Colors;      // 颜色
     uint8_t light;                      // 自身亮度
+    uint8_t Animation;                  // 动画速度 (0-5)
+
 };
