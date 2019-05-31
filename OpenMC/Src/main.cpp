@@ -315,6 +315,56 @@ int main() {
 
     // test end
 
+    auto size = window->GetWindowSize();
+    int SCR_WIDTH = size.first;
+    int SCR_HEIGHT = size.second;
+    // Set up G-Buffer
+    // 3 textures:
+    // 1. Positions (RGB)
+    // 2. Color (RGB) + Specular (A)
+    // 3. Normals (RGB) 
+    //GLuint gBuffer;
+    //glGenFramebuffers(1, &gBuffer);
+    //glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    //GLuint gPosition, gNormal, gAlbedoSpec;
+    //// - Position color buffer
+    //glGenTextures(1, &gPosition);
+    //glBindTexture(GL_TEXTURE_2D, gPosition);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+    //// - Normal color buffer
+    //glGenTextures(1, &gNormal);
+    //glBindTexture(GL_TEXTURE_2D, gNormal);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+    //// - Color + Specular color buffer
+    //glGenTextures(1, &gAlbedoSpec);
+    //glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
+    //// - Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+    //GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    //glDrawBuffers(3, attachments);
+    //// - Create and attach depth buffer (renderbuffer)
+    //GLuint rboDepth;
+    //glGenRenderbuffers(1, &rboDepth);
+    //glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    //// - Finally check if framebuffer is complete
+    //if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    //    std::cout << "Framebuffer not complete!" << std::endl;
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+
     glEnable(GL_DEPTH_TEST);
     // 渲染半透明纹理
     glEnable(GL_BLEND);
@@ -339,8 +389,9 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, size.first, size.second);
         Renderer->SetWindowSize(size.first, size.second);
-        // 渲染天空盒
-        Renderer->RenderSkyBox();
+
+        // glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+
 
         // test begin
 
@@ -354,6 +405,9 @@ int main() {
 
         Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 100.0f),
             camera->GetViewMatrix(), camera->Position);
+
+        // 渲染天空盒
+        Renderer->RenderSkyBox();
 
         Renderer->RenderText("NB ShowShow", glm::vec2(30, 30), 1.0);
 

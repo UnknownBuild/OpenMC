@@ -16,8 +16,7 @@ void main() {
 	mat4 offsetModel = mat4(1.0, 0.0, 0.0, 0.0,
 													0.0, 1.0, 0.0, 0.0,
 													0.0, 0.0, 1.0, 0.0,
-													aOffset.x, aOffset.y, aOffset.z, 1.0);
-	offsetModel = offsetModel * model;
+													aOffset.xyz, 1.0) * model;
 	gl_Position = projection * view * offsetModel * vec4(aPos, 1.0);
 	FragPos = vec3(offsetModel * vec4(aPos, 1.0));
 	Normal = mat3(transpose(inverse(offsetModel))) * aNormal;

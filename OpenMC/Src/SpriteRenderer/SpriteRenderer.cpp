@@ -91,6 +91,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     glActiveTexture(GL_TEXTURE0);
 
     glm::mat4 model = glm::mat4(1.0);
+    this->blockShader->SetMatrix4("model", model);
     switch (type) {
     case RenderType::OneTexture: // 单纹理方块
         if (colors.size() > 0) {
