@@ -41,12 +41,66 @@ bool BlockManager::Load() {
             if (member.name == "id") {
                 blocks[id].Id = static_cast<BlockId>(id);
             } else if (member.name == "name") {
+
                 blocks[id].Name = member.value.GetString();
             } else if (member.name == "type") {
                 // blocks[id].Type = static_cast<BlockType>(member.value.GetInt());
+                if (!member.value.IsNumber()) {
+                    return false;
+                }
+                blocks[id].Type = static_cast<BlockType>(member.value.GetInt());
             }
             else if (member.name == "textures") {
                 // blocks[id].Textures = member.value.GetArray()
+                if (!member.value.IsArray()) {
+                    return false;
+                }
+                // 预加载贴图
+                for (auto& t : member.value.GetArray()) {
+                    if (!t.IsString()) {
+                        return false;
+                    }
+                    std::string texture = t.GetString();
+                    if (texture[0] == '*') { // 需要分割的贴图
+                        blocks[id].Textures = ResourceManager::LoadSplitTexture(EnvPath::TextureDir + "/blocks/"+ texture.substr(1), texture);
+                        break;
+                    } else {
+                        blocks[id].Textures.push_back(ResourceManager::LoadTexture(EnvPath::TextureDir + "/blocks/" + texture, texture));
+                    }
+                }
+            }
+            else if (member.name == "render") {
+                if (!member.value.IsNumber()) {
+                    return false;
+                }
+                blocks[id].Render = static_cast<RenderType>(member.value.GetInt());
+            }
+            else if (member.name == "colors") {
+                if (!member.value.IsArray()) {
+                    return false;
+                }
+                for (auto& colorVec : member.value.GetArray()) {
+                    if (!colorVec.IsArray()) {
+                        return false;
+                    }
+                    if (colorVec.GetArray().Size() != 4) {
+                        return false;
+                    }
+                    glm::vec4 c(colorVec.GetArray()[0].GetFloat(), colorVec.GetArray()[1].GetFloat(), colorVec.GetArray()[2].GetFloat(), colorVec.GetArray()[3].GetFloat());
+                    blocks[id].Colors.push_back(c);
+                }
+            }
+            else if (member.name == "light") {
+                if (!member.value.IsNumber()) {
+                    return false;
+                }
+                blocks[id].Light = member.value.GetInt();
+            }
+            else if (member.name == "animation") {
+                if (!member.value.IsNumber()) {
+                    return false;
+                }
+                blocks[id].Animation = member.value.GetInt();
             }
         }
     }

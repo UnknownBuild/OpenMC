@@ -44,7 +44,7 @@ public:
     std::string Name;
     BlockType Type;
     RenderType Render;                  // 渲染类型
-    std::vector<std::string> Textures;  // 材质
+    std::vector<Texture2D> Textures;  // 材质
     std::vector<glm::vec4> Colors;      // 颜色
     uint8_t Light;                      // 自身亮度
     uint8_t Animation;                  // 动画速度 (0-5)
