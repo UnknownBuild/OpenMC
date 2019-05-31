@@ -26,28 +26,15 @@ SpriteRenderer::SpriteRenderer() {
 
     };
     this->skyBox = &ResourceManager::LoadTexture(faces, "skybox");
-
 }
-
-//void SpriteRenderer::InitBlock(const vector<BlockData>& blocks) {
-//    for (auto block : blocks) {
-//        // 预加载贴图
-//        vector<Texture2D> textures;
-//        for (auto texture : block.Textures) {
-//            if (texture[0] == '*') { // 需要分割的贴图
-//                textures = ResourceManager::LoadSplitTexture(EnvPath::TextureDir + texture.substr(1), texture);
-//                break;
-//            } else {
-//              textures.push_back(ResourceManager::LoadTexture(EnvPath::TextureDir + texture, texture));
-//            }
-//        }
-//    }
-//}
 
 
 void SpriteRenderer::DrawBlock(BlockId id, const glm::vec3* position, int count, int dir, int frame) {
-   /* BlockData block =  this->blocks[id];
-    DrawBlock(, block.Colors, position, count, dir);*/
+    BlockData block = Singleton<BlockManager>::GetInstance()->GetBlockData(id);
+    if (frame != 0 && block.Animation != 0) {
+        frame = (frame / block.Animation) % block.Animation;
+    }
+    this->DrawBlock(block.Textures, block.Colors, block.Render, position, count, dir, frame);
 }
 
 SpriteRenderer::~SpriteRenderer() {
@@ -82,7 +69,7 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
 
 // 通用渲染方法
 void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<glm::vec4>& colors,
-    RenderType type, const glm::vec3* position, int count, int dir, int frame) {
+    RenderType type, const glm::vec3* position, int count, int dir, int iTexture) {
     count = count > 1024 ? 1024 : count; // 最大单次渲染个数
     this->blockShader->Use();
     this->objectShader->SetMatrix4("model", glm::mat4(1.0f));
@@ -97,8 +84,8 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     vector<Texture2D> textures = _textures;
-    if (frame != 0) {
-        textures[0] = textures[frame];
+    if (iTexture != 0) {
+        textures[0] = textures[iTexture];
     }
 
     glActiveTexture(GL_TEXTURE0);

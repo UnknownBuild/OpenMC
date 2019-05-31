@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <initializer_list>
 #include "../ResourceManager/ResourceManager.h"
-#include "../World/Database/BlockData.h"
+#include "../World/Database/BlockManager.h"
 #include "../Helpers/EnvPath.h"
 #include "../Helpers/Singleton.h"
 
@@ -40,7 +40,7 @@ class SpriteRenderer {
   void DrawBlock(BlockId id, const glm::vec3* position, int count, int dir = 0, int frame = 0);
   // 渲染方块
   void DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
-      RenderType type, const glm::vec3* position, int count, int dir = 0, int frame = 0);
+      RenderType type, const glm::vec3* position, int count, int dir = 0, int iTexture = 0);
    
   // 渲染文本
   void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,

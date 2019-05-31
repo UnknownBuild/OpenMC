@@ -11,22 +11,32 @@
   },
   {
     "id": 1,
-    "name": "grass_block",
-    "type": 0,
-    "render": 5,
-    "textures": ["*lava_flow.png", "grass_top"],
-    "colors": [[0.57, 0.73, 0.37, 1.0], [0.61, 0.45, 0.37, 1.0]],
+    "name": "stone",
+    "type": 2,
+    "render": 2,
+    "textures": ["grass_block_top.png"],
+    "colors": [[0.8, 0.8, 0.8, 1.0]],
     "animation": 0,
     "light": 0
   },
   {
     "id": 2,
     "name": "grass_block",
-    "type": 0,
-    "render": 5,
-    "textures": ["grass_block_side", "grass_top"],
+    "type": 2,
+    "render": 3,
+    "textures": ["grass_block_side.png", "grass_block_top.png"],
     "colors": [[0.57, 0.73, 0.37, 1.0], [0.61, 0.45, 0.37, 1.0]],
     "animation": 0,
     "light": 0
+  },
+  {
+    "id": 3,
+    "name": "fire",
+    "type": 0,
+    "render": 6,
+    "textures": ["*fire_0.png"],
+    "colors": [[1.0, 0.5, 0.2, 1.0]],
+    "animation": 5,
+    "light": 12
   }
 ]

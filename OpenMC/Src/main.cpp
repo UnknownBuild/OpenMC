@@ -198,7 +198,8 @@ int main() {
         glm::vec3 firePosition[] = {
             glm::vec3(-3, 0, 5)
         };
-        Renderer->DrawBlock(torchTexture, {}, RenderType::FireTexture, firePosition, 1, 0, frame / 5);
+        Renderer->DrawBlock(BlockId::Fire, firePosition, 1, 0, frame);
+        // Renderer->DrawBlock(torchTexture, {}, RenderType::FireTexture, firePosition, 1, 0, frame / 5);
 
         // 渲染草方块
         glm::vec3 grassPosition[1000] = {
@@ -229,8 +230,9 @@ int main() {
                 grassPosition[grassCount++] = glm::vec3(i, -1, j);
             }
         }
-        Renderer->DrawBlock({ ResourceManager::GetTexture("grass"), ResourceManager::GetTexture("grass_top") },
-            { glm::vec4(0.567, 0.732, 0.366, 1) ,  glm::vec4(0.6, 0.45, 0.37, 1) }, RenderType::SideTexture, grassPosition, grassCount);
+        Renderer->DrawBlock(BlockId::Grass, grassPosition, grassCount);
+        //Renderer->DrawBlock({ ResourceManager::GetTexture("grass"), ResourceManager::GetTexture("grass_top") },
+        //    { glm::vec4(0.567, 0.732, 0.366, 1) ,  glm::vec4(0.6, 0.45, 0.37, 1) }, RenderType::SideTexture, grassPosition, grassCount);
 
 
         // 渲染水面
@@ -257,7 +259,9 @@ int main() {
             glm::vec3(3, 1, 4),
             glm::vec3(4, 0, 4),
         };
-        Renderer->DrawBlock({ ResourceManager::GetTexture("grass_top") }, { glm::vec4(0.8, 0.8, 0.8, 1) }, RenderType::NoiseTexture, stonePosition, 4);
+
+        Renderer->DrawBlock(BlockId::Stone, stonePosition, 4);
+        //Renderer->DrawBlock({ ResourceManager::GetTexture("grass_top") }, { glm::vec4(0.8, 0.8, 0.8, 1) }, RenderType::NoiseTexture, stonePosition, 4);
 
         //// 渲染蒲公英
         glm::vec3 dandelionPosition[] = {
