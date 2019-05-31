@@ -326,7 +326,6 @@ int main() {
         Renderer->DrawBlock({ ResourceManager::GetTexture("stone") }, {}, RenderType::OneTexture, stonePosition2, 4);
 
 
-        
         //// 渲染玻璃
         glm::vec3 glassPosition[] = {
             glm::vec3(7, 0, -3),
@@ -363,7 +362,6 @@ int main() {
             RenderType::DirCustomTexture, furnacePosition, 2, 2);
 
   
-
         //// 渲染树干
         glm::vec3 oakPosition[] = {
             glm::vec3(0, 0, 9),
@@ -390,8 +388,10 @@ int main() {
             ResourceManager::GetTexture("cactus_top"),
             ResourceManager::GetTexture("cactus_side"),
             ResourceManager::GetTexture("cactus_bottom"),
-            }, {},
-            RenderType::ThreeTexture, cactusPosition, 5);
+            }, {
+                glm::vec4(0.0, 0.625, 0.0, 1.0)
+            },
+            RenderType::OffsetTexture, cactusPosition, 5);
 
 
         //// 渲染树叶

@@ -35,6 +35,7 @@ enum class RenderType : uint8_t {
     GlassTexture = 10,      // 玻璃
     LiquidTexture = 11,     // 液体表面
     OneTexture = 12,         // 单纹理方块
+    OffsetTexture = 13,
 };
 
 class BlockData final {

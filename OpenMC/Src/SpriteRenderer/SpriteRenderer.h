@@ -87,3 +87,4 @@ class SpriteRenderer {
   PointList pointLight[10];
   int pointCount;
 };
+
