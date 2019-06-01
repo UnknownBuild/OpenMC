@@ -175,10 +175,13 @@
     <ClInclude Include="Src\World\Map\MapGenerator.h">
       <Filter>Src\World\Map</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Math\Noise.h">
+    <ClInclude Include="Src\Math\PerlinNoise.h">
       <Filter>Src\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Math\PerlinNoise.h">
+    <ClInclude Include="Src\Math\OctaveNoise.h">
+      <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Math\Noise.h">
       <Filter>Src\Math</Filter>
     </ClInclude>
   </ItemGroup>

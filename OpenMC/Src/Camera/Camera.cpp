@@ -96,7 +96,7 @@ void Camera::processInput() {
     
     }
     // 切换模式
-    if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
         if (keys[KEY_CHANGE] == false) {
             if (this->freedomView) {
                 // 释放鼠标

@@ -33,6 +33,12 @@ public:
         window->SetScrollCallback(&Input::scrollCallback);
     }
 
+    static void Clear() {
+        OnCursorPosChanged.Get().clear();
+        OnMouseButtonClick.Get().clear();
+        OnScrollChanged.Get().clear();
+    }
+
     static Callback<CursorPosChangedEvent> OnCursorPosChanged;
     static Callback<MouseButtonClickEvent> OnMouseButtonClick;
     static Callback<ScrollChangedEvent> OnScrollChanged;

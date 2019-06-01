@@ -9,11 +9,30 @@
 enum class BlockId : uint8_t {
     Air = 0,
     Stone = 1,
-    Grass = 2,
+    GrassBlock = 2,
     Dirt = 3,
     CobbleStone = 4,
-    Bedrock = 7,
-    Fire = 51
+    Water = 5,
+    Grass = 6,
+    CrackedStoneBricks = 7,
+    BrownMushroom = 8,
+    BlueOrchid = 9,
+    HornCoral = 10,
+    Dandelion = 11,
+    SeaLantern = 12,
+    Sand = 13,
+    OakPlanks = 14,
+    Glass = 15,
+    Torch = 16,
+    CraftingTable = 17,
+    Furnace = 18,
+    OakLog = 19,
+    Cactus = 20,
+    OakLeaves = 21,
+    IronDoor = 22,
+    OakDoor = 23,
+    BlueStainedGlassPane = 24,
+    Fire = 51,
 };
 
 enum class BlockType : uint8_t {

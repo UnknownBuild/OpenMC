@@ -231,6 +231,13 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         textures[0] = textures[iTexture];
     }
 
+    for (auto color : colors) {
+        if (color.a < 1) {
+            glDisable(GL_CULL_FACE);
+            break;
+        }
+    }
+
     glActiveTexture(GL_TEXTURE0);
 
     glm::mat4 model = glm::mat4(1.0);
@@ -317,7 +324,6 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
-        glEnable(GL_CULL_FACE);
         break;
     case RenderType::CustomTexture: // 六面自定义方块 (前后左右上下)
         textures[0].Bind();
@@ -467,6 +473,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     default:
         break;
     }
+    glEnable(GL_CULL_FACE);
     glBindVertexArray(0);
 }
 
