@@ -47,7 +47,7 @@ void MapGenerator::genBasicTerrain(Chunk* chunk, int32_t x, int32_t z) {
                             int posY = yHigh * 8 + yLow;
                             int posZ = zHigh * 4 + zLow;
                             if (posY == 0) {
-                                chunk->SetBlock(x + posX, posY, z + posZ, BlockId::Bedrock);
+                                // chunk->SetBlock(x + posX, posY, z + posZ, BlockId::Bedrock);
                             } else if ((blockValue += zDensityStep11) > 0.0) {
                                 chunk->SetBlock(x + posX, posY, z + posZ, BlockId::Stone);
                             } else if (posY < 64) {

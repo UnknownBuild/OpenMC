@@ -42,27 +42,14 @@ int main() {
 
     MapGenerator gen(10086);
     Chunk* chunk = gen.GenChunk(0, 0);
-    int count = 0;
+    std::vector<glm::vec3> stones;
     for (int x = 0; x < 16; x++) {
         for (int y = 0; y < 256; y++) {
             for (int z = 0; z < 16; z++) {
                 Block block = chunk->GetBlock(x, y, z);
                 switch (block.GetId()) {
                 case BlockId::Stone:
-                    count++;
-                }
-            }
-        }
-    }
-    glm::vec3* stones = new glm::vec3[count];
-    count = 0;
-    for (int x = 0; x < 16; x++) {
-        for (int y = 0; y < 256; y++) {
-            for (int z = 0; z < 16; z++) {
-                Block block = chunk->GetBlock(x, y, z);
-                switch (block.GetId()) {
-                case BlockId::Stone:
-                    stones[count++] = glm::vec3(x, y, z);
+                    stones.push_back(glm::vec3(x, y, z));
                 }
             }
         }
@@ -283,6 +270,9 @@ int main() {
 
     // 渲染海晶灯
     Renderer->DrawBlock(BlockId::SeaLantern, sea_lanternPosition);
+
+    // 渲染大量圆石
+    Renderer->DrawBlock(BlockId::Stone, stones);
 
     // 渲染圆石
     Renderer->DrawBlock(BlockId::Stone, stonePosition);
