@@ -360,7 +360,8 @@ int main() {
         // 渲染天空盒
         Renderer->RenderSkyBox();
 
-        Renderer->RenderText(to_string(round(ImGui::GetIO().Framerate)).substr(0, 5) + " FPS", glm::vec2(30, 30), 0.5);
+
+        Renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
 
         // 渲染火把
         Renderer->DrawBlock({ ResourceManager::GetTexture("torch") }, { glm::vec4(1.0, 0.5, 0.2, 1.0) }, RenderType::TorchTexture, torchPosition, 2);

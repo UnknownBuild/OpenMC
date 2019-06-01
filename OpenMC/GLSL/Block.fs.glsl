@@ -42,7 +42,7 @@ uniform bool hasColor;
 uniform bool hasTexture;
 
 // 计算点光源
-vec4 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 objectColor) {
+vec4 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
     // 漫反射着色
     float diff = max(dot(normal, lightDir), 0.0);
@@ -50,30 +50,30 @@ vec4 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, v
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     // 衰减
-    float objectDis    = length(light.position - fragPos);
+    float objectDis   = length(light.position - fragPos);
     float attenuation = 1.0 / (light.constant + light.linear * objectDis + light.quadratic * (objectDis * objectDis));
     // 合并结果
     vec4 ambient  = vec4(light.ambient, 1.0);
-    vec4 diffuse  = vec4(light.diffuse, 1.0)  * diff;
+    vec4 diffuse  = vec4(light.diffuse, 1.0) * diff;
     vec4 specular = vec4(light.specular, 1.0) * spec;
 
-    return (ambient + diffuse + specular) * objectColor * attenuation;
+    return (ambient + diffuse + specular) * attenuation;
 }
 
 // 计算定向光源
-vec4 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec4 objectColor) {
+vec4 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
     vec3 lightDir = normalize(-light.direction);
     // 漫反射着色
     float diff = max(dot(normal, lightDir), 0.0);
     // 镜面光着色
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8);
     // 合并结果
     vec4 ambient  = vec4(light.ambient, 1.0);
-    vec4 diffuse  = vec4(light.diffuse, 1.0)  * diff;
+    vec4 diffuse  = vec4(light.diffuse, 1.0) * diff;
     vec4 specular = vec4(light.specular, 1.0) * spec;
 
-    return (ambient + diffuse + specular) * objectColor;
+    return (ambient + diffuse + specular);
 }
 
 void main() {
@@ -90,12 +90,12 @@ void main() {
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    // 计算定向光源
-    vec4 result = CalcDirLight(dirLight, norm, viewDir, objectColor);
-    // 计算点光源
+    // 计算定向光源 增加 20% 的性能消耗
+    FragColor = CalcDirLight(dirLight, norm, viewDir);
+    // 计算点光源 增加 20% 的性能消耗
     for (int i = 0; i < pointCount; i++) {
-      result += CalcPointLight(pointLights[i], norm, FragPos, viewDir, objectColor);
+      FragColor += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
     }
 
-    FragColor = result;
+    FragColor *= objectColor;
 }

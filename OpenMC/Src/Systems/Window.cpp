@@ -20,7 +20,7 @@ void Window::CreateWindow(std::string title, unsigned int width, unsigned int he
         exit(-1);
     }
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(0); // V-Sync
+    glfwSwapInterval(1); // V-Sync
 }
 
 void Window::DestroyImGui() {

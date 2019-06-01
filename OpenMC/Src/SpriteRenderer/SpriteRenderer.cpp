@@ -76,7 +76,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     this->blockShader->SetInteger("hasTexture", true);
     this->blockShader->SetInteger("hasColor", false);
     this->blockShader->SetInteger("material.diffuse", 0); // 漫反射贴图
-    this->blockShader->SetFloat("material.shininess", 32); // 镜面反射率
+    this->blockShader->SetFloat("material.shininess", 16); // 镜面反射率
 
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
