@@ -204,6 +204,7 @@
     <ClInclude Include="Src\Helpers\Singleton.h" />
     <ClInclude Include="Src\Helpers\UtilTool.h" />
     <ClInclude Include="Src\Math\Noise.h" />
+    <ClInclude Include="Src\Math\OctaveNoise.h" />
     <ClInclude Include="Src\Math\PerlinNoise.h" />
     <ClInclude Include="Src\ResourceManager\Mesh.h" />
     <ClInclude Include="Src\ResourceManager\Model.h" />
@@ -231,10 +232,16 @@
     <ClInclude Include="Src\World\World.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="GLSL\Font.fs.glsl" />
-    <None Include="GLSL\Font.vs.glsl" />
+    <None Include="GLSL\2D.fs.glsl" />
+    <None Include="GLSL\2D.vs.glsl" />
+    <None Include="GLSL\Block.fs.glsl" />
+    <None Include="GLSL\Block.vs.glsl" />
+    <None Include="GLSL\GBuffer.fs.glsl" />
+    <None Include="GLSL\GBuffer.vs.glsl" />
     <None Include="GLSL\Object.fs.glsl" />
     <None Include="GLSL\Object.vs.glsl" />
+    <None Include="GLSL\Sky.fs.glsl" />
+    <None Include="GLSL\Sky.vs.glsl" />
     <None Include="Resources\Assets\blocks.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

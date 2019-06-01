@@ -11,6 +11,7 @@
 #include "Systems/Window.h"
 // test
 #include <glm/glm.hpp>
+#include "World/Map/MapGenerator.h"
 #include "ResourceManager/ResourceManager.h"
 #include "SpriteRenderer/SpriteRenderer.h"
 #include "Camera/Camera.h"
@@ -19,22 +20,6 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-
-void cursorPosCallbackA(double xOffset, double yOffset) {
-    std::cout << "Hello" << std::endl;
-}
-
-void cursorPosCallbackB(double xOffset, double yOffset) {
-    std::cout << "Hi" << std::endl;
-}
-
-void mouseButtonCallbackA(int button, int action, int mods) {
-    std::cout << "mouse button A" << std::endl;
-}
-
-void scrollCallbackA(double xoffset, double yoffset) {
-    std::cout << "scroll A" << std::endl;
-}
 
 int main() {
     Config* config = Singleton<Config>::GetInstance();
@@ -51,13 +36,12 @@ int main() {
     camera->SetLookPostion(glm::vec3(5, 5, 10));
 
     Input<0>* input = Singleton<Input<0>>::GetInstance();
-    Input<0>::OnCursorPosChanged += cursorPosCallbackA;
-    Input<0>::OnCursorPosChanged += cursorPosCallbackB;
     Input<0>::OnCursorPosChanged += camera->MouseCallback;
-    Input<0>::OnMouseButtonClick += mouseButtonCallbackA;
-    Input<0>::OnScrollChanged += scrollCallbackA;
     Input<0>::OnScrollChanged += camera->ScrollCallback;
     input->Bind(window);
+
+    MapGenerator gen(10086);
+    Chunk* chunk = gen.GenChunk(0, 0);
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
     // sceneManager->Goto(new SceneMenu());
@@ -96,7 +80,7 @@ int main() {
     ResourceManager::LoadTexture("Resources/Textures/blocks/oak_log.png", "oak_log");
     ResourceManager::LoadTexture("Resources/Textures/blocks/oak_log_top.png", "oak_log_top");
 
-    
+
 
     ResourceManager::LoadTexture("Resources/Textures/blocks/dandelion.png", "dandelion");
 
@@ -108,7 +92,7 @@ int main() {
     ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral.png", "horn_coral");
     ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_block.png", "horn_coral_block");
     ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_fan.png", "horn_coral_fan");
-    
+
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_top.png", "iron_door_top");
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_bottom.png", "iron_door_bottom");
 
@@ -347,8 +331,6 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, size.first, size.second);
         Renderer->SetWindowSize(size.first, size.second);
-        // 渲染天空盒
-        Renderer->RenderSkyBox();
 
         // test begin
 
@@ -363,7 +345,10 @@ int main() {
         Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 100.0f),
             camera->GetViewMatrix(), camera->Position);
 
-        Renderer->RenderText("NB ShowShow", glm::vec2(30, 30), 1.0);
+        // 渲染天空盒
+        Renderer->RenderSkyBox();
+
+        Renderer->RenderText(to_string(round(ImGui::GetIO().Framerate)).substr(0, 5) + " FPS", glm::vec2(30, 30), 0.5);
 
         // 渲染火把
         Renderer->DrawBlock(BlockId::Torch, torchPosition, 2);

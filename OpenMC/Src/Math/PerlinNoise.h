@@ -1,12 +1,19 @@
 ﻿#pragma once
 #include <cstdint>
+#include <random>
 
 #include "Noise.h"
 
-class PerlinNoise : public Noise {
+class PerlinNoise final : public Noise {
 public:
-    PerlinNoise(int seed);
+    PerlinNoise(uint32_t seed = std::default_random_engine::default_seed);
+
+    virtual float Get(float x, float y, float z) override;
 
 private:
-    uint8_t p[512];
+    static float fade(float t);
+    static float grad(int32_t hash, float x, float y, float z);
+    static float lerp(float t, float a, float b);
+
+    uint32_t p[512];
 };

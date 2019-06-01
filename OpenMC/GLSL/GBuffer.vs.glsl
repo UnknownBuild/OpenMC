@@ -13,12 +13,11 @@ out vec3 FragPos;
 out vec2 TexCoords;
 
 void main() {
-	mat4 offsetModel = mat4(1.0, 0.0, 0.0, 0.0,
-													0.0, 1.0, 0.0, 0.0,
-													0.0, 0.0, 1.0, 0.0,
-													aOffset.xyz, 1.0) * model;
-	gl_Position = projection * view * offsetModel * vec4(aPos, 1.0);
-	FragPos = vec3(offsetModel * vec4(aPos, 1.0));
-	Normal = mat3(transpose(inverse(offsetModel))) * aNormal;
+	mat4 aOffsetModel = mat4(1.0);
+	aOffsetModel[3] = vec4(aOffset.xyz, 1.0);
+	aOffsetModel = aOffsetModel * model;
+	gl_Position = projection * view * aOffsetModel * vec4(aPos, 1.0);
+	FragPos = vec3(aOffsetModel * vec4(aPos, 1.0));
+	Normal = mat3(transpose(inverse(aOffsetModel))) * aNormal;
 	TexCoords = aTexCoords;
 }

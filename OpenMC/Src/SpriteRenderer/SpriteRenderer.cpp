@@ -72,12 +72,11 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     RenderType type, const glm::vec3* position, int count, int dir, int iTexture) {
     count = count > 10240 ? 10240 : count; // 最大单次渲染个数
     this->blockShader->Use();
-    this->objectShader->SetMatrix4("model", glm::mat4(1.0f));
-    this->objectShader->SetInteger("hasTexture", true);
-    this->objectShader->SetInteger("hasColor", false);
-    this->objectShader->SetInteger("material.diffuse", 0); // 漫反射贴图
-    this->objectShader->SetInteger("material.specular", 0); // 镜面反射贴图
-    this->objectShader->SetFloat("material.shininess", 32); // 镜面反射率
+    this->blockShader->SetMatrix4("model", glm::mat4(1.0f));
+    this->blockShader->SetInteger("hasTexture", true);
+    this->blockShader->SetInteger("hasColor", false);
+    this->blockShader->SetInteger("material.diffuse", 0); // 漫反射贴图
+    this->blockShader->SetFloat("material.shininess", 32); // 镜面反射率
 
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
@@ -85,6 +84,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
 
     vector<Texture2D> textures = _textures;
     if (iTexture != 0) {
+        if (textures.size() < iTexture) return;
         textures[0] = textures[iTexture];
     }
 
@@ -321,45 +321,44 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
 
 // 渲染带纹理的立方体
 void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec3 position, glm::vec3 size, GLfloat rotate, glm::vec3 color) {
-    this->objectShader->Use();
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, position);
-    model = glm::rotate(model, rotate, glm::vec3(0.0f, 0.0f, 1.0f));
+    //this->objectShader->Use();
+    //glm::mat4 model = glm::mat4(1.0f);
+    //model = glm::translate(model, position);
+    //model = glm::rotate(model, rotate, glm::vec3(0.0f, 0.0f, 1.0f));
 
-    model = glm::scale(model, size);
+    //model = glm::scale(model, size);
 
-    this->objectShader->SetMatrix4("model", model);
-    this->objectShader->SetInteger("hasTexture", true);
-    this->objectShader->SetInteger("hasColor", true);
-    this->objectShader->SetInteger("material.diffuse", 0); // 漫反射贴图
-    this->objectShader->SetInteger("material.specular", 0); // 镜面反射贴图
-    this->objectShader->SetInteger("material.shininess", 32); // 镜面反射率
+    //this->objectShader->SetMatrix4("model", model);
+    //this->objectShader->SetInteger("hasTexture", true);
+    //this->objectShader->SetInteger("hasColor", true);
+    //this->objectShader->SetInteger("material.diffuse", 0); // 漫反射贴图
+    //this->objectShader->SetInteger("material.specular", 0); // 镜面反射贴图
+    //this->objectShader->SetInteger("material.shininess", 32); // 镜面反射率
 
-    // Render textured quad
-    this->objectShader->SetVector3f("material.color", color);
+    //// Render textured quad
+    //this->objectShader->SetVector3f("material.color", color);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glActiveTexture(GL_TEXTURE0);
-    texture.Bind();
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glActiveTexture(GL_TEXTURE0);
+    //texture.Bind();
 
-    glBindVertexArray(this->quadVAO);
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    //glBindVertexArray(this->quadVAO);
+    //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    //glBindVertexArray(0);
 
 }
 
-
-
+// 渲染模型
 void SpriteRenderer::DrawSprite(Model& modelObj, glm::vec3 position, glm::vec3 size, GLfloat rotate) {
-    this->objectShader->Use();
+    //this->objectShader->Use();
 
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, position);
-    model = glm::rotate(model, rotate, glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::scale(model, size);
+    //glm::mat4 model = glm::mat4(1.0f);
+    //model = glm::translate(model, position);
+    //model = glm::rotate(model, rotate, glm::vec3(0.0f, 1.0f, 0.0f));
+    //model = glm::scale(model, size);
 
-    this->objectShader->SetMatrix4("model", model);
-    modelObj.Draw(this->objectShader);
+    //this->objectShader->SetMatrix4("model", model);
+    //modelObj.Draw(this->objectShader);
 }
 
 void SpriteRenderer::initRenderData() {
@@ -707,29 +706,29 @@ void SpriteRenderer::AddPointLight(glm::vec3 pos, glm::vec3 a, glm::vec3 d, glm:
             break;
         }
     }
-
-    this->objectShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].constant").c_str(),
+    this->blockShader->Use();
+    this->blockShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].constant").c_str(),
         this->pointLight[this->pointCount].constant);
-    this->objectShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].linear").c_str(),
+    this->blockShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].linear").c_str(),
         this->pointLight[this->pointCount].linear);
-    this->objectShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].quadratic").c_str(),
+    this->blockShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].quadratic").c_str(),
         this->pointLight[this->pointCount].quadratic);
-    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].position").c_str(),
+    this->blockShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].position").c_str(),
         this->pointLight[this->pointCount].position);
-    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].ambient").c_str(),
+    this->blockShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].ambient").c_str(),
         this->pointLight[this->pointCount].ambient);
-    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].diffuse").c_str(),
+    this->blockShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].diffuse").c_str(),
         this->pointLight[this->pointCount].diffuse);
-    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].specular").c_str(),
+    this->blockShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].specular").c_str(),
         this->pointLight[this->pointCount].specular);
 
     this->pointCount++;
-    this->objectShader->SetInteger("pointCount", this->pointCount);
+    this->blockShader->SetInteger("pointCount", this->pointCount);
 }
 // 清除点光源
 void SpriteRenderer::ClearPointLight() {
     this->pointCount = 0;
-    this->objectShader->SetInteger("pointCount", this->pointCount);
+    this->blockShader->SetInteger("pointCount", this->pointCount);
 }
 // 渲染天空盒
 void SpriteRenderer::RenderSkyBox() {
