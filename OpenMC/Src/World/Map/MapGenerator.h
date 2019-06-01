@@ -21,6 +21,8 @@ private:
     OctaveNoise<PerlinNoise> minNoise;
     OctaveNoise<PerlinNoise> surfaceNoise;
 
+    std::vector<std::vector<std::vector<float>>> densityMap;
+
     std::default_random_engine engine;
     std::uniform_int_distribution<uint32_t> rand;
     uint32_t seed;

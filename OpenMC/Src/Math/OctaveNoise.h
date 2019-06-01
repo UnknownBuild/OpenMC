@@ -25,6 +25,19 @@ public:
         return static_cast<float>(total / maxValue);
     }
 
+    virtual void Get(std::vector<std::vector<std::vector<float>>>& noise, glm::vec3 offset, glm::vec3 scale) override {
+        for (size_t x = 0; x < noise.size(); x++) {
+            float xOffset = offset.x + x * scale.x;
+            for (size_t y = 0; y < noise[0].size(); y++) {
+                float yOffset = offset.y + y * scale.y;
+                for (size_t z = 0; z < noise[0][0].size(); z++) {
+                    float zOffset = offset.z + z * scale.z;
+                    noise[x][y][z] = Get(xOffset, yOffset, zOffset);
+                }
+            }
+        }
+    }
+
 private:
     TNoise innerNoise;
     int32_t octaves;

@@ -7,6 +7,10 @@ enum class BlockMeta : uint8_t {
 
 class Block final {
 public:
+    BlockId GetId() {
+        return id;
+    }
+
     void Set(BlockId id, BlockMeta meta = BlockMeta::None) {
         this->id = id;
         this->meta = meta;
