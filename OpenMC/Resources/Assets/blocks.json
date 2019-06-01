@@ -1,4 +1,4 @@
-[
+ [
   {
     "id": 0,
     "name": "air",
@@ -14,7 +14,7 @@
     "name": "stone",
     "type": 2,
     "render": 2,
-    "textures": ["grass_block_top.png"],
+    "textures": ["stone.png"],
     "colors": [[0.8, 0.8, 0.8, 1.0]],
     "animation": 0,
     "light": 0
@@ -31,6 +31,226 @@
   },
   {
     "id": 3,
+    "name": "dirt",
+    "type": 2,
+    "render": 12,
+    "textures": ["dirt.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 4,
+    "name": "cobblestone",
+    "type": 2,
+    "render": 12,
+    "textures": ["cobblestone.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 5,
+    "name": "water",
+    "type": 1,
+    "render": 11,
+    "textures": ["*water_still.png"],
+    "colors": [[0.26, 0.38 ,0.45, 0.35]],
+    "animation": 5,
+    "light": 0
+  },
+  {
+    "id": 6,
+    "name": "grass",
+    "type": 2,
+    "render": 4,
+    "textures": ["grass.png"],
+    "colors": [[0.62, 0.92, 0.4, 1]],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 7,
+    "name": "cracked_stone_bricks",
+    "type": 2,
+    "render": 12,
+    "textures": ["cracked_stone_bricks.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 8,
+    "name": "brown_mushroom",
+    "type": 2,
+    "render": 4,
+    "textures": ["brown_mushroom.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 9,
+    "name": "blue_orchid",
+    "type": 2,
+    "render": 4,
+    "textures": ["blue_orchid.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 10,
+    "name": "horn_coral",
+    "type": 2,
+    "render": 4,
+    "textures": ["horn_coral.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 11,
+    "name": "dandelion",
+    "type": 2,
+    "render": 4,
+    "textures": ["dandelion.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 12,
+    "name": "sea_lantern",
+    "type": 2,
+    "render": 12,
+    "textures": ["*sea_lantern.png"],
+    "colors": [],
+    "animation": 5,
+    "light": 2
+  },
+  {
+    "id": 13,
+    "name": "sand",
+    "type": 2,
+    "render": 12,
+    "textures": ["sand.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 14,
+    "name": "oak_planks",
+    "type": 2,
+    "render": 12,
+    "textures": ["oak_planks.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 15,
+    "name": "glass",
+    "type": 2,
+    "render": 12,
+    "textures": ["glass.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 16,
+    "name": "torch",
+    "type": 2,
+    "render": 5,
+    "textures": ["torch.png"],
+    "colors": [[1.0, 0.5, 0.2, 1.0]],
+    "animation": 0,
+    "light": 12
+  },
+  {
+    "id": 17,
+    "name": "crafting_table",
+    "type": 2,
+    "render": 7,
+    "textures": ["crafting_table_front.png", "crafting_table_side.png", "crafting_table_side.png", "crafting_table_side.png", "crafting_table_top.png", "oak_planks.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 18,
+    "name": "furnace",
+    "type": 2,
+    "render": 8,
+    "textures": ["furnace_front_on.png", "furnace_side.png", "furnace_top.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 19,
+    "name": "oak_log",
+    "type": 2,
+    "render": 1,
+    "textures": ["oak_log.png", "oak_log.png", "oak_log_top.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 20,
+    "name": "cactus",
+    "type": 2,
+    "render": 13,
+    "textures": ["cactus_top.png", "cactus_side.png", "cactus_bottom.png"],
+    "colors": [[0.0, 0.0625, 0.0, 1.0]],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 21,
+    "name": "oak_leaves",
+    "type": 2,
+    "render": 12,
+    "textures": ["oak_leaves.png"],
+    "colors": [[0.5, 0.67, 0.43, 1]],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 22,
+    "name": "iron_door",
+    "type": 2,
+    "render": 9,
+    "textures": ["iron_door_top.png", "iron_door_bottom.png"],
+    "colors": [[0.675, 0.691, 0.675, 1.0]],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 23,
+    "name": "oak_door",
+    "type": 2,
+    "render": 9,
+    "textures": ["oak_door_top.png", "oak_door_bottom.png"],
+    "colors": [[0.53, 0.38, 0.18, 1.0]],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 24,
+    "name": "blue_stained_glass_pane",
+    "type": 3,
+    "render": 10,
+    "textures": ["blue_stained_glass.png"],
+    "colors": [[0.2, 0.5,0.7, 0.35]],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 51,
     "name": "fire",
     "type": 0,
     "render": 6,
