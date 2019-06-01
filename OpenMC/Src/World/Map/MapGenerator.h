@@ -21,6 +21,14 @@ private:
     OctaveNoise<PerlinNoise> minNoise;
     OctaveNoise<PerlinNoise> surfaceNoise;
 
+    std::vector<std::vector<std::vector<float>>> heightMap;
+    std::vector<std::vector<std::vector<float>>> densityMap;
+    std::vector<std::vector<std::vector<float>>> depthMap;
+    std::vector<std::vector<std::vector<float>>> mainNoiseMap;
+    std::vector<std::vector<std::vector<float>>> maxLimitMap;
+    std::vector<std::vector<std::vector<float>>> minLimitMap;
+    std::vector<std::vector<std::vector<float>>> surfaceMap;
+
     std::default_random_engine engine;
     std::uniform_int_distribution<uint32_t> rand;
     uint32_t seed;

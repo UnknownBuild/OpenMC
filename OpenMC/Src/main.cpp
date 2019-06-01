@@ -41,7 +41,24 @@ int main() {
     input->Bind(window);
 
     MapGenerator gen(10086);
-    Chunk* chunk = gen.GenChunk(0, 0);
+    std::vector<glm::vec3> stones;
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            Chunk* chunk = gen.GenChunk(i * 16, j * 16);
+            for (int x = 0; x < 16; x++) {
+                for (int y = 0; y < 256; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        Block block = chunk->GetBlock(i * 16 + x, y, j * 16 + z);
+                        switch (block.GetId()) {
+                        case BlockId::Stone:
+                            stones.push_back(glm::vec3(i * 16 + x, y, j * 16 + z));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
     // sceneManager->Goto(new SceneMenu());
@@ -50,7 +67,6 @@ int main() {
 
     // test begin
     Singleton<BlockManager>::GetInstance()->Load();
-
 
     // 初始化渲染管理器
     SpriteRenderer* Renderer = new SpriteRenderer();
@@ -246,8 +262,7 @@ int main() {
     vector<glm::vec3> firePosition = { glm::vec3(-3, 0, 5) };
     // 渲染火
     Renderer->DrawBlock(BlockId::Fire, firePosition);
-    // 渲染草
-    Renderer->DrawBlock(BlockId::Grass, grassPosition);
+
     // 渲染圆石
     Renderer->DrawBlock(BlockId::Stone, stonePosition);
 
@@ -262,6 +277,9 @@ int main() {
 
     // 渲染海晶灯
     Renderer->DrawBlock(BlockId::SeaLantern, sea_lanternPosition);
+
+    // 渲染大量圆石
+    Renderer->DrawBlock(BlockId::Stone, stones);
 
     // 渲染圆石
     Renderer->DrawBlock(BlockId::Stone, stonePosition);
