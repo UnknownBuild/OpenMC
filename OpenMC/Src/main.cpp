@@ -51,7 +51,6 @@ int main() {
     // test begin
     Singleton<BlockManager>::GetInstance()->Load();
 
-
     // 初始化渲染管理器
     SpriteRenderer* Renderer = new SpriteRenderer();
 

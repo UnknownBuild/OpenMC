@@ -57,9 +57,9 @@ class SpriteRenderer {
   void UpdateLight();
 
   void DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
-      RenderType type, const vector<glm::vec4> &position, int dir = 0, int iTexture = 0);
+      RenderType type, const vector<glm::vec4> &position, int dir = 0, int iTexture = 0, Shader* shader = nullptr);
 
-  void RenderBlock(bool clear = true);
+  void RenderBlock(bool clear = true, Shader* shader = nullptr);
   // 渲染文本
   void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
                   glm::vec4 color = glm::vec4(1));
@@ -88,6 +88,7 @@ class SpriteRenderer {
   Shader* blockShader;
   Shader* skyShader;
   Shader* flatShader;
+  Shader* GBufferShader;
 
   // 纹理
   Texture2D* skyBox;
