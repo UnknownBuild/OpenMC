@@ -145,12 +145,13 @@ int main() {
     // 海晶灯
     vector<Texture2D> sea_lanternTexture = ResourceManager::LoadSplitTexture("Resources/Textures/blocks/sea_lantern.png", "sea_lantern");
 
+
     int frame = 0;
 
 
 
     // 草方块
-    glm::vec3 grassPosition[10000] = {
+    vector<glm::vec3> grassPosition = {
         glm::vec3(1, 0, 1),
         glm::vec3(2, 0, 2),
         glm::vec3(2, 0, 1),
@@ -170,20 +171,18 @@ int main() {
         glm::vec3(8, 0, 8),
 
         glm::vec3(8, 0, 9),
-        glm::vec3(8, 0, 10),
+        glm::vec3(8, 0, 10)
+
     };
     int grassCount = 17;
     for (int i = -40; i < 40; i++) {
         for (int j = -40; j < 40; j++) {
-            grassPosition[grassCount++] = glm::vec3(i, -1, j);
+            grassPosition.push_back(glm::vec3(i, -1, j));
         }
     }
 
     glm::vec3 torchPosition[] = {
         glm::vec3(5, 0, -3)
-    };
-    glm::vec3 firePosition[] = {
-        glm::vec3(-3, 0, 5)
     };
 
     glm::vec3 waterPosition[] = {
@@ -196,12 +195,6 @@ int main() {
     glm::vec3 sea_lanternPosition[] = {
         glm::vec3(10, 0, 12),
         glm::vec3(10, 1, 12),
-    };
-    glm::vec3 stonePosition[] = {
-        glm::vec3(3, 0, 3),
-        glm::vec3(3, 0, 4),
-        glm::vec3(3, 1, 4),
-        glm::vec3(4, 0, 4),
     };
     glm::vec3 dandelionPosition[] = {
         glm::vec3(-1, 0, -1),
@@ -317,8 +310,35 @@ int main() {
         glm::vec3(4, 0, 8),
     };
 
+    Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
+
+    Renderer->ClearPointLight();
+
+    Renderer->AddPointLight(glm::vec3(5, 0, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
+
+    Renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
+
+    vector<glm::vec3> firePosition = { glm::vec3(-3, 0, 5) };
+    // 渲染火
+    Renderer->DrawBlock(BlockId::Fire, firePosition);
+    // 渲染草
+    Renderer->DrawBlock(BlockId::Grass, grassPosition);
+
+    vector<glm::vec3>stonePosition = {
+            glm::vec3(3, 0, 3),
+            glm::vec3(3, 0, 4),
+            glm::vec3(3, 1, 4),
+            glm::vec3(4, 0, 4) };
+    // 渲染圆石
+    Renderer->DrawBlock(BlockId::Stone, stonePosition);
+    // 更新光照
+    Renderer->UpdateLight();
     // test end
 
+    int currentTime = glfwGetTime();
+
+    // 面剔除
+    // glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     // 渲染半透明纹理
     glEnable(GL_BLEND);
@@ -342,17 +362,9 @@ int main() {
         //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, size.first, size.second);
-        Renderer->SetWindowSize(size.first, size.second);
 
         // test begin
-
-        Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
-
-        Renderer->ClearPointLight();
-
-        Renderer->AddPointLight(glm::vec3(5, 0, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
-
-        Renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
+        Renderer->SetWindowSize(size.first, size.second);
 
         Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 100.0f),
             camera->GetViewMatrix(), camera->Position);
@@ -360,17 +372,19 @@ int main() {
         // 渲染天空盒
         Renderer->RenderSkyBox();
 
-
+        // 渲染文字
         Renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
+
+        if (glfwGetTime() - currentTime > 1.0) {
+            currentTime = glfwGetTime();
+            Renderer->UpdateLight();
+        }
+
+        // 渲染方块
+        Renderer->RenderBlock(false);
 
         // 渲染火把
         Renderer->DrawBlock({ ResourceManager::GetTexture("torch") }, { glm::vec4(1.0, 0.5, 0.2, 1.0) }, RenderType::TorchTexture, torchPosition, 2);
-
-        // 渲染火
-        Renderer->DrawBlock(BlockId::Fire, firePosition, 1, 0, frame);
-
-        // 渲染草
-        Renderer->DrawBlock(BlockId::Grass, grassPosition, grassCount);
 
         // 渲染水面
         Renderer->DrawBlock( waterTexture, {glm::vec4(0.26, 0.38 ,0.45, 0.35)}, RenderType::LiquidTexture, waterPosition, 4, 0, frame / 5);
@@ -378,11 +392,7 @@ int main() {
         // 渲染海晶灯
         Renderer->DrawBlock(sea_lanternTexture, { }, RenderType::OneTexture, sea_lanternPosition, 2, 0, (frame / 5) % 5);
 
-        // 渲染圆石
-        Renderer->DrawBlock(BlockId::Stone, stonePosition, 4);
-        //Renderer->DrawBlock({ ResourceManager::GetTexture("grass_top") }, { glm::vec4(0.8, 0.8, 0.8, 1) }, RenderType::NoiseTexture, stonePosition, 4);
-
-        //// 渲染蒲公英
+        // 渲染蒲公英
         Renderer->DrawBlock({ ResourceManager::GetTexture("dandelion") }, { glm::vec4(1) }, RenderType::CenterCrossTexture, dandelionPosition, 2);
 
         //// 渲染蘑菇
@@ -473,6 +483,7 @@ int main() {
             ResourceManager::GetTexture("blue_stained_glass")
             }, { glm::vec4(0.2, 0.5,0.7, 0.35) },
             RenderType::GlassTexture, colorGlassPosition, 2, 0);
+
 
         // 渲染2D纹理
         Renderer->DrawTexture(ResourceManager::GetTexture("tabel_top"), glm::vec2(100, 100), 10);

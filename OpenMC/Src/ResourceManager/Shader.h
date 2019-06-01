@@ -16,7 +16,8 @@ class Shader {
     return *this;
   };
 
-  void Compile(const char* vertexSource, const char* fragmentSource){
+  void Compile(const char* vertexSource, const char* fragmentSource,
+      const char* geometrySource = nullptr){
     unsigned int sVertex, sFragment, gShader;
     // Vertex Shader
     sVertex = glCreateShader(GL_VERTEX_SHADER);
@@ -28,14 +29,25 @@ class Shader {
     glShaderSource(sFragment, 1, &fragmentSource, NULL);
     glCompileShader(sFragment);
     checkCompileErrors(sFragment, "FRAGMENT");
+    // Geometry shader
+    if (geometrySource != nullptr) {
+        gShader = glCreateShader(GL_GEOMETRY_SHADER);
+        glShaderSource(gShader, 1, &geometrySource, NULL);
+        glCompileShader(gShader);
+        checkCompileErrors(gShader, "GEOMETRY");
+    }
 
     this->ID = glCreateProgram();
     glAttachShader(this->ID, sVertex);
     glAttachShader(this->ID, sFragment);
+    if (geometrySource != nullptr)
+        glAttachShader(this->ID, gShader);
     glLinkProgram(this->ID);
     checkCompileErrors(this->ID, "PROGRAM");
     glDeleteShader(sVertex);
     glDeleteShader(sFragment);
+    if (geometrySource != nullptr)
+        glDeleteShader(gShader);
   };
 
   void SetFloat(const char* name, float value, bool useShader = false) {

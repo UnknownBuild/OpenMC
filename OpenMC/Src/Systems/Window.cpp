@@ -58,7 +58,12 @@ void Window::InitGLFW() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_SAMPLES, 2);
+    // 性能测试
+    // 1 - 22
+    // 2 - 26 +18%
+    // 4 - 32 +45%
+    // 8 - 45 +100%
 }
 
 void Window::InitImGui() {

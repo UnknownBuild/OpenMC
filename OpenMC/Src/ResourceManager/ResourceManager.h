@@ -28,7 +28,7 @@ public:
   static std::map<GLchar, Character> 			Characters;
   static std::map<std::string, vector<Texture2D>>    MultiTextures;
   static unsigned int 										fontVAO, fontVBO;
-  static Shader&   LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, std::string name);
+  static Shader&   LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, std::string name, const GLchar* gShaderFile = nullptr);
   static Shader&   GetShader(std::string name);
   static Texture2D& LoadTexture(std::string file, std::string name, bool alpha = true);
   static Texture2D& LoadTexture(vector<std::string> file, std::string name);
@@ -43,7 +43,8 @@ public:
 private:
   ResourceManager() {}
   static Shader    loadShaderFromFile(const GLchar* vShaderFile, 
-                                      const GLchar* fShaderFile);
+                                      const GLchar* fShaderFile,
+                                      const GLchar* gShaderFile = nullptr);
   static Texture2D loadCubemap(vector<std::string> faces);
   static Texture2D loadTextureFromFile(const GLchar* file, bool alpha);
   static Model     loadModelFromFile(const GLchar* file);
