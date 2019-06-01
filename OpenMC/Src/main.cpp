@@ -253,8 +253,7 @@ int main() {
     vector<glm::vec3> firePosition = { glm::vec3(-3, 0, 5) };
     // 渲染火
     Renderer->DrawBlock(BlockId::Fire, firePosition);
-    // 渲染草
-    Renderer->DrawBlock(BlockId::Grass, grassPosition);
+
     // 渲染圆石
     Renderer->DrawBlock(BlockId::Stone, stonePosition);
 

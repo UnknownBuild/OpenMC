@@ -12,7 +12,7 @@ SpriteRenderer::SpriteRenderer() {
     this->skyShader = &ResourceManager::LoadShader("GLSL/Sky.vs.glsl",
         "GLSL/Sky.fs.glsl", "sky");
     this->GBufferShader = &ResourceManager::LoadShader("GLSL/Block.vs.glsl",
-        "GLSL/GBuffer.fs.glsl", "sky");
+        "GLSL/GBuffer.fs.glsl", "GBuffer");
     // 初始化字体
     ResourceManager::InitFont("Resources/Fonts/RAVIE.TTF");
     // 初始化立方体
@@ -523,7 +523,7 @@ void SpriteRenderer::initRenderData() {
     // 实例化数组
     glGenBuffers(1, &instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 10240, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 65536, NULL, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     float verticesQuad[] = {
