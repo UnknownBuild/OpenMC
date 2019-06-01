@@ -38,6 +38,19 @@ float PerlinNoise::Get(float x, float y, float z) {
                 grad(p[BB + 1], x - 1, y - 1, z - 1))));
 }
 
+void PerlinNoise::Get(std::vector<std::vector<std::vector<float>>>& noise, glm::vec3 offset, glm::vec3 scale) {
+    for (size_t x = 0; x < noise.size(); x++) {
+        float xOffset = offset.x + x * scale.x;
+        for (size_t y = 0; y < noise[0].size(); y++) {
+            float yOffset = offset.y + y * scale.y;
+            for (size_t z = 0; z < noise[0][0].size(); z++) {
+                float zOffset = offset.z + z * scale.z;
+                noise[x][y][z] = Get(xOffset, yOffset, zOffset);
+            }
+        }
+    }
+}
+
 float PerlinNoise::fade(float t) {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
