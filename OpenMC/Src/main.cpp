@@ -231,6 +231,10 @@ int main() {
             glm::vec3(3, 1, 4),
             glm::vec3(4, 0, 4) };
 
+    vector<glm::vec3> beetrootPostion = {
+        glm::vec3(0, 5, 0),
+    };
+
     Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
 
     Renderer->ClearPointLight();
@@ -319,6 +323,8 @@ int main() {
     // 渲染玻璃
     Renderer->DrawBlock(BlockId::BlueStainedGlassPane, colorGlassPosition, 0);
 
+    // 渲染胡萝卜
+    Renderer->DrawBlock(BlockId::Beetroot, beetrootPostion, 0);
 
     // 更新光照
     Renderer->UpdateLight();

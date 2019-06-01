@@ -254,9 +254,19 @@
     "name": "fire",
     "type": 0,
     "render": 6,
-    "textures": ["*fire_0.png"],
-    "colors": [[1.0, 0.5, 0.2, 1.0]],
+    "textures": [ "*fire_0.png" ],
+    "colors": [ [ 1.0, 0.5, 0.2, 1.0 ] ],
     "animation": 5,
     "light": 15
+  },
+  {
+    "id": 26,
+    "name": "beetroot",
+    "type": 0,
+    "render": 14,
+    "textures": [ "beetroots_stage0.png", "beetroots_stage1.png", "beetroots_stage2.png" ],
+    "colors": [ [ 0.125, 0.5, 0.2, 0.95 ] ],
+    "animation": 60,
+    "light": 0
   }
 ]
