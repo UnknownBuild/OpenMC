@@ -9,18 +9,39 @@
 enum class BlockId : uint8_t {
     Air = 0,
     Stone = 1,
-    Grass = 2,
+    GrassBlock = 2,
     Dirt = 3,
     CobbleStone = 4,
-    Bedrock = 7,
-    Fire = 51
+    Water = 5,
+    Grass = 6,
+    CrackedStoneBricks = 7,
+    BrownMushroom = 8,
+    BlueOrchid = 9,
+    HornCoral = 10,
+    Dandelion = 11,
+    SeaLantern = 12,
+    Sand = 13,
+    OakPlanks = 14,
+    Glass = 15,
+    Torch = 16,
+    CraftingTable = 17,
+    Furnace = 18,
+    OakLog = 19,
+    Cactus = 20,
+    OakLeaves = 21,
+    IronDoor = 22,
+    OakDoor = 23,
+    BlueStainedGlassPane = 24,
+    Fire = 51,
 };
 
 enum class BlockType : uint8_t {
-    None = 0,   // 无实体
-    Liquid = 1, // 液体
-    Soild = 2,  // 固体
-    Face = 3,   // 单面
+    None = 0,           // 无实体
+    Liquid = 1,         // 液体
+    Soild = 2,          // 固体
+    Face = 3,           // 单面
+    TransSoild = 4,     // 透明固体
+    TransFace = 5,      // 透明单面
 };
 
 enum class RenderType : uint8_t {
@@ -46,7 +67,7 @@ public:
     std::string Name;
     BlockType Type;
     RenderType Render;                  // 渲染类型
-    std::vector<Texture2D> Textures;  // 材质
+    std::vector<Texture2D> Textures;    // 材质
     std::vector<glm::vec4> Colors;      // 颜色
     uint8_t Light;                      // 自身亮度
     uint8_t Animation;                  // 动画速度 (0-5)
