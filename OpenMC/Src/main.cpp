@@ -5,6 +5,7 @@
 
 #include "Scenes/SceneManager.h"
 #include "Scenes/SceneMenu.h"
+#include "Scenes/SceneTitle.h"
 #include "Helpers/Config.h"
 #include "Helpers/Singleton.h"
 #include "Systems/Input.h"
@@ -44,8 +45,8 @@ int main() {
     Chunk* chunk = gen.GenChunk(0, 0);
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-    // sceneManager->Goto(new SceneMenu());
-    sceneManager->Goto(NULL);
+    sceneManager->Goto(new SceneTitle());
+    // sceneManager->Goto(NULL);
     sceneManager->Run(window);
 
     // test begin
@@ -342,7 +343,7 @@ int main() {
 
         Renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
 
-        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 100.0f),
+        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 100.0f),     
             camera->GetViewMatrix(), camera->Position);
 
         // 渲染天空盒

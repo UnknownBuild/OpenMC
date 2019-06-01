@@ -1,4 +1,8 @@
 ﻿#pragma once
+#ifndef SPRITE_RENDERER
+#define SPRITE_RENDERER
+
+
 #include <initializer_list>
 #include "../ResourceManager/ResourceManager.h"
 #include "../World/Database/BlockManager.h"
@@ -94,3 +98,5 @@ class SpriteRenderer {
 
 };
 
+
+#endif // !1
