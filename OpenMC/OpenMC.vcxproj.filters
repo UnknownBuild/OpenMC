@@ -186,10 +186,25 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="GLSL\Font.fs.glsl">
+    <None Include="Resources\Assets\blocks.json">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="GLSL\2D.fs.glsl">
       <Filter>GLSL</Filter>
     </None>
-    <None Include="GLSL\Font.vs.glsl">
+    <None Include="GLSL\2D.vs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\Block.fs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\Block.vs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\GBuffer.fs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\GBuffer.vs.glsl">
       <Filter>GLSL</Filter>
     </None>
     <None Include="GLSL\Object.fs.glsl">
@@ -198,8 +213,11 @@
     <None Include="GLSL\Object.vs.glsl">
       <Filter>GLSL</Filter>
     </None>
-    <None Include="Resources\Assets\blocks.json">
-      <Filter>资源文件</Filter>
+    <None Include="GLSL\Sky.fs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\Sky.vs.glsl">
+      <Filter>GLSL</Filter>
     </None>
   </ItemGroup>
 </Project>
