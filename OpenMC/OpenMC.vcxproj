@@ -204,6 +204,7 @@
     <ClInclude Include="Src\Helpers\Singleton.h" />
     <ClInclude Include="Src\Helpers\UtilTool.h" />
     <ClInclude Include="Src\Math\Noise.h" />
+    <ClInclude Include="Src\Math\OctaveNoise.h" />
     <ClInclude Include="Src\Math\PerlinNoise.h" />
     <ClInclude Include="Src\ResourceManager\Mesh.h" />
     <ClInclude Include="Src\ResourceManager\Model.h" />
