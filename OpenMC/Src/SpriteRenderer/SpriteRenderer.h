@@ -41,7 +41,7 @@ class SpriteRenderer {
   // 渲染方块
   void DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
       RenderType type, const glm::vec3* position, int count, int dir = 0, int iTexture = 0);
-   
+
   // 渲染文本
   void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
                   glm::vec4 color = glm::vec4(1));
@@ -84,7 +84,7 @@ class SpriteRenderer {
   unsigned int entityVAO3;
   unsigned int entityVAO4;
   unsigned int entityVAO5;
-   
+
   unsigned int instanceVBO;
   unsigned int flatVBO;
 

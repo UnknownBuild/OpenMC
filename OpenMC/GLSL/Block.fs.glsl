@@ -1,5 +1,9 @@
 #version 330 core
+#define NR_POINT_LIGHTS 10
 out vec4 FragColor;
+in vec2 TexCoords;
+in vec3 Normal;
+in vec3 FragPos;
 
 struct Material {
     sampler2D diffuse;
@@ -7,7 +11,6 @@ struct Material {
     float shininess;
 		vec4 color;
 };
-
 struct PointLight {
     vec3 position;
 
@@ -28,12 +31,6 @@ struct DirLight {
     vec3 specular;
 };
 
-#define NR_POINT_LIGHTS 10
-
-in vec2 TexCoords;
-in vec3 Normal;
-in vec3 FragPos;
-
 uniform vec3 viewPos;
 uniform Material material;
 
@@ -45,7 +42,7 @@ uniform bool hasColor;
 uniform bool hasTexture;
 
 // 计算点光源
-vec4 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
+vec4 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 objectColor) {
     vec3 lightDir = normalize(light.position - fragPos);
     // 漫反射着色
     float diff = max(dot(normal, lightDir), 0.0);
@@ -59,23 +56,12 @@ vec4 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec4 ambient  = vec4(light.ambient, 1.0);
     vec4 diffuse  = vec4(light.diffuse, 1.0)  * diff;
     vec4 specular = vec4(light.specular, 1.0) * spec;
-		if (hasTexture) {
-			ambient  *=  texture(material.diffuse, TexCoords);
-			diffuse  *=  texture(material.diffuse, TexCoords);
-			specular *=  texture(material.specular, TexCoords);
-		}
-    ambient  *= attenuation;
-    diffuse  *= attenuation;
-    specular *= attenuation;
-		vec4 res = ambient + diffuse + specular;
-		if (hasColor) {
-			res *= material.color;
-		}
-    return res;
+
+    return (ambient + diffuse + specular) * objectColor * attenuation;
 }
 
 // 计算定向光源
-vec4 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
+vec4 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec4 objectColor) {
     vec3 lightDir = normalize(-light.direction);
     // 漫反射着色
     float diff = max(dot(normal, lightDir), 0.0);
@@ -86,36 +72,30 @@ vec4 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
     vec4 ambient  = vec4(light.ambient, 1.0);
     vec4 diffuse  = vec4(light.diffuse, 1.0)  * diff;
     vec4 specular = vec4(light.specular, 1.0) * spec;
-		if (hasTexture) {
-			ambient  *=  texture(material.diffuse, TexCoords);
-			diffuse  *=  texture(material.diffuse, TexCoords);
-			specular *=  texture(material.specular, TexCoords);
-		}
-		vec4 res = ambient + diffuse + specular;
-		if (hasColor) {
-			res *= material.color;
-		}
-    return res;
+
+    return (ambient + diffuse + specular) * objectColor;
 }
 
 void main() {
-  vec4 texColor = texture(material.diffuse, TexCoords);
-	if (hasTexture && texColor.a < 0.1) {
-    discard;
-  }
-	if (hasColor &&  material.color.a < 0.1) {
-    discard;
-  }
+    vec4 objectColor = vec4(1.0);
+    if (hasTexture) {
+        objectColor *= texture(material.diffuse, TexCoords);
+    }
+    if (hasColor) {
+        objectColor *= material.color;
+    }
+    if (objectColor.a < 0.1) {
+        discard;
+    }
+    vec3 norm = normalize(Normal);
+    vec3 viewDir = normalize(viewPos - FragPos);
 
-	vec3 norm = normalize(Normal);
-	vec3 viewDir = normalize(viewPos - FragPos);
+    // 计算定向光源
+    vec4 result = CalcDirLight(dirLight, norm, viewDir, objectColor);
+    // 计算点光源
+    for (int i = 0; i < pointCount; i++) {
+      result += CalcPointLight(pointLights[i], norm, FragPos, viewDir, objectColor);
+    }
 
-	// 计算定向光源
-	vec4 result = CalcDirLight(dirLight, norm, viewDir);
-	// 计算点光源
-	for (int i = 0; i < pointCount; i++) {
-		result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
-	}
-
-	FragColor = result;
+    FragColor = result;
 }

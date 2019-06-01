@@ -52,11 +52,11 @@ int main() {
     camera->SetLookPostion(glm::vec3(5, 5, 10));
 
     Input<0>* input = Singleton<Input<0>>::GetInstance();
-    Input<0>::OnCursorPosChanged += cursorPosCallbackA;
-    Input<0>::OnCursorPosChanged += cursorPosCallbackB;
+    //Input<0>::OnCursorPosChanged += cursorPosCallbackA;
+    //Input<0>::OnCursorPosChanged += cursorPosCallbackB;
     Input<0>::OnCursorPosChanged += camera->MouseCallback;
-    Input<0>::OnMouseButtonClick += mouseButtonCallbackA;
-    Input<0>::OnScrollChanged += scrollCallbackA;
+    //Input<0>::OnMouseButtonClick += mouseButtonCallbackA;
+    //Input<0>::OnScrollChanged += scrollCallbackA;
     Input<0>::OnScrollChanged += camera->ScrollCallback;
     input->Bind(window);
 
@@ -100,7 +100,7 @@ int main() {
     ResourceManager::LoadTexture("Resources/Textures/blocks/oak_log.png", "oak_log");
     ResourceManager::LoadTexture("Resources/Textures/blocks/oak_log_top.png", "oak_log_top");
 
-    
+
 
     ResourceManager::LoadTexture("Resources/Textures/blocks/dandelion.png", "dandelion");
 
@@ -112,7 +112,7 @@ int main() {
     ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral.png", "horn_coral");
     ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_block.png", "horn_coral_block");
     ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_fan.png", "horn_coral_fan");
-    
+
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_top.png", "iron_door_top");
     ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_bottom.png", "iron_door_bottom");
 
@@ -319,56 +319,6 @@ int main() {
 
     // test end
 
-    auto size = window->GetWindowSize();
-    int SCR_WIDTH = size.first;
-    int SCR_HEIGHT = size.second;
-    // Set up G-Buffer
-    // 3 textures:
-    // 1. Positions (RGB)
-    // 2. Color (RGB) + Specular (A)
-    // 3. Normals (RGB) 
-    //GLuint gBuffer;
-    //glGenFramebuffers(1, &gBuffer);
-    //glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-    //GLuint gPosition, gNormal, gAlbedoSpec;
-    //// - Position color buffer
-    //glGenTextures(1, &gPosition);
-    //glBindTexture(GL_TEXTURE_2D, gPosition);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
-    //// - Normal color buffer
-    //glGenTextures(1, &gNormal);
-    //glBindTexture(GL_TEXTURE_2D, gNormal);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-    //// - Color + Specular color buffer
-    //glGenTextures(1, &gAlbedoSpec);
-    //glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
-    //// - Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-    //GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    //glDrawBuffers(3, attachments);
-    //// - Create and attach depth buffer (renderbuffer)
-    //GLuint rboDepth;
-    //glGenRenderbuffers(1, &rboDepth);
-    //glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-    //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
-    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-    //// - Finally check if framebuffer is complete
-    //if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    //    std::cout << "Framebuffer not complete!" << std::endl;
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-
     glEnable(GL_DEPTH_TEST);
     // 渲染半透明纹理
     glEnable(GL_BLEND);
@@ -394,9 +344,6 @@ int main() {
         glViewport(0, 0, size.first, size.second);
         Renderer->SetWindowSize(size.first, size.second);
 
-        // glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-
-
         // test begin
 
         Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
@@ -413,7 +360,7 @@ int main() {
         // 渲染天空盒
         Renderer->RenderSkyBox();
 
-        Renderer->RenderText("NB ShowShow", glm::vec2(30, 30), 1.0);
+        Renderer->RenderText(to_string(round(ImGui::GetIO().Framerate)).substr(0, 5) + " FPS", glm::vec2(30, 30), 0.5);
 
         // 渲染火把
         Renderer->DrawBlock({ ResourceManager::GetTexture("torch") }, { glm::vec4(1.0, 0.5, 0.2, 1.0) }, RenderType::TorchTexture, torchPosition, 2);
@@ -482,7 +429,7 @@ int main() {
             }, {},
             RenderType::DirCustomTexture, furnacePosition, 2, 2);
 
-  
+
         //// 渲染树干
         Renderer->DrawBlock({
             ResourceManager::GetTexture("oak_log"),
@@ -504,7 +451,7 @@ int main() {
 
         //// 渲染树叶
         Renderer->DrawBlock({ ResourceManager::GetTexture("oak_leaves") }, { glm::vec4(0.5, 0.67, 0.43, 1) }, RenderType::OneTexture, leavePosition, 13);
-     
+
 
         // 渲染门
         Renderer->DrawBlock({
