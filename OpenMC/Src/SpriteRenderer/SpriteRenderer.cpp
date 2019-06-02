@@ -22,7 +22,7 @@ SpriteRenderer::SpriteRenderer() {
     this->blockShader = &ResourceManager::LoadShader("GLSL/Block.vs.glsl",
         "GLSL/Block.fs.glsl", "block");
     this->flatShader = &ResourceManager::LoadShader("GLSL/2D.vs.glsl",
-        "GLSL/2D.fs.glsl", "font");
+        "GLSL/2D.fs.glsl", "flat");
     this->fontShader = &ResourceManager::LoadShader("GLSL/Font.vs.glsl",
         "GLSL/Font.fs.glsl", "font");
     this->skyShader = &ResourceManager::LoadShader("GLSL/Sky.vs.glsl",
