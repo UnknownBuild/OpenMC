@@ -86,6 +86,9 @@
     <ClCompile Include="Src\Math\PerlinNoise.cpp">
       <Filter>Src\Math</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Scenes\SceneTitle.cpp">
+      <Filter>Src\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">
@@ -183,6 +186,9 @@
     </ClInclude>
     <ClInclude Include="Src\Math\Noise.h">
       <Filter>Src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scenes\SceneTitle.h">
+      <Filter>Src\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

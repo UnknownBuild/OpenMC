@@ -39,6 +39,8 @@ public:
 
     // 获取视图矩阵
     glm::mat4 GetViewMatrix();
+    // 返回单例
+    static Camera* getCameraInst();
     // 处理鼠标移动
     static void MouseCallback(double xpos, double ypos);
     // 处理滚轮滚动
