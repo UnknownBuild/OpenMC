@@ -1,12 +1,22 @@
 ﻿#include "SceneTitle.h"
 
+bool cursorOnButton;
+
 void SceneTitle::Start() {
     window = Singleton<Window>::GetInstance();
     camera = Camera::getCameraInst();
     Renderer = Singleton<SpriteRenderer>::GetInstance();
+
+    Input<0>* input = Singleton<Input<0>>::GetInstance();
+    input->Clear();
+    Input<0>::OnCursorPosChanged += cursorPosCallback;
+    Input<0>::OnMouseButtonClick += mouseButtonCallback;
+    input->Bind(window);
+
     Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
     Renderer->UpdateLight();
     currentTime = glfwGetTime();
+    cursorOnButton = false;
 
     srand((int)time(0));
     setUpGraphics();
@@ -37,7 +47,6 @@ void SceneTitle::setUpGraphics(){
         glm::vec3(0, 0, 0),
         glm::vec3(0, 1, 0),
         glm::vec3(0, 2, 0),
-        glm::vec3(0, 3, 0),
     };
 
     vector<glm::vec3> leavesPosition = {
@@ -90,7 +99,26 @@ void SceneTitle::setUpGraphics(){
     //graphics->Update();
 }
 
+void SceneTitle::cursorPosCallback(double xpos, double ypos) {
+    if (xpos >= 390 && xpos <= 600 && ypos >= 625 && ypos <= 677) {
+        cursorOnButton = true;
+    }
+    else {
+        cursorOnButton = false;
+    }
+}
+
+void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
+    if (cursorOnButton && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        std::cout << "start game" << std::endl;
+        SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+        sceneManager->Goto(new SceneMenu());
+        sceneManager->Run(Singleton<Window>::GetInstance());
+    }
+}
+
 void SceneTitle::Update() {
+    
     glfwPollEvents();
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -113,8 +141,16 @@ void SceneTitle::Update() {
 
     Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first / (float)size.second, 0.1f, 100.0f),
         camera->GetViewMatrix(), camera->Position);
+
     // 渲染文字
     Renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
+    if (cursorOnButton) {
+        Renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
+    }
+    else {
+        Renderer->RenderText("Start", glm::vec2(400, 100), 1);
+    }
+
 
     // 渲染天空盒
     Renderer->RenderSkyBox();

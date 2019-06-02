@@ -2,6 +2,7 @@
 #include "../Helpers/Singleton.h"
 #include "../Systems/Graphics.h"
 #include "../Systems/Window.h"
+#include "../Systems/Input.h"
 
 class Scene {
 public:
