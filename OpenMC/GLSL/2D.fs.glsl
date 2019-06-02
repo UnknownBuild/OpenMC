@@ -2,14 +2,11 @@
 in vec2 TexCoords;
 out vec4 color;
 
-uniform sampler2D text;
-uniform vec4 textColor;
+uniform sampler2D image;
 
 void main() {
-    if (texture(text, TexCoords).r < 0.1) {
+    if (texture(image, TexCoords).r < 0.1) {
         discard;
     }
-
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
-    color = textColor * sampled;
+    color = texture(image, TexCoords);
 }

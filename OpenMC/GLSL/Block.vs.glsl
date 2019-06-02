@@ -97,7 +97,7 @@ void main() {
 	for (int i = 0; i < pointCount; i++) {
 		lightColor += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
 	}
-	lightColor = vec4(lightColor.xyz *  (1.0) ,lightColor.a);
+	lightColor = vec4(lightColor.xyz * 1.0 ,lightColor.a);
 
     float cameraDistance = distance(viewPos, vec3(position));
     // fogFactor = pow(clamp(cameraDistance / fogDistance, 0.0, 1.0), 4.0);

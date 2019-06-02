@@ -1,6 +1,20 @@
 ﻿#include "SpriteRenderer.h"
 #include "../World/Database/BlockData.h"
 
+#define get(x, y, z)\
+data[\
+    clamp(x, size)+\
+    clamp(y, size)*size+\
+    clamp(z, size)*size*size\
+]
+
+#define put(x, y, z, value)\
+data[\
+    (x)+\
+    (y)*size+\
+    (z)*size*size\
+] = value
+
 SpriteRenderer::SpriteRenderer() {
   // 初始化着色器
     this->objectShader = &ResourceManager::LoadShader("GLSL/Object.vs.glsl",
@@ -9,6 +23,8 @@ SpriteRenderer::SpriteRenderer() {
         "GLSL/Block.fs.glsl", "block");
     this->flatShader = &ResourceManager::LoadShader("GLSL/2D.vs.glsl",
         "GLSL/2D.fs.glsl", "font");
+    this->fontShader = &ResourceManager::LoadShader("GLSL/Font.vs.glsl",
+        "GLSL/Font.fs.glsl", "font");
     this->skyShader = &ResourceManager::LoadShader("GLSL/Sky.vs.glsl",
         "GLSL/Sky.fs.glsl", "sky");
     this->GBufferShader = &ResourceManager::LoadShader("GLSL/GBuffer.vs.glsl",
@@ -46,7 +62,7 @@ SpriteRenderer::SpriteRenderer() {
 
     };
     this->skyBox = &ResourceManager::LoadTexture(faces, "skybox");
-    this->lightValue = new LightValue[40 * 40 * 40];
+    this->lightValue = new LightValue[100];
 }
 
 
@@ -85,92 +101,116 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3> &positions, int dir
 
 // 更新光照
 void SpriteRenderer::UpdateLight() {
-    return;
+    //const int size = 40;
 
-    const int size = 40;
+    //memset(this->lightValue, 0, size * size * size * sizeof(LightValue));
 
-    memset(this->lightValue, 0, size * size * size * sizeof(LightValue));
+    // 遍历所有光源
+    //int lightIndex = 0;
+    //for (auto& light : this->lightBlock) {
+    //    for (auto& pos : light.position) {
+    //        this->lightValue[lightIndex] = { lightIndex, light.data.Light, pos };
+    //    }
+    //}
 
-    // 填充光照范围
-    unsigned int blockIndex = 0;
-    for (auto& block : this->renderData) {
-        unsigned int posIndex = -1;
-        for (auto& pos : block.position) {
-            posIndex++;
-            if (pos.a > 0) {
-                continue;
-            }
-            glm::vec4 relaPos = pos - glm::vec4(viewPos, 1);
-            relaPos += glm::vec4(size / 2);
-            if (relaPos.x >= 0 && relaPos.x < size &&
-                relaPos.y >= 0 && relaPos.y < size &&
-                relaPos.z >= 0 && relaPos.z < size) {
-                int offset = relaPos.z * size * size + relaPos.y * size + relaPos.x;
-                lightValue[offset] = {blockIndex, posIndex, block.data.Type, 0};
-            }
-        }
-        blockIndex++;
-    }
+    //for (auto& block : this->renderData) {
+    //    for (auto& pos : block.position) {
+    //        glm::vec4 relaPos = pos - glm::vec4(viewPos, 1);
+    //    }
+    //}
 
-    // 注入垂直光
-    for (int x = 0; x < size; x++) {
-        for (int y = 0; y < size ; y++) {
-            for (int z = 0; z < size; z++) {
-                int offset = z * size * size + y * size + x;
-                if (lightValue[offset].type == BlockType::Soild || lightValue[offset].type == BlockType::Face) {
-                    break;
-                } else {
-                    lightValue[offset].value = 10;
-                }
-            }
-        }
-    }
+    //for (int x = 0; x < size; x++) {
+    //    for (int y = 0; y < size ; y++) {
+    //        for (int z = 0; z < size; z++) {
+    //            int offset = z * size * size + y * size + x;
+    //            LightValue* v = &lightValue[offset];
+    //            if (v->type != BlockType::None) {
+    //                readyBlock[v->blockIndex]->position[v->posIndex].a = 1 -  v->value / 10.0f;
+    //            }
+    //        }
+    //    }
+    //}
 
-    // 注入点光源
-    for (auto& light : this->lightBlock) {
-        for (auto& pos : light.position) {
-            glm::vec4 relaPos = pos - glm::vec4(viewPos, 1);
-            relaPos += glm::vec4(size / 2);
-            if (relaPos.x >= 0 && relaPos.x < size &&
-                relaPos.y >= 0 && relaPos.y < size &&
-                relaPos.z >= 0 && relaPos.z < size) {
-                int offset = relaPos.z * size * size + relaPos.y * size + relaPos.x;
-                lightValue[offset].value = light.data.Light;
-            }
-        }
-    }
+    //// 填充光照范围
+    //unsigned int blockIndex = 0;
+    //for (auto& block : this->renderData) {
+    //    unsigned int posIndex = -1;
+    //    for (auto& pos : block.position) {
+    //        posIndex++;
+    //        if (pos.a > 0) {
+    //            continue;
+    //        }
+    //        glm::vec4 relaPos = pos - glm::vec4(viewPos, 1);
+    //        relaPos += glm::vec4(size / 2);
+    //        if (relaPos.x >= 0 && relaPos.x < size &&
+    //            relaPos.y >= 0 && relaPos.y < size &&
+    //            relaPos.z >= 0 && relaPos.z < size) {
+    //            int offset = relaPos.z * size * size + relaPos.y * size + relaPos.x;
+    //            lightValue[offset] = {blockIndex, posIndex, block.data.Type, 0};
+    //        }
+    //    }
+    //    blockIndex++;
+    //}
 
-    // 扩散 15 次
-    for (int t = 0; t < 12; t++) {
-        for (int x = 1; x < size - 1; x++) {
-            for (int y = 1; y < size - 1; y++) {
-                for (int z = 1; z < size - 1; z++) {
-                    int offset = z * size * size + y * size + x;
-                    uint8_t value = lightValue[offset].value;
-                    value = max(value, lightValue[offset - 1].value);
-                    value = max(value, lightValue[offset + 1].value);
-                    value = max(value, lightValue[offset - size].value);
-                    value = max(value, lightValue[offset + size].value);
-                    value = max(value, lightValue[offset - size * size].value);
-                    value = max(value, lightValue[offset + size * size].value);
-                    if (value != lightValue[offset].value) value--;
+    //// 注入垂直光
+    //for (int x = 0; x < size; x++) {
+    //    for (int y = 0; y < size ; y++) {
+    //        for (int z = 0; z < size; z++) {
+    //            int offset = z * size * size + y * size + x;
+    //            if (lightValue[offset].type == BlockType::Soild || lightValue[offset].type == BlockType::Face) {
+    //                break;
+    //            } else {
+    //                lightValue[offset].value = 10;
+    //            }
+    //        }
+    //    }
+    //}
 
-                    if (lightValue[offset].type == BlockType::Soild || lightValue[offset].type == BlockType::Face) {
-                        blockIndex = 0;
-                        for (auto& block : this->renderData) {
-                            if (blockIndex == lightValue[offset].blockIndex) {
-                                block.position[lightValue[offset].posIndex].a = value / 10.0f;
-                                break;
-                            }
-                            blockIndex++;
-                        }
-                    } else {
-                        lightValue[offset].value = value;
-                    }
-                }
-            }
-        }
-    }
+    //// 注入点光源
+    //for (auto& light : this->lightBlock) {
+    //    for (auto& pos : light.position) {
+    //        glm::vec4 relaPos = pos - glm::vec4(viewPos, 1);
+    //        relaPos += glm::vec4(size / 2);
+    //        if (relaPos.x >= 0 && relaPos.x < size &&
+    //            relaPos.y >= 0 && relaPos.y < size &&
+    //            relaPos.z >= 0 && relaPos.z < size) {
+    //            int offset = relaPos.z * size * size + relaPos.y * size + relaPos.x;
+    //            lightValue[offset].value = light.data.Light;
+    //        }
+    //    }
+    //}
+
+    //// 扩散 15 次
+    //for (int t = 0; t < 12; t++) {
+    //    for (int x = 1; x < size - 1; x++) {
+    //        for (int y = 1; y < size - 1; y++) {
+    //            for (int z = 1; z < size - 1; z++) {
+    //                int offset = z * size * size + y * size + x;
+    //                uint8_t value = lightValue[offset].value;
+    //                value = max(value, lightValue[offset - 1].value);
+    //                value = max(value, lightValue[offset + 1].value);
+    //                value = max(value, lightValue[offset - size].value);
+    //                value = max(value, lightValue[offset + size].value);
+    //                value = max(value, lightValue[offset - size * size].value);
+    //                value = max(value, lightValue[offset + size * size].value);
+    //                if (value != lightValue[offset].value) value--;
+
+    //                if (lightValue[offset].type == BlockType::Soild || lightValue[offset].type == BlockType::Face) {
+    //                    blockIndex = 0;
+    //                    for (auto& block : this->renderData) {
+    //                        if (blockIndex == lightValue[offset].blockIndex) {
+    //                            block.position[lightValue[offset].posIndex].a = value / 10.0f;
+    //                            break;
+    //                        }
+    //                        blockIndex++;
+    //                    }
+    //                } else {
+    //                    lightValue[offset].value = value;
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 }
 
 void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
@@ -234,7 +274,7 @@ void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 vie
 
 void SpriteRenderer::SetWindowSize(int w, int h) {
     this->flatShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
-
+    this->fontShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
 }
 
 
@@ -872,9 +912,9 @@ unsigned int SpriteRenderer::makeVAO(float* vertices, int verticesLen, unsigned 
 }
 
 void SpriteRenderer::RenderText(std::string text, glm::vec2 position, GLfloat scale, glm::vec4 color) {
-    flatShader->Use();
-    flatShader->SetVector4f("textColor", color);
-    flatShader->SetInteger("text", 0);
+    fontShader->Use();
+    fontShader->SetVector4f("textColor", color);
+    fontShader->SetInteger("text", 0);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(ResourceManager::fontVAO);
 
@@ -997,11 +1037,10 @@ void SpriteRenderer::RenderSkyBox() {
     glDepthFunc(GL_LESS);
 }
 // 渲染2D纹理
-void SpriteRenderer::DrawTexture(Texture2D& texture, glm::vec2 position, float scale, glm::vec4 color) {
+void SpriteRenderer::DrawTexture(Texture2D& texture, glm::vec2 position, float scale) {
 
     this->flatShader->Use();
-    flatShader->SetVector4f("textColor", color);
-    flatShader->SetInteger("text", 0);
+    flatShader->SetInteger("image", 0);
 
     glBindVertexArray(this->flatVAO);
 

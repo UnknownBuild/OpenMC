@@ -29,10 +29,9 @@ struct BlockInst {
 };
 
 struct LightValue {
-    unsigned int blockIndex;
-    unsigned int posIndex;
-    BlockType type;
-    uint8_t value;
+    unsigned int id;
+    int value;
+    glm::vec4 position;
 };
 
 class SpriteRenderer {
@@ -68,7 +67,7 @@ class SpriteRenderer {
   // 渲染天空盒
   void RenderSkyBox();
   // 渲染2D纹理
-  void DrawTexture(Texture2D& texture, glm::vec2 position, float scale = 1.0, glm::vec4 color = glm::vec4(1));
+  void DrawTexture(Texture2D& texture, glm::vec2 position, float scale = 1.0);
   // 设置参数
   void SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion);
   // 设置平行光源
@@ -95,6 +94,7 @@ class SpriteRenderer {
   Shader* blockShader;
   Shader* skyShader;
   Shader* flatShader;
+  Shader* fontShader;
   // 纹理
   Texture2D* skyBox;
 

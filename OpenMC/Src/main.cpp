@@ -504,10 +504,10 @@ int main() {
         // 渲染文字
         Renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
 
-        //if (glfwGetTime() - currentTime > 1.0) {
-        //    currentTime = glfwGetTime();
-        //    Renderer->UpdateLight();
-        //}
+        if (glfwGetTime() - currentTime > 1.0) {
+            currentTime = glfwGetTime();
+            Renderer->UpdateLight();
+        }
 
         // 渲染方块
         Renderer->RenderBlock(false);
