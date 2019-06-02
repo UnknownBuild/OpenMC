@@ -14,8 +14,8 @@ std::map<std::string, Model>        ResourceManager::Models;
 std::map<GLchar, Character>         ResourceManager::Characters;
 unsigned int ResourceManager::fontVAO, ResourceManager::fontVBO;
 
-Shader& ResourceManager::LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, std::string name) {
-  Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile);
+Shader& ResourceManager::LoadShader(const GLchar* vShaderFile, const GLchar* fShaderFile, std::string name, const GLchar* gShaderFile) {
+  Shaders[name] = loadShaderFromFile(vShaderFile, fShaderFile, gShaderFile);
   return Shaders[name];
 }
 
@@ -61,7 +61,7 @@ void ResourceManager::Clear(){
     glDeleteTextures(1, &iter.second.ID);
 }
 
-Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLchar * fShaderFile) {
+Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLchar * fShaderFile, const GLchar* gShaderFile) {
   std::string vertexCode;
   std::string fragmentCode;
   std::string geometryCode;
@@ -76,6 +76,14 @@ Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLc
     fragmentShaderFile.close();
     vertexCode = vShaderStream.str();
     fragmentCode = fShaderStream.str();
+    if (gShaderFile != nullptr)
+    {
+        std::ifstream geometryShaderFile(gShaderFile);
+        std::stringstream gShaderStream;
+        gShaderStream << geometryShaderFile.rdbuf();
+        geometryShaderFile.close();
+        geometryCode = gShaderStream.str();
+    }
   } catch (std::exception e) {
     std::cout << "ERROR::SHADER: Failed to read shader files" << std::endl;
   }
@@ -83,7 +91,7 @@ Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLc
   const GLchar* fShaderCode = fragmentCode.c_str();
   const GLchar* gShaderCode = geometryCode.c_str();
   Shader shader;
-  shader.Compile(vShaderCode, fShaderCode);
+  shader.Compile(vShaderCode, fShaderCode, gShaderFile != nullptr ? gShaderCode : nullptr);
   return shader;
 }
 

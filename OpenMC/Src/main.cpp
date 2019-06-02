@@ -43,6 +43,18 @@ int main() {
 
     MapGenerator gen(10086);
     Chunk* chunk = gen.GenChunk(0, 0);
+    std::vector<glm::vec3> stones;
+    for (int x = 0; x < 16; x++) {
+        for (int y = 0; y < 256; y++) {
+            for (int z = 0; z < 16; z++) {
+                Block block = chunk->GetBlock(x, y, z);
+                switch (block.GetId()) {
+                case BlockId::Stone:
+                    stones.push_back(glm::vec3(x, y, z));
+                }
+            }
+        }
+    }
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
     sceneManager->Goto(new SceneTitle());
@@ -51,87 +63,14 @@ int main() {
 
     // test begin
     Singleton<BlockManager>::GetInstance()->Load();
-    // 初始化模型
-    // ResourceManager::LoadModel("Resources/Models/Garden/Garden.obj", "garden");
-    // ResourceManager::LoadModel("Resources/Models/Table/Table.obj", "table");
-    // 初始化纹理
-    ResourceManager::LoadTexture("Resources/Textures/blocks/grass_block_side.png", "grass");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/grass_block_top.png", "grass_top");
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/oak_planks.png", "oak_planks");
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/crafting_table_side.png", "tabel_side");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/crafting_table_top.png", "tabel_top");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/crafting_table_front.png", "tabel_front");
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/furnace_front.png", "furnace_front");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/furnace_front_on.png", "furnace_front_on");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/furnace_side.png", "furnace_side");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/furnace_top.png", "furnace_top");
-
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/cracked_stone_bricks.png", "stone");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/sand.png", "sand");
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/torch.png", "torch");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/glass.png", "glass");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/grass.png", "grassTop");
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/oak_leaves.png", "oak_leaves");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/oak_log.png", "oak_log");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/oak_log_top.png", "oak_log_top");
-
-
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/dandelion.png", "dandelion");
-
-    // brown蘑菇
-    ResourceManager::LoadTexture("Resources/Textures/blocks/brown_mushroom.png", "brown_mushroom");
-    // blue flower
-    ResourceManager::LoadTexture("Resources/Textures/blocks/blue_orchid.png", "blue_orchid");
-    // horn_coral
-    ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral.png", "horn_coral");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_block.png", "horn_coral_block");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/horn_coral_fan.png", "horn_coral_fan");
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_top.png", "iron_door_top");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/iron_door_bottom.png", "iron_door_bottom");
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/oak_door_top.png", "oak_door_top");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/oak_door_bottom.png", "oak_door_bottom");
-
-    ResourceManager::LoadTexture("Resources/Textures/blocks/blue_stained_glass.png", "blue_stained_glass");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/blue_stained_glass_pane_top.png", "blue_stained_glass_pane_top");
-
-    // 仙人掌
-    ResourceManager::LoadTexture("Resources/Textures/blocks/cactus_side.png", "cactus_side");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/cactus_top.png", "cactus_top");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/cactus_bottom.png", "cactus_bottom");
-    // 蛋糕
-    ResourceManager::LoadTexture("Resources/Textures/blocks/cake_bottom.png", "cake_bottom");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/cake_inner.png", "cake_inner");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/cake_side.png", "cake_side");
-    ResourceManager::LoadTexture("Resources/Textures/blocks/cake_top.png", "cake_top");
-
-
 
     // 初始化渲染管理器
     SpriteRenderer* Renderer = new SpriteRenderer();
 
     glm::vec3 testColor = glm::vec3(0.5, 0.5 ,0.5);
 
-    vector<Texture2D> torchTexture = ResourceManager::LoadSplitTexture("Resources/Textures/blocks/fire_0.png", "fire");
-
-    vector<Texture2D> waterTexture = ResourceManager::LoadSplitTexture("Resources/Textures/blocks/water_still.png", "water");
-    // 海晶灯
-    vector<Texture2D> sea_lanternTexture = ResourceManager::LoadSplitTexture("Resources/Textures/blocks/sea_lantern.png", "sea_lantern");
-
-    int frame = 0;
-
-
-
     // 草方块
-    glm::vec3 grassPosition[10000] = {
+    vector<glm::vec3> grassPosition = {
         glm::vec3(1, 0, 1),
         glm::vec3(2, 0, 2),
         glm::vec3(2, 0, 1),
@@ -151,71 +90,63 @@ int main() {
         glm::vec3(8, 0, 8),
 
         glm::vec3(8, 0, 9),
-        glm::vec3(8, 0, 10),
+        glm::vec3(8, 0, 10)
+
     };
     int grassCount = 17;
     for (int i = -40; i < 40; i++) {
         for (int j = -40; j < 40; j++) {
-            grassPosition[grassCount++] = glm::vec3(i, -1, j);
+            grassPosition.push_back(glm::vec3(i, -1, j));
         }
     }
 
-    glm::vec3 torchPosition[] = {
+    vector<glm::vec3> torchPosition = {
         glm::vec3(5, 0, -3)
     };
-    glm::vec3 firePosition[] = {
-        glm::vec3(-3, 0, 5)
-    };
 
-    glm::vec3 waterPosition[] = {
+    vector<glm::vec3> waterPosition = {
         glm::vec3(6, 0, 8),
         glm::vec3(6, 0, 9),
         glm::vec3(7, 0, 8),
-        glm::vec3(7, 0, 9), 
+        glm::vec3(7, 0, 9),
     };
 
-    glm::vec3 sea_lanternPosition[] = {
+    vector<glm::vec3> sea_lanternPosition = {
         glm::vec3(10, 0, 12),
         glm::vec3(10, 1, 12),
     };
-    glm::vec3 stonePosition[] = {
-        glm::vec3(3, 0, 3),
-        glm::vec3(3, 0, 4),
-        glm::vec3(3, 1, 4),
-        glm::vec3(4, 0, 4),
-    };
-    glm::vec3 dandelionPosition[] = {
+    vector<glm::vec3> dandelionPosition = {
         glm::vec3(-1, 0, -1),
         glm::vec3(-2, 0, 0),
     };
-    glm::vec3 brown_mushroomPosition[] = {
+    vector<glm::vec3> brown_mushroomPosition = {
         glm::vec3(12, 0, 10),
     };
-    glm::vec3 horn_coralPosition[] = {
+    vector<glm::vec3> horn_coralPosition = {
         glm::vec3(12, 0, 12),
     };
-    glm::vec3 dirtPosition[] = {
+    vector<glm::vec3> dirtPosition = {
         glm::vec3(12, 0, 16),
         glm::vec3(12, 1, 16),
     };
-    glm::vec3 cobble_stonePosition[] = {
+    vector<glm::vec3> cobble_stonePosition = {
         glm::vec3(12, 0, 18),
         glm::vec3(12, 1, 18),
     };
-    glm::vec3 grassTopPosition[] = {
+    vector<glm::vec3> grassTopPosition = {
         glm::vec3(1, 0, 6),
         glm::vec3(1, 0, 7),
         glm::vec3(0, 0, 7),
         glm::vec3(1, 0, 8),
         glm::vec3(2, 0, 8),
     };
-    glm::vec3 sandPosition[] = {
+    vector<glm::vec3> sandPosition = {
         glm::vec3(1, 0, -2),
         glm::vec3(1, 0, -1),
         glm::vec3(1, 1, 0),
         glm::vec3(2, 0, 0),
     };
-    glm::vec3 oakPostions[] = {
+    vector<glm::vec3> oakPostions = {
         glm::vec3(-3, 0, 3),
         glm::vec3(-3, 0, 4),
         glm::vec3(-3, 1, 4),
@@ -246,41 +177,41 @@ int main() {
         glm::vec3(-5, 1, -1),
         glm::vec3(-5, 2, -1),
     };
-    glm::vec3 blue_orchidPosition[] = {
+    vector<glm::vec3> blue_orchidPosition = {
         glm::vec3(12, 0, 11),
     };
-    glm::vec3 stonePosition2[] = {
+    vector<glm::vec3> stonePosition2 = {
         glm::vec3(3, 0, -3),
         glm::vec3(3, 0, -4),
         glm::vec3(3, 1, -4),
         glm::vec3(4, 0, -4),
     };
-    glm::vec3 glassPosition[] = {
+    vector<glm::vec3> glassPosition = {
         glm::vec3(7, 0, -3),
         glm::vec3(7, 0, -4),
         glm::vec3(7, 1, -4),
         glm::vec3(8, 0, -4),
     };
-    glm::vec3 tablePosition[] = {
+    vector<glm::vec3> tablePosition = {
         glm::vec3(0, 1, 0),
     };
-    glm::vec3 furnacePosition[] = {
+    vector<glm::vec3> furnacePosition = {
         glm::vec3(3, 2, 3),
     };
-    glm::vec3 oakPosition[] = {
+    vector<glm::vec3> oakPosition = {
         glm::vec3(0, 0, 9),
         glm::vec3(0, 1, 9),
         glm::vec3(0, 2, 9),
         glm::vec3(0, 3, 9),
     };
-    glm::vec3 cactusPosition[] = {
+    vector<glm::vec3> cactusPosition = {
         glm::vec3(10, 0, 10),
         glm::vec3(10, 1, 10),
         glm::vec3(10, 2, 10),
         glm::vec3(10, 3, 10),
         glm::vec3(10, 4, 10),
     };
-    glm::vec3 leavePosition[] = {
+    vector<glm::vec3> leavePosition = {
         glm::vec3(0, 4, 9),
         glm::vec3(1, 4, 9),
         glm::vec3(-1, 4, 9),
@@ -295,19 +226,122 @@ int main() {
         glm::vec3(0, 5, 10),
         glm::vec3(1, 5, 8),
     };
-    glm::vec3 doorPosition[] = {
+    vector<glm::vec3> doorPosition = {
         glm::vec3(6, 0, 6),
     };
-    glm::vec3 oakDoorPosition[] = {
+    vector<glm::vec3> oakDoorPosition = {
         glm::vec3(6, 0, 4),
     };
-    glm::vec3 colorGlassPosition[] = {
+    vector<glm::vec3> colorGlassPosition = {
         glm::vec3(4, 0, 7),
         glm::vec3(4, 0, 8),
     };
 
+    vector<glm::vec3> stonePosition = {
+            glm::vec3(3, 0, 3),
+            glm::vec3(3, 0, 4),
+            glm::vec3(3, 1, 4),
+            glm::vec3(4, 0, 4) };
+
+    Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
+
+    Renderer->ClearPointLight();
+
+    Renderer->AddPointLight(glm::vec3(5, 0, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
+
+    Renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
+
+    vector<glm::vec3> firePosition = { glm::vec3(-3, 0, 5) };
+    // 渲染火
+    Renderer->DrawBlock(BlockId::Fire, firePosition);
+
+    // 渲染圆石
+    Renderer->DrawBlock(BlockId::Stone, stonePosition);
+
+    // 渲染火把
+    Renderer->DrawBlock(BlockId::Torch, torchPosition);
+
+    // 渲染草
+    Renderer->DrawBlock(BlockId::GrassBlock, grassPosition);
+
+    // 渲染水面
+    Renderer->DrawBlock(BlockId::Water, waterPosition);
+
+    // 渲染海晶灯
+    Renderer->DrawBlock(BlockId::SeaLantern, sea_lanternPosition);
+
+    // 渲染大量圆石
+    Renderer->DrawBlock(BlockId::Stone, stones);
+
+    // 渲染圆石
+    Renderer->DrawBlock(BlockId::Stone, stonePosition);
+
+    // 渲染煤
+    Renderer->DrawBlock(BlockId::Dirt, dirtPosition);
+
+    // 渲染鹅卵石
+    Renderer->DrawBlock(BlockId::CobbleStone, cobble_stonePosition);
+
+    //// 渲染蒲公英
+    Renderer->DrawBlock(BlockId::Dandelion, dandelionPosition);
+
+    //// 渲染蘑菇
+    Renderer->DrawBlock(BlockId::BrownMushroom, brown_mushroomPosition);
+
+    //// 渲染 blue flower
+    Renderer->DrawBlock(BlockId::BlueOrchid, blue_orchidPosition);
+
+    //// 渲染 horn_coral
+    Renderer->DrawBlock(BlockId::HornCoral, horn_coralPosition);
+
+    //// 渲染草
+    Renderer->DrawBlock(BlockId::Grass, grassTopPosition);
+
+    //// 渲染沙子
+    Renderer->DrawBlock(BlockId::Sand, sandPosition);
+
+    // 渲染橡木
+    Renderer->DrawBlock(BlockId::OakPlanks, oakPostions);
+
+    //// 渲染岩石
+    Renderer->DrawBlock(BlockId::CrackedStoneBricks, stonePosition2);
+
+    //// 渲染玻璃
+    Renderer->DrawBlock(BlockId::Glass, glassPosition);
+
+    //// 渲染工作台
+    Renderer->DrawBlock(BlockId::CraftingTable, tablePosition, 1);
+
+    //// 渲染火炉
+    Renderer->DrawBlock(BlockId::Furnace, furnacePosition, 2);
+
+    //// 渲染树干
+    Renderer->DrawBlock(BlockId::OakLog, oakPosition);
+
+    // 渲染仙人掌
+    Renderer->DrawBlock(BlockId::Cactus, cactusPosition);
+
+    //// 渲染树叶
+    Renderer->DrawBlock(BlockId::OakLeaves, leavePosition);
+
+    // 渲染门
+    Renderer->DrawBlock(BlockId::IronDoor, doorPosition, 2);
+
+    // 渲染门
+    Renderer->DrawBlock(BlockId::OakDoor, oakDoorPosition, 3);
+
+    // 渲染玻璃
+    Renderer->DrawBlock(BlockId::BlueStainedGlassPane, colorGlassPosition, 0);
+
+
+    // 更新光照
+    Renderer->UpdateLight();
     // test end
 
+    int currentTime = glfwGetTime();
+
+    // 面剔除
+    // glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     // 渲染半透明纹理
     glEnable(GL_BLEND);
@@ -317,8 +351,6 @@ int main() {
     // Gamma 校正
     // glEnable(GL_FRAMEBUFFER_SRGB);
     while (!window->IsClose()) {
-        frame++;
-        if (frame > 31 * 5) frame = 0;
 
         glfwPollEvents();
         camera->Update();
@@ -331,100 +363,26 @@ int main() {
         //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, size.first, size.second);
-        Renderer->SetWindowSize(size.first, size.second);
 
         // test begin
+        Renderer->SetWindowSize(size.first, size.second);
 
-        Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
-
-        Renderer->ClearPointLight();
-
-        Renderer->AddPointLight(glm::vec3(5, 0, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
-
-        Renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
-
-        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 100.0f),     
+        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 100.0f),
             camera->GetViewMatrix(), camera->Position);
 
         // 渲染天空盒
         Renderer->RenderSkyBox();
 
-        Renderer->RenderText(to_string(round(ImGui::GetIO().Framerate)).substr(0, 5) + " FPS", glm::vec2(30, 30), 0.5);
+        // 渲染文字
+        Renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
 
-        // 渲染火把
-        Renderer->DrawBlock(BlockId::Torch, torchPosition, 2);
+        if (glfwGetTime() - currentTime > 1.0) {
+            currentTime = glfwGetTime();
+            Renderer->UpdateLight();
+        }
 
-        // 渲染火
-        Renderer->DrawBlock(BlockId::Fire, firePosition, 1, 0, frame);
-
-        // 渲染草
-        Renderer->DrawBlock(BlockId::GrassBlock, grassPosition, grassCount);
-
-        // 渲染水面
-        Renderer->DrawBlock(BlockId::Water, waterPosition, 4, 0, frame);
-
-        // 渲染海晶灯
-        Renderer->DrawBlock(BlockId::SeaLantern, sea_lanternPosition, 2, 0, frame);
-
-        // 渲染圆石
-        Renderer->DrawBlock(BlockId::Stone, stonePosition, 4);
-
-        // 渲染煤
-        Renderer->DrawBlock(BlockId::Dirt, dirtPosition, 2);
-
-        // 渲染鹅卵石
-        Renderer->DrawBlock(BlockId::CobbleStone, cobble_stonePosition, 4);
-
-        //// 渲染蒲公英
-        Renderer->DrawBlock(BlockId::Dandelion, dandelionPosition, 2);
-
-        //// 渲染蘑菇
-        Renderer->DrawBlock(BlockId::BrownMushroom, brown_mushroomPosition, 1);
-
-        //// 渲染 blue flower
-        Renderer->DrawBlock(BlockId::BlueOrchid, blue_orchidPosition, 1);
-
-        //// 渲染 horn_coral
-        Renderer->DrawBlock(BlockId::HornCoral, horn_coralPosition, 1);
-
-        //// 渲染草
-        Renderer->DrawBlock(BlockId::Grass, grassTopPosition, 3);
-
-        //// 渲染沙子
-        Renderer->DrawBlock(BlockId::Sand, sandPosition, 4);
-
-        // 渲染橡木
-        Renderer->DrawBlock(BlockId::OakPlanks, oakPostions, 29);
-
-        //// 渲染岩石
-        Renderer->DrawBlock(BlockId::CrackedStoneBricks, stonePosition2, 4);
-
-        //// 渲染玻璃
-        Renderer->DrawBlock(BlockId::Glass, glassPosition, 4);
-
-        //// 渲染工作台
-        Renderer->DrawBlock(BlockId::CraftingTable, tablePosition, 1, 1);
-
-        //// 渲染火炉
-        Renderer->DrawBlock(BlockId::Furnace, furnacePosition, 1, 2);
-
-        //// 渲染树干
-        Renderer->DrawBlock(BlockId::OakLog, oakPosition, 4);
-
-        // 渲染仙人掌
-        Renderer->DrawBlock(BlockId::Cactus, cactusPosition, 5);
-
-        //// 渲染树叶
-        Renderer->DrawBlock(BlockId::OakLeaves, leavePosition, 13);
-
-        // 渲染门
-        Renderer->DrawBlock(BlockId::IronDoor, doorPosition, 2, 2);
-
-        // 渲染门
-        Renderer->DrawBlock(BlockId::OakDoor, oakDoorPosition, 2, 3);
-
-        // 渲染玻璃
-        Renderer->DrawBlock(BlockId::BlueStainedGlassPane, colorGlassPosition, 2, 0);
+        // 渲染方块
+        Renderer->RenderBlock(false);
 
         // 渲染2D纹理
         Renderer->DrawTexture(ResourceManager::GetTexture("tabel_top"), glm::vec2(100, 100), 10);

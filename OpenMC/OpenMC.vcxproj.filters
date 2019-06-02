@@ -225,5 +225,8 @@
     <None Include="GLSL\Sky.vs.glsl">
       <Filter>GLSL</Filter>
     </None>
+    <None Include="GLSL\Block.gs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

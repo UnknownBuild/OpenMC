@@ -11,6 +11,8 @@ SpriteRenderer::SpriteRenderer() {
         "GLSL/2D.fs.glsl", "font");
     this->skyShader = &ResourceManager::LoadShader("GLSL/Sky.vs.glsl",
         "GLSL/Sky.fs.glsl", "sky");
+    this->GBufferShader = &ResourceManager::LoadShader("GLSL/Block.vs.glsl",
+        "GLSL/GBuffer.fs.glsl", "GBuffer");
     // 初始化字体
     ResourceManager::InitFont("Resources/Fonts/RAVIE.TTF");
     // 初始化立方体
@@ -26,16 +28,150 @@ SpriteRenderer::SpriteRenderer() {
 
     };
     this->skyBox = &ResourceManager::LoadTexture(faces, "skybox");
+    this->lightValue = new LightValue[40 * 40 * 40];
 }
 
 
-void SpriteRenderer::DrawBlock(BlockId id, const glm::vec3* position, int count, int dir, int frame) {
-    BlockData block = Singleton<BlockManager>::GetInstance()->GetBlockData(id);
-    if (frame != 0 && block.Animation != 0) {
-        frame = (frame / block.Animation) % block.Textures.size();
+int getDis(glm::vec4 a, glm::vec4 b) {
+    return abs(a.x - b.x) + abs(a.y - b.y) + abs(a.z - b.z);
+}
+
+
+void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3> &positions, int dir) {
+    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(id);
+
+    BlockInst inst;
+    inst.data = data;
+    inst.dir = dir;
+
+    vector<glm::vec4> posWithLight;
+    for (auto position : positions) {
+        posWithLight.push_back(glm::vec4(position, data.Light));
     }
-    this->DrawBlock(block.Textures, block.Colors, block.Render, position, count, dir, frame);
+
+    // 处理光照
+    if (data.Light > 0) {
+        this->lightBlock.push_back({ data, posWithLight, dir });
+    }
+
+    // 简单处理渲染顺序
+    for (auto color : data.Colors) {
+        if (color.a > 0 && color.a < 1) {
+            // 具有透明度的方块
+            this->renderData.push_back({ data, posWithLight, dir });
+            return;
+        }
+    }
+    this->renderData.push_front({ data, posWithLight, dir });
 }
+
+// 更新光照
+void SpriteRenderer::UpdateLight() {
+    return;
+
+    const int size = 40;
+
+
+    memset(this->lightValue, 0, size * size * size * sizeof(LightValue));
+
+    // 填充光照范围
+    unsigned int blockIndex = 0;
+    for (auto& block : this->renderData) {
+        unsigned int posIndex = -1;
+        for (auto& pos : block.position) {
+            posIndex++;
+            if (pos.a > 0) {
+                continue;
+            }
+            glm::vec4 relaPos = pos - glm::vec4(viewPos, 1);
+            relaPos += glm::vec4(size / 2);
+            if (relaPos.x >= 0 && relaPos.x < size &&
+                relaPos.y >= 0 && relaPos.y < size &&
+                relaPos.z >= 0 && relaPos.z < size) {
+                int offset = relaPos.z * size * size + relaPos.y * size + relaPos.x;
+                lightValue[offset] = {blockIndex, posIndex, block.data.Type, 0};
+            }
+        }
+        blockIndex++;
+    }
+
+    // 注入垂直光
+    for (int x = 0; x < size; x++) {
+        for (int y = 0; y < size ; y++) {
+            for (int z = 0; z < size; z++) {
+                int offset = z * size * size + y * size + x;
+                if (lightValue[offset].type == BlockType::Soild || lightValue[offset].type == BlockType::Face) {
+                    break;
+                } else {
+                    lightValue[offset].value = 10;
+                }
+            }
+        }
+    }
+
+    // 注入点光源
+    for (auto& light : this->lightBlock) {
+        for (auto& pos : light.position) {
+            glm::vec4 relaPos = pos - glm::vec4(viewPos, 1);
+            relaPos += glm::vec4(size / 2);
+            if (relaPos.x >= 0 && relaPos.x < size &&
+                relaPos.y >= 0 && relaPos.y < size &&
+                relaPos.z >= 0 && relaPos.z < size) {
+                int offset = relaPos.z * size * size + relaPos.y * size + relaPos.x;
+                lightValue[offset].value = light.data.Light;
+            }
+        }
+    }
+
+    // 扩散 15 次
+    for (int t = 0; t < 12; t++) {
+        for (int x = 1; x < size - 1; x++) {
+            for (int y = 1; y < size - 1; y++) {
+                for (int z = 1; z < size - 1; z++) {
+                    int offset = z * size * size + y * size + x;
+                    uint8_t value = lightValue[offset].value;
+                    value = max(value, lightValue[offset - 1].value);
+                    value = max(value, lightValue[offset + 1].value);
+                    value = max(value, lightValue[offset - size].value);
+                    value = max(value, lightValue[offset + size].value);
+                    value = max(value, lightValue[offset - size * size].value);
+                    value = max(value, lightValue[offset + size * size].value);
+                    if (value != lightValue[offset].value) value--;
+
+                    if (lightValue[offset].type == BlockType::Soild || lightValue[offset].type == BlockType::Face) {
+                        blockIndex = 0;
+                        for (auto& block : this->renderData) {
+                            if (blockIndex == lightValue[offset].blockIndex) {
+                                block.position[lightValue[offset].posIndex].a = value / 10.0f;
+                                break;
+                            }
+                            blockIndex++;
+                        }
+                    } else {
+                        lightValue[offset].value = value;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
+    this->renderFrame++;
+
+    for (auto block : this->renderData) {
+        int frame = 0;
+        if (block.data.Animation != 0) {
+            frame = (this->renderFrame / block.data.Animation) % block.data.Textures.size();
+        }
+        this->DrawBlock(block.data.Textures, block.data.Colors, block.data.Render, block.position, block.dir, frame, shader);
+    }
+
+    if (clear) {
+        this->renderData.clear();
+    }
+}
+
 
 SpriteRenderer::~SpriteRenderer() {
     glDeleteVertexArrays(1, &this->quadVAO);
@@ -57,6 +193,8 @@ void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 vie
     this->blockShader->SetMatrix4("view", view);
     this->blockShader->SetVector3f("viewPos", viewPostion);
 
+    this->viewPos = viewPostion;
+
     this->skyShader->Use();
     this->skyShader->SetMatrix4("projection", projection);
     this->skyShader->SetMatrix4("view", glm::mat4(glm::mat3(view)));
@@ -67,19 +205,24 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
 }
 
 
+// 已废弃方法
+void SpriteRenderer::DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
+    RenderType type, const glm::vec3* position, int count, int dir, int iTexture) {
+    return;
+}
+
 // 通用渲染方法
 void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<glm::vec4>& colors,
-    RenderType type, const glm::vec3* position, int count, int dir, int iTexture) {
-    count = count > 10240 ? 10240 : count; // 最大单次渲染个数
-    this->blockShader->Use();
-    this->blockShader->SetMatrix4("model", glm::mat4(1.0f));
-    this->blockShader->SetInteger("hasTexture", true);
-    this->blockShader->SetInteger("hasColor", false);
-    this->blockShader->SetInteger("material.diffuse", 0); // 漫反射贴图
-    this->blockShader->SetFloat("material.shininess", 32); // 镜面反射率
-
+    RenderType type, const vector<glm::vec4>& position, int dir, int iTexture, Shader* shader) {
+    if (shader == nullptr) shader = this->blockShader;
+    shader->Use();
+    shader->SetMatrix4("model", glm::mat4(1.0f));
+    shader->SetInteger("hasTexture", true);
+    shader->SetInteger("hasColor", false);
+    shader->SetInteger("material.diffuse", 0); // 漫反射贴图
+    int count = position.size();
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * count, &position[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4) * count, &position[0]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     vector<Texture2D> textures = _textures;
@@ -88,14 +231,21 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         textures[0] = textures[iTexture];
     }
 
+    for (auto color : colors) {
+        if (color.a < 1) {
+            glDisable(GL_CULL_FACE);
+            break;
+        }
+    }
+
     glActiveTexture(GL_TEXTURE0);
 
     glm::mat4 model = glm::mat4(1.0);
     switch (type) {
     case RenderType::OneTexture: // 单纹理方块
         if (colors.size() > 0) {
-            this->blockShader->SetInteger("hasColor", true);
-            this->blockShader->SetVector4f("material.color", colors[0]);
+            shader->SetInteger("hasColor", true);
+            shader->SetVector4f("material.color", colors[0]);
         }
         textures[0].Bind();
         glBindVertexArray(this->quadVAO);
@@ -115,8 +265,8 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::NoiseTexture:// 噪声 + 颜色
-        this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetVector4f("material.color", colors[0]);
+        shader->SetInteger("hasColor", true);
+        shader->SetVector4f("material.color", colors[0]);
 
         textures[0].Bind();
         glBindVertexArray(this->quadVAO);
@@ -134,23 +284,25 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
 
         textures[1].Bind();
-        this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetVector4f("material.color", colors[0]);
+        shader->SetInteger("hasColor", true);
+        shader->SetVector4f("material.color", colors[0]);
         glBindVertexArray(this->topVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
-        this->blockShader->SetVector4f("material.color", colors[1]);
+        shader->SetVector4f("material.color", colors[1]);
         glBindVertexArray(this->bottomVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::CenterCrossTexture: // 中心交叉纹理
         textures[0].Bind();
         if (colors.size() > 0) {
-            this->blockShader->SetInteger("hasColor", true);
-            this->blockShader->SetVector4f("material.color", colors[0]);
+            shader->SetInteger("hasColor", true);
+            shader->SetVector4f("material.color", colors[0]);
         }
         glBindVertexArray(this->entityVAO1);
+        glDisable(GL_CULL_FACE);
         glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
+        glEnable(GL_CULL_FACE);
         break;
     case RenderType::TorchTexture: // 火把
         textures[0].Bind();
@@ -159,14 +311,15 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         glBindVertexArray(this->topVAO);
         model = glm::translate(model, glm::vec3(0, -0.375, 0));
         model = glm::scale(model, glm::vec3(0.125, 1, 0.125));
-        this->blockShader->SetMatrix4("model", model);
-        this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetInteger("hasTexture", false);
-        this->blockShader->SetVector4f("material.color", colors[0]);
+        shader->SetMatrix4("model", model);
+        shader->SetInteger("hasColor", true);
+        shader->SetInteger("hasTexture", false);
+        shader->SetVector4f("material.color", colors[0]);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::FireTexture: // 火焰
         textures[0].Bind();
+        glDisable(GL_CULL_FACE);
         glBindVertexArray(this->entityVAO3);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
         glBindVertexArray(this->quadVAO);
@@ -194,7 +347,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         break;
     case RenderType::DirCustomTexture: // 具有方向的方块 （前、侧边、上下）
         model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
-        this->blockShader->SetMatrix4("model", model);
+        shader->SetMatrix4("model", model);
         textures[0].Bind();
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
@@ -216,96 +369,100 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::DoorTexture: // 双层单面（门:上下）
-        this->blockShader->SetVector4f("material.color", colors[0]);
+        shader->SetVector4f("material.color", colors[0]);
         model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         model = glm::scale(model, glm::vec3(1, 1, 0.125));
 
         // 前后
         textures[1].Bind();
-        this->blockShader->SetMatrix4("model", model);
-        this->blockShader->SetInteger("hasColor", false);
-        this->blockShader->SetInteger("hasTexture", true);
+        shader->SetMatrix4("model", model);
+        shader->SetInteger("hasColor", false);
+        shader->SetInteger("hasTexture", true);
         glBindVertexArray(this->entityVAO4);
         glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
         // 四周
-        this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetInteger("hasTexture", false);
+        shader->SetInteger("hasColor", true);
+        shader->SetInteger("hasTexture", false);
         glBindVertexArray(this->entityVAO5);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
 
         model = glm::translate(model, glm::vec3(0, 1, 0));
-        this->blockShader->SetMatrix4("model", model);
-        this->blockShader->SetInteger("hasColor", false);
-        this->blockShader->SetInteger("hasTexture", true);
+        shader->SetMatrix4("model", model);
+        shader->SetInteger("hasColor", false);
+        shader->SetInteger("hasTexture", true);
         textures[0].Bind();
         glBindVertexArray(this->entityVAO4);
         glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
 
-        this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetInteger("hasTexture", false);
+        shader->SetInteger("hasColor", true);
+        shader->SetInteger("hasTexture", false);
         glBindVertexArray(this->entityVAO5);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
         break;
     case RenderType::GlassTexture: // 渲染染色玻璃 前后、周边贴图、方向
-        this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetVector4f("material.color", colors[0]);
+        shader->SetInteger("hasColor", true);
+        shader->SetVector4f("material.color", colors[0]);
         model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         model = glm::scale(model, glm::vec3(1, 1, 0.125));
         // 前后
         textures[0].Bind();
-        this->blockShader->SetMatrix4("model", model);
-        this->blockShader->SetInteger("hasTexture", true);
+        shader->SetMatrix4("model", model);
+        shader->SetInteger("hasTexture", true);
         glBindVertexArray(this->entityVAO4);
+        glDisable(GL_CULL_FACE);
         glDrawElementsInstanced(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0, count);
         // 四周
-        this->blockShader->SetVector4f("material.color",
+        shader->SetVector4f("material.color",
             glm::vec4(colors[0].x, colors[0].y, colors[0].z, 0.2));
-        this->blockShader->SetInteger("hasTexture", false);
+        shader->SetInteger("hasTexture", false);
         glBindVertexArray(this->entityVAO5);
         glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+        glEnable(GL_CULL_FACE);
         break;
     case RenderType::LiquidTexture: // 水面
-        this->blockShader->SetInteger("hasColor", true);
-        this->blockShader->SetVector4f("material.color", colors[0]);
+        shader->SetInteger("hasColor", true);
+        shader->SetVector4f("material.color", colors[0]);
         model = glm::rotate(model, glm::radians(90.0f * dir), glm::vec3(0, 1, 0));
         model = glm::translate(model, glm::vec3(0, -0.125, 0));
 
         textures[0].Bind();
-        this->blockShader->SetMatrix4("model", model);
+        shader->SetMatrix4("model", model);
         glBindVertexArray(this->topVAO);
+        glDisable(GL_CULL_FACE);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+        glEnable(GL_CULL_FACE);
         break;
     case RenderType::OffsetTexture: // 偏移纹理(上、四周、下)，平移幅度(上、四周、下)
         textures[0].Bind();
         model = glm::translate(glm::mat4(1.0), glm::vec3(0, colors[0].x, 0));
-        this->blockShader->SetMatrix4("model", model);
+        shader->SetMatrix4("model", model);
         glBindVertexArray(this->topVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
         textures[1].Bind();
         model = glm::translate(glm::mat4(1.0), glm::vec3(colors[0].y, 0, 0));
-        this->blockShader->SetMatrix4("model", model);
+        shader->SetMatrix4("model", model);
         glBindVertexArray(this->leftVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
         model = glm::translate(glm::mat4(1.0), glm::vec3(-colors[0].y, 0, 0));
-        this->blockShader->SetMatrix4("model", model);
+        shader->SetMatrix4("model", model);
         glBindVertexArray(this->rightVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
         model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, -colors[0].y));
-        this->blockShader->SetMatrix4("model", model);
+        shader->SetMatrix4("model", model);
         glBindVertexArray(this->quadVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
         model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, colors[0].y));
-        this->blockShader->SetMatrix4("model", model);
+        shader->SetMatrix4("model", model);
         glBindVertexArray(this->backVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
         textures[2].Bind();
         model = glm::translate(glm::mat4(1.0), glm::vec3(0, colors[0].z, 0));
-        this->blockShader->SetMatrix4("model", model);
+        shader->SetMatrix4("model", model);
         glBindVertexArray(this->bottomVAO);
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
@@ -316,6 +473,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     default:
         break;
     }
+    glEnable(GL_CULL_FACE);
     glBindVertexArray(0);
 }
 
@@ -365,7 +523,7 @@ void SpriteRenderer::initRenderData() {
     // 实例化数组
     glGenBuffers(1, &instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 10240, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 65536, NULL, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     float verticesQuad[] = {
@@ -376,18 +534,18 @@ void SpriteRenderer::initRenderData() {
         -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
         // 后面
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 右下角
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
         -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
         // 左边
         -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
         -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
         -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
         // 右边
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
         // 下面
         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // 左下角
@@ -395,9 +553,9 @@ void SpriteRenderer::initRenderData() {
         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // 右上角
         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // 左上角
         // 上面
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f, // 左上角
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // 右上角
         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f, // 左上角
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f  // 左下角
     };
 
@@ -444,23 +602,23 @@ void SpriteRenderer::initRenderData() {
     float verticesEntity2[] = {
         // 后面
         -0.5f, -0.5f, -0.0625f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 右下角
-        0.5f, -0.5f,  -0.0625f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
-        0.5f,  0.5f,  -0.0625f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
         -0.5f,  0.5f, -0.0625f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
+        0.5f,  0.5f,  -0.0625f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
+        0.5f, -0.5f,  -0.0625f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
         // 正面
-        -0.5f, -0.5f,  0.0625f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
         0.5f, -0.5f,   0.0625f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
         0.5f,  0.5f,   0.0625f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
         -0.5f,  0.5f,  0.0625f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
+        -0.5f, -0.5f,  0.0625f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
         // 左边
+        -0.0625f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
         -0.0625f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         -0.0625f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
         -0.0625f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
-        -0.0625f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
         // 右边
-        0.0625f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
-        0.0625f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         0.0625f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        0.0625f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        0.0625f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
         0.0625f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
     };
 
@@ -492,42 +650,42 @@ void SpriteRenderer::initRenderData() {
 
     this->entityVAO3 = this->makeVAO(verticesEntity3, sizeof(verticesEntity3), indicesQuad, 24 * sizeof(unsigned int));
 
-
+    // 门前后
     float verticesEntity4[] = {
         // 正面
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
         -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
         // 后面
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 右下角
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 左下角
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 左上角
         -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 右上角
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 左上角
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 左下角
     };
     this->entityVAO4 = this->makeVAO(verticesEntity4, sizeof(verticesEntity4), indicesQuad, 12 * sizeof(unsigned int));
 
-
+    // 门四周
     float verticesEntity5[] = {
         // 左边
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
         -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
         -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
         // 右边
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
         // 下面
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // 左下角
         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // 右下角
         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // 右上角
         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // 左上角
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // 左下角
         // 上面
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f, // 左上角
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // 右上角
         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // 右下角
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // 右上角
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f, // 左上角
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f  // 左下角
     };
 
@@ -624,7 +782,7 @@ unsigned int SpriteRenderer::makeVAO(float* vertices, int verticesLen, unsigned 
 
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)0);
     glVertexAttribDivisor(3, 1);
 
     glBindVertexArray(0);

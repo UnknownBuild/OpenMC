@@ -238,6 +238,7 @@
     <None Include="GLSL\2D.fs.glsl" />
     <None Include="GLSL\2D.vs.glsl" />
     <None Include="GLSL\Block.fs.glsl" />
+    <None Include="GLSL\Block.gs.glsl" />
     <None Include="GLSL\Block.vs.glsl" />
     <None Include="GLSL\GBuffer.fs.glsl" />
     <None Include="GLSL\GBuffer.vs.glsl" />

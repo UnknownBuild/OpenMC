@@ -215,7 +215,7 @@
     "type": 2,
     "render": 12,
     "textures": ["oak_leaves.png"],
-    "colors": [[0.5, 0.67, 0.43, 1]],
+    "colors": [[0.5, 0.67, 0.43, 0.95]],
     "animation": 0,
     "light": 0
   },
@@ -225,7 +225,7 @@
     "type": 2,
     "render": 9,
     "textures": ["iron_door_top.png", "iron_door_bottom.png"],
-    "colors": [[0.675, 0.691, 0.675, 1.0]],
+    "colors": [[0.675, 0.691, 0.675, 0.95]],
     "animation": 0,
     "light": 0
   },
@@ -235,7 +235,7 @@
     "type": 2,
     "render": 9,
     "textures": ["oak_door_top.png", "oak_door_bottom.png"],
-    "colors": [[0.53, 0.38, 0.18, 1.0]],
+    "colors": [[0.53, 0.38, 0.18, 0.95]],
     "animation": 0,
     "light": 0
   },
@@ -257,6 +257,6 @@
     "textures": ["*fire_0.png"],
     "colors": [[1.0, 0.5, 0.2, 1.0]],
     "animation": 5,
-    "light": 12
+    "light": 15
   }
 ]
