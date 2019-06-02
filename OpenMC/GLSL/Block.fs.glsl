@@ -1,7 +1,9 @@
-#version 330 core
+﻿#version 330 core
 out vec4 FragColor;
 in vec4 lightColor;
 in vec2 TexCoords;
+in float fogHeight;
+in float fogFactor;
 
 struct Material {
     sampler2D diffuse;
@@ -22,6 +24,5 @@ void main() {
     if (objectColor.a < 0.1) {
         discard;
     }
-
-    FragColor = lightColor * objectColor;
+    FragColor = mix(lightColor * objectColor, vec4(0.8, 0.8, 0.8, 1.0), fogFactor);
 }

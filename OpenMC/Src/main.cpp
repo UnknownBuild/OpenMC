@@ -252,7 +252,7 @@ int main() {
         glm::vec3(0, 5, 0),
     };
 
-    Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
+    Renderer->SetLight(glm::vec3(1.0f, -1.0f, 1.0f));
 
     Renderer->ClearPointLight();
 

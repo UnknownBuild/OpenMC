@@ -1,4 +1,4 @@
-#version 330 core
+﻿#version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
@@ -11,6 +11,8 @@ uniform mat4 projection;
 
 out vec4 lightColor;
 out vec2 TexCoords;
+out float fogHeight;
+out float fogFactor;
 
 struct PointLight {
     vec3 position;
@@ -73,13 +75,17 @@ vec4 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
     return (ambient + diffuse + specular);
 }
 
+const float pi = 3.14159265;
+const float e = 2.71828182845904523536028747135266249;
+
 void main() {
 	mat4 offsetModel = mat4(1.0, 0.0, 0.0, 0.0,
 													0.0, 1.0, 0.0, 0.0,
 													0.0, 0.0, 1.0, 0.0,
 													aOffset.xyz, 1.0) * model;
-	gl_Position = projection * view * offsetModel * vec4(aPos, 1.0);
-	vec3 FragPos = vec3(offsetModel * vec4(aPos, 1.0));
+    vec4 position = offsetModel * vec4(aPos, 1.0);
+	gl_Position = projection * view * position;
+	vec3 FragPos = vec3(position);
 	vec3 Normal = mat3(transpose(inverse(offsetModel))) * aNormal;
 	TexCoords = aTexCoords;
 
@@ -92,4 +98,14 @@ void main() {
 		lightColor += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
 	}
 	lightColor = vec4(lightColor.xyz *  (1.0) ,lightColor.a);
+
+    float cameraDistance = distance(viewPos, vec3(position));
+    // fogFactor = pow(clamp(cameraDistance / fogDistance, 0.0, 1.0), 4.0);
+    fogFactor = 1 - pow(e, -pow(cameraDistance * 0.01, 2));
+
+    float dy = position.y - viewPos.y;
+    float dx = distance(position.xz, viewPos.xz);
+    fogHeight = (atan(dy, dx) + pi / 2) / pi;
+
+
 }

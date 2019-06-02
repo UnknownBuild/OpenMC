@@ -89,7 +89,6 @@ void SpriteRenderer::UpdateLight() {
 
     const int size = 40;
 
-
     memset(this->lightValue, 0, size * size * size * sizeof(LightValue));
 
     // 填充光照范围
