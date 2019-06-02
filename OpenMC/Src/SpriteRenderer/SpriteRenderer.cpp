@@ -502,7 +502,30 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
         break;
+    case RenderType::OffsetSideTexture: // 偏移纹理(四周)，平移幅度(四周)
 
+        textures[0].Bind();
+        model = glm::translate(glm::mat4(1.0), glm::vec3(colors[0].x, 0, 0));
+        this->blockShader->SetMatrix4("model", model);
+        glBindVertexArray(this->leftVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        model = glm::translate(glm::mat4(1.0), glm::vec3(-colors[0].x, 0, 0));
+        this->blockShader->SetMatrix4("model", model);
+        glBindVertexArray(this->rightVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, -colors[0].x));
+        this->blockShader->SetMatrix4("model", model);
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, colors[0].x));
+        this->blockShader->SetMatrix4("model", model);
+        glBindVertexArray(this->backVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        break;
 
 
     default:

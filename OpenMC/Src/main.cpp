@@ -42,19 +42,24 @@ int main() {
     input->Bind(window);
 
     MapGenerator gen(10086);
-    Chunk* chunk = gen.GenChunk(0, 0);
     std::vector<glm::vec3> stones;
-    for (int x = 0; x < 16; x++) {
-        for (int y = 0; y < 256; y++) {
-            for (int z = 0; z < 16; z++) {
-                Block block = chunk->GetBlock(x, y, z);
-                switch (block.GetId()) {
-                case BlockId::Stone:
-                    stones.push_back(glm::vec3(x, y, z));
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            Chunk* chunk = gen.GenChunk(i * 16, j * 16);
+            for (int x = 0; x < 16; x++) {
+                for (int y = 0; y < 256; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        Block block = chunk->GetBlock(i * 16 + x, y, j * 16 + z);
+                        switch (block.GetId()) {
+                        case BlockId::Stone:
+                            stones.push_back(glm::vec3(i * 16 + x, y, j * 16 + z));
+                        }
+                    }
                 }
             }
         }
     }
+
 
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
     // sceneManager->Goto(new SceneMenu());
@@ -243,6 +248,10 @@ int main() {
             glm::vec3(3, 1, 4),
             glm::vec3(4, 0, 4) };
 
+    vector<glm::vec3> beetrootPostion = {
+        glm::vec3(0, 5, 0),
+    };
+
     Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
 
     Renderer->ClearPointLight();
@@ -333,6 +342,8 @@ int main() {
     // 渲染玻璃
     Renderer->DrawBlock(BlockId::BlueStainedGlassPane, colorGlassPosition, 0);
 
+    // 渲染胡萝卜
+    Renderer->DrawBlock(BlockId::Beetroot, beetrootPostion, 0);
 
     // 更新光照
     Renderer->UpdateLight();

@@ -33,6 +33,7 @@ enum class BlockId : uint8_t {
     OakDoor = 23,
     BlueStainedGlassPane = 24,
     Fire = 51,
+    Beetroot = 26,
 };
 
 enum class BlockType : uint8_t {
@@ -59,6 +60,7 @@ enum class RenderType : uint8_t {
     LiquidTexture = 11,     // 液体表面
     OneTexture = 12,         // 单纹理方块
     OffsetTexture = 13,
+    OffsetSideTexture = 14, 
 };
 
 class BlockData final {
