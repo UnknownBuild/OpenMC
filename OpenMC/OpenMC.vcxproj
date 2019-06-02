@@ -243,6 +243,10 @@
     <None Include="GLSL\Object.vs.glsl" />
     <None Include="GLSL\Sky.fs.glsl" />
     <None Include="GLSL\Sky.vs.glsl" />
+    <None Include="GLSL\Ssao.fs.glsl" />
+    <None Include="GLSL\Ssao.vs.glsl" />
+    <None Include="GLSL\SsaoBlur.fs.glsl" />
+    <None Include="GLSL\SsaoLight.fs.glsl" />
     <None Include="Resources\Assets\blocks.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
