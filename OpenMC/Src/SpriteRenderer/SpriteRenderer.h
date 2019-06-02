@@ -68,6 +68,8 @@ class SpriteRenderer {
   // 渲染文本
   void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
                   glm::vec4 color = glm::vec4(1));
+
+  void RenderScreen();
   // 渲染天空盒
   void RenderSkyBox();
   // 渲染2D纹理
@@ -83,18 +85,21 @@ class SpriteRenderer {
   // 更改渲染范围
   void SetWindowSize(int w, int h);
 
+  Shader* GBufferShader;
+  Shader* SsaoShader;
+  Shader* SsaoBlurShader;
+  Shader* SsaoLightShader;
  private:
   void initRenderData();
   unsigned int makeVAO(float *vertices, int verticesLen, unsigned int *indices, int indicesLen);
   unsigned int renderFrame;
+
 
   // 着色器
   Shader* objectShader;
   Shader* blockShader;
   Shader* skyShader;
   Shader* flatShader;
-  Shader* GBufferShader;
-
   // 纹理
   Texture2D* skyBox;
 
@@ -103,6 +108,7 @@ class SpriteRenderer {
   unsigned int backVAO, leftVAO, rightVAO, topVAO, bottomVAO;
   unsigned int skyboxVAO;
   unsigned int flatVAO;
+  unsigned int screenVAO;
 
   unsigned int entityVAO1;
   unsigned int entityVAO2;

@@ -228,5 +228,17 @@
     <None Include="GLSL\Block.gs.glsl">
       <Filter>GLSL</Filter>
     </None>
+    <None Include="GLSL\Ssao.fs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\Ssao.vs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\SsaoBlur.fs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\SsaoLight.fs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

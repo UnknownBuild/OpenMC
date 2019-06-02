@@ -11,8 +11,26 @@ SpriteRenderer::SpriteRenderer() {
         "GLSL/2D.fs.glsl", "font");
     this->skyShader = &ResourceManager::LoadShader("GLSL/Sky.vs.glsl",
         "GLSL/Sky.fs.glsl", "sky");
-    this->GBufferShader = &ResourceManager::LoadShader("GLSL/Block.vs.glsl",
+    this->GBufferShader = &ResourceManager::LoadShader("GLSL/GBuffer.vs.glsl",
         "GLSL/GBuffer.fs.glsl", "GBuffer");
+    this->SsaoBlurShader = &ResourceManager::LoadShader("GLSL/Ssao.vs.glsl",
+        "GLSL/SsaoBlur.fs.glsl", "SSAOBlur");
+
+    this->SsaoBlurShader->Use().SetInteger("ssaoInput", 0);
+
+    this->SsaoShader = &ResourceManager::LoadShader("GLSL/Ssao.vs.glsl",
+        "GLSL/Ssao.fs.glsl", "SSAO");
+    this->SsaoShader->Use().SetInteger("gPositionDepth", 0);
+    this->SsaoShader->Use().SetInteger("gNormal", 1);
+    this->SsaoShader->Use().SetInteger("texNoise", 2);
+
+
+    this->SsaoLightShader = &ResourceManager::LoadShader("GLSL/Ssao.vs.glsl",
+        "GLSL/SsaoLight.fs.glsl", "SSAOLight");
+    this->SsaoLightShader->Use().SetInteger("gAlbedo", 0);
+    this->SsaoLightShader->Use().SetInteger("ssao", 1);
+
+
     // 初始化字体
     ResourceManager::InitFont("Resources/Fonts/RAVIE.TTF");
     // 初始化立方体
@@ -70,7 +88,6 @@ void SpriteRenderer::UpdateLight() {
     return;
 
     const int size = 40;
-
 
     memset(this->lightValue, 0, size * size * size * sizeof(LightValue));
 
@@ -184,6 +201,12 @@ void SpriteRenderer::SetLight(glm::vec3 direction) {
     this->blockShader->SetVector3f("dirLight.ambient", glm::vec3(0.3f));
     this->blockShader->SetVector3f("dirLight.diffuse", glm::vec3(0.65f));
     this->blockShader->SetVector3f("dirLight.specular", glm::vec3(0.2f));
+
+    this->GBufferShader->Use();
+    this->GBufferShader->SetVector3f("dirLight.direction", direction);
+    this->GBufferShader->SetVector3f("dirLight.ambient", glm::vec3(0.3f));
+    this->GBufferShader->SetVector3f("dirLight.diffuse", glm::vec3(0.65f));
+    this->GBufferShader->SetVector3f("dirLight.specular", glm::vec3(0.2f));
 }
 
 // 设置视图
@@ -193,15 +216,25 @@ void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 vie
     this->blockShader->SetMatrix4("view", view);
     this->blockShader->SetVector3f("viewPos", viewPostion);
 
+    this->GBufferShader->Use();
+    this->GBufferShader->SetMatrix4("projection", projection);
+    this->GBufferShader->SetMatrix4("view", view);
+
     this->viewPos = viewPostion;
 
     this->skyShader->Use();
     this->skyShader->SetMatrix4("projection", projection);
     this->skyShader->SetMatrix4("view", glm::mat4(glm::mat3(view)));
+
+    this->SsaoShader->Use().SetMatrix4("projection", projection);
+
+    this->GBufferShader->Use().SetVector3f("viewPos", viewPostion);
+
 }
 
 void SpriteRenderer::SetWindowSize(int w, int h) {
     this->flatShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
+
 }
 
 
@@ -214,13 +247,14 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& textures, const vector<g
 // 通用渲染方法
 void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<glm::vec4>& colors,
     RenderType type, const vector<glm::vec4>& position, int dir, int iTexture, Shader* shader) {
+    int count = position.size();
+    if (count == 0) return;
     if (shader == nullptr) shader = this->blockShader;
     shader->Use();
     shader->SetMatrix4("model", glm::mat4(1.0f));
     shader->SetInteger("hasTexture", true);
     shader->SetInteger("hasColor", false);
     shader->SetInteger("material.diffuse", 0); // 漫反射贴图
-    int count = position.size();
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4) * count, &position[0]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -467,7 +501,30 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
 
         break;
+    case RenderType::OffsetSideTexture: // 偏移纹理(四周)，平移幅度(四周)
 
+        textures[0].Bind();
+        model = glm::translate(glm::mat4(1.0), glm::vec3(colors[0].x, 0, 0));
+        this->blockShader->SetMatrix4("model", model);
+        glBindVertexArray(this->leftVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        model = glm::translate(glm::mat4(1.0), glm::vec3(-colors[0].x, 0, 0));
+        this->blockShader->SetMatrix4("model", model);
+        glBindVertexArray(this->rightVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, -colors[0].x));
+        this->blockShader->SetMatrix4("model", model);
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        model = glm::translate(glm::mat4(1.0), glm::vec3(0, 0, colors[0].x));
+        this->blockShader->SetMatrix4("model", model);
+        glBindVertexArray(this->backVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        break;
 
 
     default:
@@ -756,6 +813,28 @@ void SpriteRenderer::initRenderData() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    // 屏幕渲染
+    unsigned int screenVBO;
+    float screenVertices[] = {
+        // Positions        // Texture Coords
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    };
+    // Setup plane VAO
+    glGenVertexArrays(1, &screenVAO);
+    glGenBuffers(1, &screenVBO);
+    glBindVertexArray(screenVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, screenVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(screenVertices), &screenVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 
@@ -880,13 +959,31 @@ void SpriteRenderer::AddPointLight(glm::vec3 pos, glm::vec3 a, glm::vec3 d, glm:
     this->blockShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].specular").c_str(),
         this->pointLight[this->pointCount].specular);
 
+    this->GBufferShader->Use();
+    this->GBufferShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].constant").c_str(),
+        this->pointLight[this->pointCount].constant);
+    this->GBufferShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].linear").c_str(),
+        this->pointLight[this->pointCount].linear);
+    this->GBufferShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].quadratic").c_str(),
+        this->pointLight[this->pointCount].quadratic);
+    this->GBufferShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].position").c_str(),
+        this->pointLight[this->pointCount].position);
+    this->GBufferShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].ambient").c_str(),
+        this->pointLight[this->pointCount].ambient);
+    this->GBufferShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].diffuse").c_str(),
+        this->pointLight[this->pointCount].diffuse);
+    this->GBufferShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].specular").c_str(),
+        this->pointLight[this->pointCount].specular);
+
     this->pointCount++;
-    this->blockShader->SetInteger("pointCount", this->pointCount);
+    this->blockShader->SetInteger("pointCount", this->pointCount, true);
+    this->GBufferShader->SetInteger("pointCount", this->pointCount, true);
 }
 // 清除点光源
 void SpriteRenderer::ClearPointLight() {
     this->pointCount = 0;
     this->blockShader->SetInteger("pointCount", this->pointCount);
+    this->GBufferShader->SetInteger("pointCount", this->pointCount);
 }
 // 渲染天空盒
 void SpriteRenderer::RenderSkyBox() {
@@ -933,4 +1030,10 @@ void SpriteRenderer::DrawTexture(Texture2D& texture, glm::vec2 position, float s
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+}
+
+void SpriteRenderer::RenderScreen() {
+    glBindVertexArray(screenVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
 }
