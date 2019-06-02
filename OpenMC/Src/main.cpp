@@ -56,16 +56,16 @@ int main() {
         }
     }
 
-    SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-    sceneManager->Goto(new SceneTitle());
-    // sceneManager->Goto(NULL);
-    sceneManager->Run(window);
+    // 初始化渲染管理器
+    SpriteRenderer* Renderer = Singleton<SpriteRenderer>::GetInstance();
 
     // test begin
     Singleton<BlockManager>::GetInstance()->Load();
 
-    // 初始化渲染管理器
-    SpriteRenderer* Renderer = new SpriteRenderer();
+    SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+    sceneManager->Goto(new SceneTitle());
+    // sceneManager->Goto(NULL);
+    sceneManager->Run(window);
 
     glm::vec3 testColor = glm::vec3(0.5, 0.5 ,0.5);
 

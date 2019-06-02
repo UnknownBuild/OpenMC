@@ -22,6 +22,10 @@ Camera::Camera(GLFWwindow* window) {
     // glfwSetScrollCallback(window, this->ScrollCallback);
 }
 
+Camera* Camera::getCameraInst() {
+    return CameraInst;
+}
+
 glm::mat4 Camera::GetViewMatrix() {
     return glm::lookAt(Position, Position + Front, Up);
 }
