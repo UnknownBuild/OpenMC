@@ -1,6 +1,6 @@
 #version 330 core
 layout (location = 0) out vec4 gPositionDepth;
-layout (location = 1) out vec4 gNormal;
+layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
 
 in vec2 TexCoords;
@@ -40,7 +40,7 @@ void main() {
     // And store linear depth into gPositionDepth's alpha component
     gPositionDepth.a = LinearizeDepth(gl_FragCoord.z); // Divide by FAR if you need to store depth in range 0.0 - 1.0 (if not using floating point colorbuffer)
     // Also store the per-fragment normals into the gbuffer
-    gNormal = vec4(normalize(Normal), 1.0);
+    gNormal = normalize(Normal);
     // And the diffuse per-fragment color
     gAlbedoSpec = objectColor * lightColor; // Currently all objects have constant albedo color
 }

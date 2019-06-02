@@ -338,121 +338,121 @@ int main() {
     Renderer->UpdateLight();
     // test end
 
-     auto size = window->GetWindowSize();
-     int SCR_WIDTH = size.first;
-     int SCR_HEIGHT = size.second;
-     // Set up G-Buffer
-     // 3 textures:
-     // 1. Positions + depth (RGBA)
-     // 2. Color (RGB)
-     // 3. Normals (RGB)
-     
-     GLuint gBuffer;
-     glGenFramebuffers(1, &gBuffer);
-     glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-     GLuint gPositionDepth, gNormal, gAlbedo;
-     // - Position + linear depth color buffer
-     glGenTextures(1, &gPositionDepth);
-     glBindTexture(GL_TEXTURE_2D, gPositionDepth);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPositionDepth, 0);
-     // - Normal color buffer
-     glGenTextures(1, &gNormal);
-     glBindTexture(GL_TEXTURE_2D, gNormal);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-     // - Albedo color buffer
-     glGenTextures(1, &gAlbedo);
-     glBindTexture(GL_TEXTURE_2D, gAlbedo);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo, 0);
-     // - Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-     GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-     glDrawBuffers(3, attachments);
-     // - Create and attach depth buffer (renderbuffer)
-     GLuint rboDepth;
-     glGenRenderbuffers(1, &rboDepth);
-     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
-     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-     // - Finally check if framebuffer is complete
-     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-         std::cout << "GBuffer Framebuffer not complete!" << std::endl;
+    //auto size = window->GetWindowSize();
+    //int SCR_WIDTH = size.first;
+    //int SCR_HEIGHT = size.second;
+    //// Set up G-Buffer
+    //// 3 textures:
+    //// 1. Positions + depth (RGBA)
+    //// 2. Color (RGB)
+    //// 3. Normals (RGB)
+    // 
+    //GLuint gBuffer;
+    //glGenFramebuffers(1, &gBuffer);
+    //glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    //GLuint gPositionDepth, gNormal, gAlbedo;
+    //// - Position + linear depth color buffer
+    //glGenTextures(1, &gPositionDepth);
+    //glBindTexture(GL_TEXTURE_2D, gPositionDepth);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPositionDepth, 0);
+    //// - Normal color buffer
+    //glGenTextures(1, &gNormal);
+    //glBindTexture(GL_TEXTURE_2D, gNormal);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+    //// - Albedo color buffer
+    //glGenTextures(1, &gAlbedo);
+    //glBindTexture(GL_TEXTURE_2D, gAlbedo);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo, 0);
+    //// - Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+    //GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    //glDrawBuffers(3, attachments);
+    //// - Create and attach depth buffer (renderbuffer)
+    //GLuint rboDepth;
+    //glGenRenderbuffers(1, &rboDepth);
+    //glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    //// - Finally check if framebuffer is complete
+    //if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    //    std::cout << "GBuffer Framebuffer not complete!" << std::endl;
 
-     // Also create framebuffer to hold SSAO processing stage
-     GLuint ssaoFBO, ssaoBlurFBO;
-     glGenFramebuffers(1, &ssaoFBO);  glGenFramebuffers(1, &ssaoBlurFBO);
-     glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
-     GLuint ssaoColorBuffer, ssaoColorBufferBlur;
-     // - SSAO color buffer
-     glGenTextures(1, &ssaoColorBuffer);
-     glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer, 0);
-     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-         std::cout << "SSAO Framebuffer not complete!" << std::endl;
-     // - and blur stage
-     glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
-     glGenTextures(1, &ssaoColorBufferBlur);
-     glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBufferBlur, 0);
-     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-         std::cout << "SSAO Blur Framebuffer not complete!" << std::endl;
-     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //// Also create framebuffer to hold SSAO processing stage
+    //GLuint ssaoFBO, ssaoBlurFBO;
+    //glGenFramebuffers(1, &ssaoFBO);  glGenFramebuffers(1, &ssaoBlurFBO);
+    //glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+    //GLuint ssaoColorBuffer, ssaoColorBufferBlur;
+    //// - SSAO color buffer
+    //glGenTextures(1, &ssaoColorBuffer);
+    //glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer, 0);
+    //if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    //    std::cout << "SSAO Framebuffer not complete!" << std::endl;
+    //// - and blur stage
+    //glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
+    //glGenTextures(1, &ssaoColorBufferBlur);
+    //glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBufferBlur, 0);
+    //if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    //    std::cout << "SSAO Blur Framebuffer not complete!" << std::endl;
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-     // Sample kernel
-     std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
-     std::default_random_engine generator;
-     std::vector<glm::vec3> ssaoKernel;
-     for (GLuint i = 0; i < 64; ++i)
-     {
-         glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
-         sample = glm::normalize(sample);
-         sample *= randomFloats(generator);
-         GLfloat scale = GLfloat(i) / 64.0;
+    //// Sample kernel
+    //std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
+    //std::default_random_engine generator;
+    //std::vector<glm::vec3> ssaoKernel;
+    //for (GLuint i = 0; i < 64; ++i)
+    //{
+    //    glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
+    //    sample = glm::normalize(sample);
+    //    sample *= randomFloats(generator);
+    //    GLfloat scale = GLfloat(i) / 64.0;
 
-         // Scale samples s.t. they're more aligned to center of kernel
-         scale = 0.1f + scale * scale * (1.0f - 0.1f);
-         // scale = lerp(0.1f, 1.0f, scale * scale);
-         sample *= scale;
-         ssaoKernel.push_back(sample);
-     }
-     Renderer->SsaoShader->Use();
-     for (GLuint i = 0; i < 64; ++i)
-         Renderer->SsaoShader->SetVector3f(("samples[" + std::to_string(i) + "]").c_str(), ssaoKernel[i]);
+    //    // Scale samples s.t. they're more aligned to center of kernel
+    //    scale = 0.1f + scale * scale * (1.0f - 0.1f);
+    //    // scale = lerp(0.1f, 1.0f, scale * scale);
+    //    sample *= scale;
+    //    ssaoKernel.push_back(sample);
+    //}
+    //Renderer->SsaoShader->Use();
+    //for (GLuint i = 0; i < 64; ++i)
+    //    Renderer->SsaoShader->SetVector3f(("samples[" + std::to_string(i) + "]").c_str(), ssaoKernel[i]);
 
-     // Noise texture
-     std::vector<glm::vec3> ssaoNoise;
-     for (GLuint i = 0; i < 16; i++)
-     {
-         glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
-         ssaoNoise.push_back(noise);
-     }
-     GLuint noiseTexture; glGenTextures(1, &noiseTexture);
-     glBindTexture(GL_TEXTURE_2D, noiseTexture);
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-     Renderer->SsaoShader->Use();
-     Renderer->SsaoShader->SetVector2f("noiseScale", glm::vec2(SCR_WIDTH / 4.0f, SCR_HEIGHT / 4.0f));
+    //// Noise texture
+    //std::vector<glm::vec3> ssaoNoise;
+    //for (GLuint i = 0; i < 16; i++)
+    //{
+    //    glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
+    //    ssaoNoise.push_back(noise);
+    //}
+    //GLuint noiseTexture; glGenTextures(1, &noiseTexture);
+    //glBindTexture(GL_TEXTURE_2D, noiseTexture);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    //Renderer->SsaoShader->Use();
+    //Renderer->SsaoShader->SetVector2f("noiseScale", glm::vec2(SCR_WIDTH / 4.0f, SCR_HEIGHT / 4.0f));
 
 
-     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     int currentTime = glfwGetTime();
 
@@ -461,7 +461,8 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     // 渲染半透明纹理
     glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // 使用混合
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // 多重缓冲
     glEnable(GL_MULTISAMPLE);
     // Gamma 校正
@@ -500,57 +501,56 @@ int main() {
         // 渲染方块
         Renderer->RenderBlock(false);
 
-        // 1. Geometry Pass: render scene's geometry/color data into gbuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Renderer->RenderBlock(false, Renderer->GBufferShader);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //// 1. Geometry Pass: render scene's geometry/color data into gbuffer
+        //glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //Renderer->RenderBlock(false, Renderer->GBufferShader);
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        //float* output_image = new float[SCR_WIDTH * SCR_HEIGHT * 4];
+        ////float* output_image = new float[SCR_WIDTH * SCR_HEIGHT * 4];
+        ////glBindTexture(GL_TEXTURE_2D, gNormal);
+        ////glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, output_image);
+        ////for (int i = 0; i < SCR_WIDTH; i++) {
+        ////    for (int j = 0; j < SCR_HEIGHT; j++) {
+        ////        int offset = i * SCR_HEIGHT + j;
+        ////        offset *= 4;
+        ////        printf("%f ", output_image[offset + 0]);
+        ////        printf("%f ", output_image[offset + 1]);
+        ////        printf("%f ", output_image[offset + 2]);
+        ////        printf("%f\n", output_image[offset + 3]);
+        ////    }
+        ////}
+
+        //// 2. Create SSAO texture
+        //glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+        //glClear(GL_COLOR_BUFFER_BIT);
+        //Renderer->SsaoShader->Use();
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, gPositionDepth);
+        //glActiveTexture(GL_TEXTURE1);
         //glBindTexture(GL_TEXTURE_2D, gNormal);
-        //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, output_image);
-        //for (int i = 0; i < SCR_WIDTH; i++) {
-        //    for (int j = 0; j < SCR_HEIGHT; j++) {
-        //        int offset = i * SCR_HEIGHT + j;
-        //        offset *= 4;
-        //        printf("%f ", output_image[offset + 0]);
-        //        printf("%f ", output_image[offset + 1]);
-        //        printf("%f ", output_image[offset + 2]);
-        //        printf("%f\n", output_image[offset + 3]);
-        //    }
-        //}
+        //glActiveTexture(GL_TEXTURE2);
+        //glBindTexture(GL_TEXTURE_2D, noiseTexture);
+        //Renderer->RenderScreen();
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        //// 3. Blur SSAO texture to remove noise
+        //glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
+        //glClear(GL_COLOR_BUFFER_BIT);
+        //Renderer->SsaoBlurShader->Use();
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+        //Renderer->RenderScreen();
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        // 2. Create SSAO texture
-        glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
-        glClear(GL_COLOR_BUFFER_BIT);
-        Renderer->SsaoShader->Use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, gPositionDepth);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, gNormal);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, noiseTexture);
-        Renderer->RenderScreen();
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        // 3. Blur SSAO texture to remove noise
-        glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
-        glClear(GL_COLOR_BUFFER_BIT);
-        Renderer->SsaoBlurShader->Use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
-        Renderer->RenderScreen();
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        // 4. Lighting Pass: traditional deferred Blinn-Phong lighting now with added screen-space ambient occlusion
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Renderer->SsaoLightShader->Use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, gAlbedo);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
-        Renderer->RenderScreen();
+        //// 4. Lighting Pass: traditional deferred Blinn-Phong lighting now with added screen-space ambient occlusion
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //Renderer->SsaoLightShader->Use();
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, gAlbedo);
+        //glActiveTexture(GL_TEXTURE1);
+        //glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
+        //Renderer->RenderScreen();
 
         // 渲染2D纹理
         Renderer->DrawTexture(ResourceManager::GetTexture("tabel_top"), glm::vec2(100, 100), 10);
