@@ -113,7 +113,6 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
         std::cout << "start game" << std::endl;
         SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
         sceneManager->Goto(new SceneMenu());
-        sceneManager->Run(Singleton<Window>::GetInstance());
     }
 }
 
@@ -152,9 +151,10 @@ void SceneTitle::Update() {
 
 
     // 渲染天空盒
-    Renderer->RenderSkyBox();
 
     graphics->Update();
+    Renderer->RenderSkyBox();
+
 
     Renderer->RenderBlock(false);
     // test end
