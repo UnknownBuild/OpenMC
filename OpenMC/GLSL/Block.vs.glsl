@@ -103,9 +103,7 @@ void main() {
     // fogFactor = pow(clamp(cameraDistance / fogDistance, 0.0, 1.0), 4.0);
     fogFactor = 1 - pow(e, -pow(cameraDistance * 0.01, 2));
 
-    float dy = position.y - viewPos.y;
-    float dx = distance(position.xz, viewPos.xz);
-    fogHeight = (atan(dy, dx) + pi / 2) / pi;
-
-
+    // float dy = position.y - viewPos.y;
+    // float dx = distance(position.xz, viewPos.xz);
+    // fogHeight = (atan(dy, dx) + pi / 2) / pi;
 }

@@ -24,5 +24,5 @@ void main() {
     if (objectColor.a < 0.1) {
         discard;
     }
-    FragColor = mix(lightColor * objectColor, vec4(0.8, 0.8, 0.8, 1.0), fogFactor);
+    FragColor = mix(lightColor * objectColor, vec4(0.6, 0.8, 0.8, 1.0), fogFactor);
 }

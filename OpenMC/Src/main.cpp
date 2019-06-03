@@ -357,7 +357,7 @@ int main() {
     //// 1. Positions + depth (RGBA)
     //// 2. Color (RGB)
     //// 3. Normals (RGB)
-    // 
+    //
     //GLuint gBuffer;
     //glGenFramebuffers(1, &gBuffer);
     //glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
@@ -496,7 +496,7 @@ int main() {
         Renderer->SetWindowSize(size.first, size.second);
 
         Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 256.0f),
-            camera->GetViewMatrix(), camera->Position);
+            camera->GetViewMatrix(), camera->Position, camera->Front);
 
         // 渲染天空盒
         Renderer->RenderSkyBox();

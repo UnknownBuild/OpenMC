@@ -103,8 +103,8 @@ void SceneTitle::Update() {
     glViewport(0, 0, size.first, size.second);
 
     // render test
-    float camPosX = sin(glfwGetTime() / 2) * 15;
-    float camPosZ = cos(glfwGetTime() / 2) * 15;
+    float camPosX = sin(glfwGetTime() / 4) * 15;
+    float camPosZ = cos(glfwGetTime() / 4) * 15;
     camera->SetLookPostion(glm::vec3(camPosX, 5, camPosZ), glm::vec3(0.0f, 2.0f, 0.0f));
 
     camera->Update();
@@ -112,7 +112,7 @@ void SceneTitle::Update() {
     Renderer->SetWindowSize(size.first, size.second);
 
     Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first / (float)size.second, 0.1f, 100.0f),
-        camera->GetViewMatrix(), camera->Position);
+        camera->GetViewMatrix(), camera->Position, camera->Front);
     // 渲染文字
     Renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
 

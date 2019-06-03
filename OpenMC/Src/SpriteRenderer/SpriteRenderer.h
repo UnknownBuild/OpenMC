@@ -2,15 +2,11 @@
 #ifndef SPRITE_RENDERER
 #define SPRITE_RENDERER
 
-
-#include <initializer_list>
 #include "../ResourceManager/ResourceManager.h"
 #include "../World/Database/BlockManager.h"
 #include "../Helpers/EnvPath.h"
 #include "../Helpers/Singleton.h"
 #include <list>
-
-using std::initializer_list;
 
 struct PointList {
     int id;
@@ -33,11 +29,18 @@ struct BlockInst {
     int dir;
 };
 
-struct LightValue {
-    unsigned int id;
-    int value;
-    glm::vec4 position;
+struct BlockCell {
+    BlockId id;
+    int light;
 };
+
+// 渲染区块数据
+struct RenderRegionData {
+    list<BlockInst> blockData;
+    bool requireUpdate;
+    BlockCell* blocks;
+};
+
 
 class SpriteRenderer {
  public:
@@ -54,9 +57,6 @@ class SpriteRenderer {
                   GLfloat rotate = 0.0f);
   // 渲染方块
   void DrawBlock(BlockId id, vector<glm::vec3> &position, int dir = 0);
-  // 渲染方块
-  void DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
-      RenderType type, const glm::vec3* position, int count, int dir = 0, int iTexture = 0);
 
   void UpdateLight();
 
@@ -74,7 +74,7 @@ class SpriteRenderer {
   // 渲染2D纹理
   void DrawTexture(Texture2D& texture, glm::vec2 position, float scale = 1.0);
   // 设置参数
-  void SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion);
+  void SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion, glm::vec3 front);
   // 设置平行光源
   void SetLight(glm::vec3 direction);
   // 添加点光源
@@ -92,6 +92,8 @@ class SpriteRenderer {
   void initRenderData();
   unsigned int makeVAO(float *vertices, int verticesLen, unsigned int *indices, int indicesLen);
   unsigned int renderFrame;
+  bool isVisable(float x, float y, float z);
+  void renderBlock(RenderRegionData region, Shader* shader);
 
 
   // 着色器
@@ -122,13 +124,16 @@ class SpriteRenderer {
   std::list<BlockInst> renderData;
   vector<BlockInst> lightBlock;
 
-  LightValue* lightValue; // 渲染区块
+  map<int, map<int, map<int, RenderRegionData>>> renderRegion;
 
   // 点光源
   PointList pointLight[10];
   int pointCount;
 
   glm::vec3 viewPos;
+  glm::vec3 viewFront;
+
+  const unsigned int RENDER_SIZE = 20;
 
 };
 

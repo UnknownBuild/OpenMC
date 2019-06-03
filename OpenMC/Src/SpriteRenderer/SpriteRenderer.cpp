@@ -1,22 +1,9 @@
 ﻿#include "SpriteRenderer.h"
 #include "../World/Database/BlockData.h"
-
-#define get(x, y, z)\
-data[\
-    clamp(x, size)+\
-    clamp(y, size)*size+\
-    clamp(z, size)*size*size\
-]
-
-#define put(x, y, z, value)\
-data[\
-    (x)+\
-    (y)*size+\
-    (z)*size*size\
-] = value
+#include <functional>
 
 SpriteRenderer::SpriteRenderer() {
-  // 初始化着色器
+    // 初始化着色器
     this->objectShader = &ResourceManager::LoadShader("GLSL/Object.vs.glsl",
         "GLSL/Object.fs.glsl", "object");
     this->blockShader = &ResourceManager::LoadShader("GLSL/Block.vs.glsl",
@@ -52,7 +39,7 @@ SpriteRenderer::SpriteRenderer() {
     // 初始化立方体
     this->initRenderData();
     // 初始化天空盒
-    vector<std::string> faces {
+    vector<std::string> faces{
         "Resources/Textures/sky/cloudtop_ft.jpg",
         "Resources/Textures/sky/cloudtop_bk.jpg",
         "Resources/Textures/sky/cloudtop_up.jpg",
@@ -62,7 +49,6 @@ SpriteRenderer::SpriteRenderer() {
 
     };
     this->skyBox = &ResourceManager::LoadTexture(faces, "skybox");
-    this->lightValue = new LightValue[100];
 }
 
 
@@ -71,32 +57,37 @@ int getDis(glm::vec4 a, glm::vec4 b) {
 }
 
 
-void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3> &positions, int dir) {
+void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir) {
     BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(id);
 
-    BlockInst inst;
-    inst.data = data;
-    inst.dir = dir;
+    // 分区块写入
+    map<int, map<int, map<int, BlockInst>>> regionInst;
 
-    vector<glm::vec4> posWithLight;
-    for (auto position : positions) {
-        posWithLight.push_back(glm::vec4(position, data.Light));
+    for (auto& position : positions) {
+        glm::i32vec3 t = glm::i32vec3(position) / glm::i32vec3(RENDER_SIZE);
+        BlockInst* b = &regionInst[t.x][t.y][t.z];
+        if (b->data.Type == BlockType::None) {
+            b->data = data;
+            b->dir = dir;
+        }
+        regionInst[t.x][t.y][t.z].position.push_back(glm::vec4(position, data.Light));
     }
 
-    // 处理光照
-    if (data.Light > 0) {
-        this->lightBlock.push_back({ data, posWithLight, dir });
-    }
+    bool isTrans = (data.Type == BlockType::TransSoild || data.Type == BlockType::TransFace || data.Type == BlockType::Liquid);
 
-    // 简单处理渲染顺序
-    for (auto color : data.Colors) {
-        if (color.a > 0 && color.a < 1) {
-            // 具有透明度的方块
-            this->renderData.push_back({ data, posWithLight, dir });
-            return;
+    for (auto& instX : regionInst) {
+        for (auto& instY : instX.second) {
+            for (auto& instZ : instY.second) {
+                if (isTrans) {
+                    this->renderRegion[instX.first][instY.first][instZ.first].blockData.push_back(instZ.second);
+                }
+                else {
+                    this->renderRegion[instX.first][instY.first][instZ.first].blockData.push_front(instZ.second);
+
+                }
+            }
         }
     }
-    this->renderData.push_front({ data, posWithLight, dir });
 }
 
 // 更新光照
@@ -213,19 +204,89 @@ void SpriteRenderer::UpdateLight() {
     //}
 }
 
+bool SpriteRenderer::isVisable(float x, float y, float z) {
+    // printf("Region %f %f %f\n", x, y, z);
+    x += this->viewFront.x * 3;
+    y += this->viewFront.y * 3;
+    z += this->viewFront.z * 3;
+    glm::vec3 regionPos = glm::normalize(glm::vec3(x, y, z) * glm::vec3(RENDER_SIZE) - this->viewPos);
+    glm::vec3 viewAngle = regionPos * this->viewFront;
+    float viewCos = viewAngle.x + viewAngle.y + viewAngle.z;
+    //printf("RegionFront %f %f %f %f\n", x, y, z, viewCos);
+    //printf("regionPos %f %f %f\n", regionPos.x , regionPos.y, regionPos.z);
+    //printf("viewAngle %f %f %f\n", viewAngle.x, viewAngle.y, viewAngle.z);
+    return viewCos > 0.7;
+}
+
+template<typename T>
+void traverseMap(T start, T end, std::function<void(T)> func) {
+    for (T i = start; i != end; i++) {
+        func(i);
+    }
+}
+typedef map<int, map<int, map<int, RenderRegionData>>> XIterator;
+typedef map<int, map<int, RenderRegionData>> YIterator;
+typedef map<int, RenderRegionData> ZIterator;
+
 void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
     this->renderFrame++;
+    // 从远处开始渲染， 只渲染视角范围内的
 
-    for (auto block : this->renderData) {
+    // 是否正向渲染
+    bool fx = this->viewFront.x < 0;
+    bool fy = this->viewFront.y < 0;
+    bool fz = this->viewFront.z < 0;
+
+    if (fx) traverseMap<XIterator::iterator>(this->renderRegion.begin(), this->renderRegion.end(), [&](XIterator::iterator ix) {
+                if (fy) traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+                            if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
+                                        if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
+                                        });
+                            else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
+                                        if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
+                                        });
+                            });
+                else    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+                            if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
+                                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
+                                });
+                            else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
+                                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
+                                });
+                            });
+                });
+    else    traverseMap<XIterator::reverse_iterator>(this->renderRegion.rbegin(), this->renderRegion.rend(), [&](XIterator::reverse_iterator ix) {
+            if (fy) traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+                if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
+                    if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
+                    });
+                else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
+                    if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
+                    });
+                });
+            else    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+                if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
+                    if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
+                    });
+                else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
+                    if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
+                    });
+                });
+            });
+
+    if (clear) {
+        this->renderRegion.clear();
+    }
+}
+
+
+void SpriteRenderer::renderBlock(RenderRegionData region, Shader* shader) {
+    for (auto block : region.blockData) {
         int frame = 0;
         if (block.data.Animation != 0) {
             frame = (this->renderFrame / block.data.Animation) % block.data.Textures.size();
         }
         this->DrawBlock(block.data.Textures, block.data.Colors, block.data.Render, block.position, block.dir, frame, shader);
-    }
-
-    if (clear) {
-        this->renderData.clear();
     }
 }
 
@@ -250,7 +311,7 @@ void SpriteRenderer::SetLight(glm::vec3 direction) {
 }
 
 // 设置视图
-void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion) {
+void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion, glm::vec3 front) {
     this->blockShader->Use();
     this->blockShader->SetMatrix4("projection", projection);
     this->blockShader->SetMatrix4("view", view);
@@ -261,6 +322,7 @@ void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 vie
     this->GBufferShader->SetMatrix4("view", view);
 
     this->viewPos = viewPostion;
+    this->viewFront = glm::normalize(front);
 
     this->skyShader->Use();
     this->skyShader->SetMatrix4("projection", projection);
@@ -277,12 +339,6 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
     this->fontShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
 }
 
-
-// 已废弃方法
-void SpriteRenderer::DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
-    RenderType type, const glm::vec3* position, int count, int dir, int iTexture) {
-    return;
-}
 
 // 通用渲染方法
 void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<glm::vec4>& colors,
