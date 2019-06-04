@@ -39,12 +39,6 @@ void Window::Dialog(std::string title, std::string text) {
     MessageBox(NULL, text.c_str(), title.c_str(), MB_OK | MB_ICONEXCLAMATION);
 }
 
-std::pair<unsigned int, unsigned int> Window::GetWindowSize() {
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    return { width, height };
-}
-
 void Window::InitGLAD() {
     if (!gladLoadGL()) {
         Dialog("Error", "Failed to initialize GLAD.");
@@ -84,6 +78,10 @@ bool Window::IsFullScreen() {
 
 void Window::SetCursorPosCallback(CursorPosCallback callback) {
     glfwSetCursorPosCallback(window, callback);
+}
+
+void Window::SetKeyCallback(KeyCallback callback) {
+    glfwSetKeyCallback(window, callback);
 }
 
 void Window::SetMouseButtonCallback(MouseButtonCallback callback) {

@@ -23,43 +23,38 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+void c(int key, int scanmods, int action, int mods) {
+    std::cout << key << " ";
+    if (action == GLFW_PRESS) {
+        std::cout << "Press" << std::endl;
+    } else if (action == GLFW_REPEAT) {
+        std::cout << "Repeat" << std::endl;
+    } else if (action == GLFW_RELEASE) {
+        std::cout << "RELEASE" << std::endl;
+    }
+}
+
 int main() {
+    // 初始化配置文件
     Config* config = Singleton<Config>::GetInstance();
     config->Load();
 
+    // 初始化游戏窗体
     Window* window = Singleton<Window>::GetInstance();
     window->InitGLFW();
     window->CreateWindow("OpenMC", config->Width, config->Height, config->IsFullScreen);
     window->InitGLAD();
     window->InitImGui();
 
-    // 初始化摄像头
-    Camera* camera = new Camera(window->GetWindow());
-    camera->SetLookPostion(glm::vec3(5, 5, 10));
-
-    Input<0>* input = Singleton<Input<0>>::GetInstance();
-    Input<0>::OnCursorPosChanged += camera->MouseCallback;
-    Input<0>::OnScrollChanged += camera->ScrollCallback;
+    // 初始化输入层
+    Input<0> * input = Singleton<Input<0>>::GetInstance();
     input->Bind(window);
 
-    MapGenerator gen(10086);
-    std::vector<glm::vec3> stones;
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            Chunk* chunk = gen.GenChunk(i * 16, j * 16);
-            for (int x = 0; x < 16; x++) {
-                for (int y = 0; y < 256; y++) {
-                    for (int z = 0; z < 16; z++) {
-                        Block block = chunk->GetBlock(i * 16 + x, y, j * 16 + z);
-                        switch (block.GetId()) {
-                        case BlockId::Stone:
-                            stones.push_back(glm::vec3(i * 16 + x, y, j * 16 + z));
-                        }
-                    }
-                }
-            }
-        }
-    }
+    // 初始化摄像头
+    Camera* camera = Singleton<Camera>::GetInstance();
+    camera->SetLookPostion(glm::vec3(5, 5, 10));
+    camera->Bind(input, window);
+
 
     // 初始化渲染管理器
     SpriteRenderer* Renderer = Singleton<SpriteRenderer>::GetInstance();
@@ -67,10 +62,11 @@ int main() {
     // test begin
     Singleton<BlockManager>::GetInstance()->Load();
 
+    // 初始化场景管理
     SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-    sceneManager->Goto(new SceneTitle());
-    // sceneManager->Goto(NULL);
+    // sceneManager->Goto(new SceneTitle());
     sceneManager->Run(window);
+
 
     glm::vec3 testColor = glm::vec3(0.5, 0.5 ,0.5);
 
@@ -490,12 +486,12 @@ int main() {
         auto size = window->GetWindowSize();
         //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glViewport(0, 0, size.first, size.second);
+        glViewport(0, 0, size.Width, size.Height);
 
         // test begin
-        Renderer->SetWindowSize(size.first, size.second);
+        Renderer->SetWindowSize(size.Width, size.Height);
 
-        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first/(float)size.second, 0.1f, 256.0f),
+        Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.Width/(float)size.Height, 0.1f, 256.0f),
             camera->GetViewMatrix(), camera->Position, camera->Front);
 
         // 渲染天空盒

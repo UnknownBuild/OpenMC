@@ -3,8 +3,10 @@
 bool cursorOnButton;
 
 void SceneTitle::Start() {
+    camera = Singleton<Camera>::GetInstance();
+
     window = Singleton<Window>::GetInstance();
-    camera = Camera::getCameraInst();
+    // camera = Camera::getCameraInst();
     Renderer = Singleton<SpriteRenderer>::GetInstance();
 
     Input<0>* input = Singleton<Input<0>>::GetInstance();
@@ -127,7 +129,7 @@ void SceneTitle::Update() {
     auto size = window->GetWindowSize();
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, size.first, size.second);
+    glViewport(0, 0, size.Width, size.Height);
 
     // render test
     float camPosX = sin(glfwGetTime() / 4) * 15;
@@ -136,9 +138,9 @@ void SceneTitle::Update() {
 
     camera->Update();
 
-    Renderer->SetWindowSize(size.first, size.second);
+    Renderer->SetWindowSize(size.Width, size.Height);
 
-    Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first / (float)size.second, 0.1f, 100.0f),
+    Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.Width / (float)size.Height, 0.1f, 100.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
     // 渲染文字
     Renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
