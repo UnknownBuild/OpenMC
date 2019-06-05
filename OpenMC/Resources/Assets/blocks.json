@@ -242,7 +242,7 @@
   {
     "id": 24,
     "name": "blue_stained_glass_pane",
-    "type": 3,
+    "type": 5,
     "render": 10,
     "textures": ["blue_stained_glass.png"],
     "colors": [[0.2, 0.5,0.7, 0.35]],
