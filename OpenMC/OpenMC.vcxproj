@@ -220,6 +220,7 @@
     <ClInclude Include="Src\Scenes\SceneManager.h" />
     <ClInclude Include="Src\Scenes\SceneMenu.h" />
     <ClInclude Include="Src\Scenes\SceneTitle.h" />
+    <ClInclude Include="Src\SpriteRenderer\Sprite.h" />
     <ClInclude Include="Src\SpriteRenderer\SpriteRenderer.h" />
     <ClInclude Include="Src\Systems\Graphics.h" />
     <ClInclude Include="Src\Systems\Input.h" />

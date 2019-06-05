@@ -13,18 +13,18 @@ void SceneTitle::Start() {
     renderer = Singleton<SpriteRenderer>::GetInstance();
 
     // 初始化
-    Input<0>* input = Singleton<Input<0>>::GetInstance();
+    Input<0> * input = Singleton<Input<0>>::GetInstance();
     input->Clear();
-    Input<0>::OnCursorPosChanged += cursorPosCallback;
-    Input<0>::OnMouseButtonClick += mouseButtonCallback;
+    Input<0>::OnCursorPosChanged += std::bind(&SceneTitle::cursorPosCallback, this, std::placeholders::_1, std::placeholders::_2);
+    Input<0>::OnMouseButtonClick += std::bind(&SceneTitle::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+
 
     renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
-    renderer->UpdateLight();
     currentTime = glfwGetTime();
     cursorOnButton = false;
 
-    srand((int)time(0));
-    setUpGraphics();
+    srand(( int) time(0));
+    initBlocks();
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -33,7 +33,7 @@ void SceneTitle::Start() {
     glEnable(GL_MULTISAMPLE);
 }
 
-void SceneTitle::setUpGraphics(){
+void SceneTitle::initBlocks() {
     // 草方块
     vector<glm::vec3> grassPosition;
     for (int i = -30; i < 30; i++) {
@@ -45,13 +45,11 @@ void SceneTitle::setUpGraphics(){
         glm::vec3(0, 0, 0),
         glm::vec3(0, 1, 0),
     };
-
     vector<glm::vec3> oakPosition = {
         glm::vec3(0, 0, 0),
         glm::vec3(0, 1, 0),
         glm::vec3(0, 2, 0),
     };
-
     vector<glm::vec3> leavesPosition = {
         glm::vec3(0, 3, 0),
         glm::vec3(1, 3, 0),
@@ -67,10 +65,8 @@ void SceneTitle::setUpGraphics(){
         glm::vec3(0, 4, 1),
         glm::vec3(1, 4, -1),
     };
-
-
     vector<glm::vec3> dandelionPosition;
-    for (int i = 0; i < 50; i ++) {
+    for (int i = 0; i < 50; i++) {
         int x = rand() % 41 - 20;
         int z = rand() % 41 - 20;
         dandelionPosition.push_back(glm::vec3(x, 0, z));
@@ -88,16 +84,16 @@ void SceneTitle::setUpGraphics(){
         blue_orchidPosition.push_back(glm::vec3(x, 0, z));
     }
 
-    graphics = new Graphics();
+    //graphics = new Graphics();
 
-    // add Sprite
-    graphics->AddBlocks(BlockId::GrassBlock, grassPosition, 0, true);
-    graphics->AddBlocks(BlockId::Dandelion, dandelionPosition, 0, true);
-    graphics->AddBlocks(BlockId::BlueOrchid, blue_orchidPosition, 0, true);
-    graphics->AddBlocks(BlockId::BrownMushroom, mushroomPosition, 0, true);
-    graphics->AddBlocks(BlockId::OakLog, oakPosition, 0, true);
-    graphics->AddBlocks(BlockId::OakLeaves, leavesPosition, 0, true);
-    graphics->Add2DSprite("Resources/Textures/gui/minecraft_title.png", "minecraft_title", 320, 600, 2);
+    //// add Sprite
+    //graphics->AddBlocks(BlockId::GrassBlock, grassPosition, 0, true);
+    //graphics->AddBlocks(BlockId::Dandelion, dandelionPosition, 0, true);
+    //graphics->AddBlocks(BlockId::BlueOrchid, blue_orchidPosition, 0, true);
+    //graphics->AddBlocks(BlockId::BrownMushroom, mushroomPosition, 0, true);
+    //graphics->AddBlocks(BlockId::OakLog, oakPosition, 0, true);
+    //graphics->AddBlocks(BlockId::OakLeaves, leavesPosition, 0, true);
+    //graphics->Add2DSprite("Resources/Textures/gui/minecraft_title.png", "minecraft_title", 320, 600, 2);
 
     //graphics->Update();
 }
@@ -105,8 +101,7 @@ void SceneTitle::setUpGraphics(){
 void SceneTitle::cursorPosCallback(double xpos, double ypos) {
     if (xpos >= 390 && xpos <= 600 && ypos >= 625 && ypos <= 677) {
         cursorOnButton = true;
-    }
-    else {
+    } else {
         cursorOnButton = false;
     }
 }
@@ -121,29 +116,53 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
 
 void SceneTitle::Update() {
     auto size = window->GetWindowSize();
-
-    // render test
     float camPosX = sin(glfwGetTime() / 4) * 15;
     float camPosZ = cos(glfwGetTime() / 4) * 15;
     camera->SetLookPostion(glm::vec3(camPosX, 5, camPosZ), glm::vec3(0.0f, 2.0f, 0.0f));
-
     camera->Update();
-
     renderer->SetWindowSize(size.Width, size.Height);
-
-    renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.Width / (float)size.Height, 0.1f, 100.0f),
+    renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 100.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
+
     // 渲染文字
-    renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
-    if (cursorOnButton) {
+    renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);
+
+    // 渲染菜单
+    switch (menuItem) {
+    case Null:
+        renderer->RenderText("Start", glm::vec2(390, 95), 1.0);
+        renderer->RenderText("Load", glm::vec2(400, 90), 1);
+        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
+        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
+        break;
+    case MenuStart:
         renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
-    }
-    else {
-        renderer->RenderText("Start", glm::vec2(400, 100), 1);
+        renderer->RenderText("Load", glm::vec2(400, 90), 1);
+        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
+        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
+        break;
+    case MenuLoad:
+        renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
+        renderer->RenderText("Load", glm::vec2(400, 90), 1);
+        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
+        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
+        break;
+    case MenuSettings:
+        renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
+        renderer->RenderText("Load", glm::vec2(400, 90), 1);
+        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
+        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
+        break;
+    case MenuExit:
+        renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
+        renderer->RenderText("Load", glm::vec2(400, 90), 1);
+        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
+        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
+        break;
     }
 
     // 渲染天空盒
-    graphics->Update();
+    // graphics->Update();
     renderer->RenderSkyBox();
     renderer->RenderBlock(false);
 }

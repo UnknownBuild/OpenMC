@@ -19,6 +19,7 @@ private:
 public:
     void Set(std::string path_, std::string name_, float x_, float y_, float scale_);
     void Draw();
+    std::function<void()> OnClick;
 };
 
 class Sprite3D : public Sprite {

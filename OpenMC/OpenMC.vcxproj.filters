@@ -193,6 +193,9 @@
     <ClInclude Include="Src\Scenes\SceneTitle.h">
       <Filter>Src\Scenes</Filter>
     </ClInclude>
+    <ClInclude Include="Src\SpriteRenderer\Sprite.h">
+      <Filter>Src\SpriteRenderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Assets\blocks.json">
