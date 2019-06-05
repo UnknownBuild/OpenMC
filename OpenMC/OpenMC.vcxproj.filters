@@ -89,6 +89,9 @@
     <ClCompile Include="Src\Scenes\SceneTitle.cpp">
       <Filter>Src\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Scenes\Scene.cpp">
+      <Filter>Src\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">

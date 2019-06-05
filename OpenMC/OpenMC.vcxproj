@@ -191,6 +191,7 @@
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Math\PerlinNoise.cpp" />
     <ClCompile Include="Src\ResourceManager\ResourceManager.cpp" />
+    <ClCompile Include="Src\Scenes\Scene.cpp" />
     <ClCompile Include="Src\Scenes\SceneManager.cpp" />
     <ClCompile Include="Src\Scenes\SceneMenu.cpp" />
     <ClCompile Include="Src\Scenes\SceneTitle.cpp" />

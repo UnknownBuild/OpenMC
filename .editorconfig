@@ -1,8 +1,12 @@
-# Editor Config for Classes
+﻿# Editor Config for Classes
 root = true
 
 [*]
 charset = utf-8-bom
+end_of_line = crlf
+
+[*.{glsl}]
+charset = utf-8
 end_of_line = crlf
 
 [*.{c,cpp,h,hpp}]

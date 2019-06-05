@@ -1,22 +1,25 @@
-﻿#include "SceneTitle.h"
+﻿#include <ctime>
+#include <imgui.h>
+
+#include "SceneGame.h"
+#include "SceneManager.h"
+#include "SceneTitle.h"
 
 bool cursorOnButton;
 
 void SceneTitle::Start() {
-    camera = Singleton<Camera>::GetInstance();
-
     window = Singleton<Window>::GetInstance();
-    // camera = Camera::getCameraInst();
-    Renderer = Singleton<SpriteRenderer>::GetInstance();
+    camera = Singleton<Camera>::GetInstance();
+    renderer = Singleton<SpriteRenderer>::GetInstance();
 
+    // 初始化
     Input<0>* input = Singleton<Input<0>>::GetInstance();
     input->Clear();
     Input<0>::OnCursorPosChanged += cursorPosCallback;
     Input<0>::OnMouseButtonClick += mouseButtonCallback;
-    input->Bind(window);
 
-    Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
-    Renderer->UpdateLight();
+    renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
+    renderer->UpdateLight();
     currentTime = glfwGetTime();
     cursorOnButton = false;
 
@@ -25,10 +28,8 @@ void SceneTitle::Start() {
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
-    // 渲染半透明纹理
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // 多重缓冲
     glEnable(GL_MULTISAMPLE);
 }
 
@@ -114,22 +115,12 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
     if (cursorOnButton && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         std::cout << "start game" << std::endl;
         SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-        sceneManager->Goto(new SceneMenu());
+        sceneManager->Goto(new SceneGame());
     }
 }
 
 void SceneTitle::Update() {
-
-    glfwPollEvents();
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
     auto size = window->GetWindowSize();
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, size.Width, size.Height);
 
     // render test
     float camPosX = sin(glfwGetTime() / 4) * 15;
@@ -138,43 +129,21 @@ void SceneTitle::Update() {
 
     camera->Update();
 
-    Renderer->SetWindowSize(size.Width, size.Height);
+    renderer->SetWindowSize(size.Width, size.Height);
 
-    Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.Width / (float)size.Height, 0.1f, 100.0f),
+    renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.Width / (float)size.Height, 0.1f, 100.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
     // 渲染文字
-    Renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
+    renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
     if (cursorOnButton) {
-        Renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
+        renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
     }
     else {
-        Renderer->RenderText("Start", glm::vec2(400, 100), 1);
+        renderer->RenderText("Start", glm::vec2(400, 100), 1);
     }
-
 
     // 渲染天空盒
-
     graphics->Update();
-    Renderer->RenderSkyBox();
-
-
-    Renderer->RenderBlock(false);
-    // test end
-
-    ImGui::Render();
-
-    int display_w, display_h;
-    glfwMakeContextCurrent(Singleton<Window>::GetInstance()->GetWindow());
-    glfwGetFramebufferSize(Singleton<Window>::GetInstance()->GetWindow(), &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwMakeContextCurrent(Singleton<Window>::GetInstance()->GetWindow());
-    glfwSwapBuffers(Singleton<Window>::GetInstance()->GetWindow());
-
-    static bool flag;
-    if (!flag) {
-        //Singleton<Window>::GetInstance()->Dialog("Hello Zhenly", "A error occurs.");
-        flag = true;
-    }
+    renderer->RenderSkyBox();
+    renderer->RenderBlock(false);
 }

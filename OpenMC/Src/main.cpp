@@ -23,17 +23,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-void c(int key, int scanmods, int action, int mods) {
-    std::cout << key << " ";
-    if (action == GLFW_PRESS) {
-        std::cout << "Press" << std::endl;
-    } else if (action == GLFW_REPEAT) {
-        std::cout << "Repeat" << std::endl;
-    } else if (action == GLFW_RELEASE) {
-        std::cout << "RELEASE" << std::endl;
-    }
-}
-
 int main() {
     // 初始化配置文件
     Config* config = Singleton<Config>::GetInstance();
@@ -52,21 +41,22 @@ int main() {
 
     // 初始化摄像头
     Camera* camera = Singleton<Camera>::GetInstance();
-    camera->SetLookPostion(glm::vec3(5, 5, 10));
-    camera->Bind(input, window);
+    camera->Bind(window);
 
+    // 初始化方块管理
+    Singleton<BlockManager>::GetInstance()->Load();
+
+    // 初始化场景管理
+    SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+    sceneManager->Goto(new SceneTitle());
+    sceneManager->Run(window);
+
+    return 0;
 
     // 初始化渲染管理器
     SpriteRenderer* Renderer = Singleton<SpriteRenderer>::GetInstance();
 
     // test begin
-    Singleton<BlockManager>::GetInstance()->Load();
-
-    // 初始化场景管理
-    SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-    // sceneManager->Goto(new SceneTitle());
-    sceneManager->Run(window);
-
 
     glm::vec3 testColor = glm::vec3(0.5, 0.5 ,0.5);
 

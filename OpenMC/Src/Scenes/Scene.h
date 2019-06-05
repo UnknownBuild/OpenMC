@@ -1,27 +1,15 @@
 ﻿#pragma once
-#include "../Helpers/Singleton.h"
-#include "../Systems/Graphics.h"
 #include "../Systems/Window.h"
-#include "../Systems/Input.h"
 
 class Scene {
 public:
-    void Main(Window* window) {
-        Start();
-        while (!window->IsClose() && !sceneChanging) {
-            Singleton<Graphics>::GetInstance()->Update();
-            Update();
-        }
-        Terminate();
-    }
+    void Main(Window* window);
 
     virtual void Start() {}
     virtual void Update() {}
     virtual void Terminate() {}
 
-    void SetSceneChanging(bool sceneChanging) {
-        this->sceneChanging = sceneChanging;
-    }
+    void SetSceneChanging(bool sceneChanging);
 
 private:
     bool sceneChanging = false;

@@ -22,9 +22,12 @@ class Camera {
 public:
     Camera();
 
-    template<typename unsigned int ID>
-    void Bind(Input<ID>* input, Window* window) {
+    void Bind(Window* window) {
         this->window = window;
+    }
+
+    template<typename unsigned int ID>
+    void Bind(Input<ID>* input) {
         input->OnCursorPosChanged += std::bind(&Camera::MouseCallback, this, std::placeholders::_1, std::placeholders::_2);
         input->OnScrollChanged += std::bind(&Camera::ScrollCallback, this, std::placeholders::_1, std::placeholders::_2);
     }

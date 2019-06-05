@@ -1,14 +1,7 @@
 ﻿#pragma once
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include "../SpriteRenderer/SpriteRenderer.h"
+#include "../Systems/Graphics.h"
 #include "Scene.h"
-#include "SceneMenu.h"
-#include "SceneManager.h"
-#include<time.h>
-
 
 class SceneTitle final : public Scene {
 public:
@@ -23,7 +16,7 @@ public:
 private:
     Graphics *graphics;
 
-    SpriteRenderer* Renderer;
+    SpriteRenderer* renderer;
     Camera* camera;
     Window* window;
     int currentTime;
