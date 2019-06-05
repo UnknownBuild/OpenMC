@@ -1,37 +1,31 @@
-﻿#include "SceneTitle.h"
+﻿#include <ctime>
+#include <imgui.h>
+
+#include "../Helpers/EnvPath.h"
+#include "SceneGame.h"
+#include "SceneManager.h"
+#include "SceneTitle.h"
 
 bool cursorOnButton;
 
 void SceneTitle::Start() {
-    window = Singleton<Window>::GetInstance();
-    camera = Camera::getCameraInst();
-    Renderer = Singleton<SpriteRenderer>::GetInstance();
-
-    Input<0>* input = Singleton<Input<0>>::GetInstance();
+    // 初始化输入层
+    Input<0> * input = Singleton<Input<0>>::GetInstance();
     input->Clear();
-    Input<0>::OnCursorPosChanged += cursorPosCallback;
-    Input<0>::OnMouseButtonClick += mouseButtonCallback;
-    input->Bind(window);
-
-    Renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
-    Renderer->UpdateLight();
-    currentTime = glfwGetTime();
-    cursorOnButton = false;
-
-    srand((int)time(0));
-    setUpGraphics();
-
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    // 渲染半透明纹理
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // 多重缓冲
-    glEnable(GL_MULTISAMPLE);
+    Input<0>::OnCursorPosChanged += std::bind(&SceneTitle::cursorPosCallback, this, std::placeholders::_1, std::placeholders::_2);
+    Input<0>::OnMouseButtonClick += std::bind(&SceneTitle::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    // 初始化摄像机
+    camera = Singleton<Camera>::GetInstance();
+    // 初始化渲染器
+    renderer = Singleton<SpriteRenderer>::GetInstance();
+    renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
+    // 初始化资源
+    ResourceManager::LoadTexture(EnvPath::GameTitleImage, "title");
+    initBlocks();
 }
 
-void SceneTitle::setUpGraphics(){
-    // 草方块
+void SceneTitle::initBlocks() {
+    srand(static_cast<unsigned int>(time(0)));
     vector<glm::vec3> grassPosition;
     for (int i = -30; i < 30; i++) {
         for (int j = -30; j < 30; j++) {
@@ -42,13 +36,11 @@ void SceneTitle::setUpGraphics(){
         glm::vec3(0, 0, 0),
         glm::vec3(0, 1, 0),
     };
-
     vector<glm::vec3> oakPosition = {
         glm::vec3(0, 0, 0),
         glm::vec3(0, 1, 0),
         glm::vec3(0, 2, 0),
     };
-
     vector<glm::vec3> leavesPosition = {
         glm::vec3(0, 3, 0),
         glm::vec3(1, 3, 0),
@@ -64,10 +56,8 @@ void SceneTitle::setUpGraphics(){
         glm::vec3(0, 4, 1),
         glm::vec3(1, 4, -1),
     };
-
-
     vector<glm::vec3> dandelionPosition;
-    for (int i = 0; i < 50; i ++) {
+    for (int i = 0; i < 50; i++) {
         int x = rand() % 41 - 20;
         int z = rand() % 41 - 20;
         dandelionPosition.push_back(glm::vec3(x, 0, z));
@@ -85,94 +75,71 @@ void SceneTitle::setUpGraphics(){
         blue_orchidPosition.push_back(glm::vec3(x, 0, z));
     }
 
-    graphics = new Graphics();
-
-    // add Sprite
-    graphics->AddBlocks(BlockId::GrassBlock, grassPosition, 0, true);
-    graphics->AddBlocks(BlockId::Dandelion, dandelionPosition, 0, true);
-    graphics->AddBlocks(BlockId::BlueOrchid, blue_orchidPosition, 0, true);
-    graphics->AddBlocks(BlockId::BrownMushroom, mushroomPosition, 0, true);
-    graphics->AddBlocks(BlockId::OakLog, oakPosition, 0, true);
-    graphics->AddBlocks(BlockId::OakLeaves, leavesPosition, 0, true);
-    graphics->Add2DSprite("Resources/Textures/gui/minecraft_title.png", "minecraft_title", 320, 600, 2);
-
-    //graphics->Update();
+    renderer->DrawBlock(BlockId::GrassBlock, grassPosition, 0);
+    renderer->DrawBlock(BlockId::Dandelion, dandelionPosition, 0);
+    renderer->DrawBlock(BlockId::BlueOrchid, blue_orchidPosition, 0);
+    renderer->DrawBlock(BlockId::BrownMushroom, mushroomPosition, 0);
+    renderer->DrawBlock(BlockId::OakLog, oakPosition, 0);
+    renderer->DrawBlock(BlockId::OakLeaves, leavesPosition, 0);
 }
 
 void SceneTitle::cursorPosCallback(double xpos, double ypos) {
-    if (xpos >= 390 && xpos <= 600 && ypos >= 625 && ypos <= 677) {
-        cursorOnButton = true;
-    }
-    else {
-        cursorOnButton = false;
+    auto size = window->GetWindowSize();
+    if (xpos >= 50 && xpos <= 240 && size.Height - ypos >= 250 && size.Height - ypos <= 300) {
+        menuItem = MenuStart;
+    } else if (xpos >= 50 && xpos <= 200 && size.Height - ypos >= 200 && size.Height - ypos <= 250) {
+        menuItem = MenuLoad;
+    } else if (xpos >= 50 && xpos <= 330 && size.Height - ypos >= 150 && size.Height - ypos <= 200) {
+        menuItem = MenuSettings;
+    } else if (xpos >= 50 && xpos <= 185 && size.Height - ypos >= 100 && size.Height - ypos <= 150) {
+        menuItem = MenuExit;
+    } else {
+        menuItem = Null;
     }
 }
 
 void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
-    if (cursorOnButton && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        std::cout << "start game" << std::endl;
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-        sceneManager->Goto(new SceneMenu());
-        sceneManager->Run(Singleton<Window>::GetInstance());
+        switch (menuItem) {
+        case MenuStart:
+            sceneManager->Goto(new SceneGame());
+            break;
+        case MenuLoad:
+            break;
+        case MenuSettings:
+            break;
+        case MenuExit:
+            sceneManager->Goto(nullptr);
+            break;
+        }
     }
 }
 
 void SceneTitle::Update() {
-
-    glfwPollEvents();
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
     auto size = window->GetWindowSize();
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, size.first, size.second);
 
-    // render test
+    // 更新摄像机和渲染器
     float camPosX = sin(glfwGetTime() / 4) * 15;
     float camPosZ = cos(glfwGetTime() / 4) * 15;
     camera->SetLookPostion(glm::vec3(camPosX, 5, camPosZ), glm::vec3(0.0f, 2.0f, 0.0f));
-
     camera->Update();
-
-    Renderer->SetWindowSize(size.first, size.second);
-
-    Renderer->SetView(glm::perspective((float)glm::radians(camera->Zoom), size.first / (float)size.second, 0.1f, 100.0f),
+    renderer->SetWindowSize(size.Width, size.Height);
+    renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 100.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
-    // 渲染文字
-    Renderer->RenderText(to_string(ImGui::GetIO().Framerate).substr(0, 5) + " FPS", glm::vec2(10, 10), 0.4);
-    if (cursorOnButton) {
-        Renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
-    }
-    else {
-        Renderer->RenderText("Start", glm::vec2(400, 100), 1);
-    }
 
+    // 渲染FPS
+    renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);
 
+    // 渲染标题
+    renderer->DrawTexture(ResourceManager::GetTexture("title"), glm::vec2(size.Width / 2 - 200, size.Height - 150), 2.0f);
+    // 渲染菜单
+    renderer->RenderText("Start", glm::vec2(50, 250), 1.0f, menuItem == MenuStart ? YELLOW : WHITE);
+    renderer->RenderText("Load", glm::vec2(50, 200), 1.0f, menuItem == MenuLoad ? YELLOW : WHITE);
+    renderer->RenderText("Settings", glm::vec2(50, 150), 1.0f, menuItem == MenuSettings ? YELLOW : WHITE);
+    renderer->RenderText("Exit", glm::vec2(50, 100), 1.0f, menuItem == MenuExit ? YELLOW : WHITE);
     // 渲染天空盒
-    Renderer->RenderSkyBox();
-
-    graphics->Update();
-
-    Renderer->RenderBlock(false);
-    // test end
-
-    ImGui::Render();
-
-    int display_w, display_h;
-    glfwMakeContextCurrent(Singleton<Window>::GetInstance()->GetWindow());
-    glfwGetFramebufferSize(Singleton<Window>::GetInstance()->GetWindow(), &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwMakeContextCurrent(Singleton<Window>::GetInstance()->GetWindow());
-    glfwSwapBuffers(Singleton<Window>::GetInstance()->GetWindow());
-
-    static bool flag;
-    if (!flag) {
-        //Singleton<Window>::GetInstance()->Dialog("Hello Zhenly", "A error occurs.");
-        flag = true;
-    }
+    renderer->RenderSkyBox();
+    // 渲染方块
+    renderer->RenderBlock(false);
 }

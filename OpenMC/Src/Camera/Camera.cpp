@@ -1,11 +1,7 @@
 ﻿#include"Camera.h"
 #define M_PI       3.14159265358979323846
 
-static Camera* CameraInst;
-
-Camera::Camera(GLFWwindow* window) {
-    CameraInst = this;
-
+Camera::Camera() {
     this->Position = glm::vec3(0.0f, 3.0f, 10.0f);
     this->Front = glm::vec3(0.0f, 0.0f, -1.0f);
     this->WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -16,14 +12,6 @@ Camera::Camera(GLFWwindow* window) {
     this->MouseSensitivity = SENSITIVITY;
     this->Zoom = ZOOM;
     this->freedomView = false;
-
-    this->window = window;
-    // glfwSetCursorPosCallback(window, this->MouseCallback);
-    // glfwSetScrollCallback(window, this->ScrollCallback);
-}
-
-Camera* Camera::getCameraInst() {
-    return CameraInst;
 }
 
 glm::mat4 Camera::GetViewMatrix() {
@@ -32,7 +20,7 @@ glm::mat4 Camera::GetViewMatrix() {
 
 void Camera::Update() {
     this->processInput();
-    this->upDateDeltaTime();
+    this->updateDeltaTime();
 }
 
 void Camera::SetLookPostion(glm::vec3 pos, glm::vec3 look) {
@@ -69,46 +57,43 @@ void Camera::TransitionTo(glm::vec3 target, float p) {
     }
 }
 
-void Camera::upDateDeltaTime() {
+void Camera::updateDeltaTime() {
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 }
 
 void Camera::processInput() {
-
     // 自由视角下键盘控制摄像机方向
     if (this->freedomView) {
         float velocity = MovementSpeed * deltaTime;
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        if (window->GetKey(GLFW_KEY_W) == GLFW_PRESS)
             Position += Front * velocity;
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        if (window->GetKey(GLFW_KEY_S) == GLFW_PRESS)
             Position -= Front * velocity;
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        if (window->GetKey(GLFW_KEY_A) == GLFW_PRESS)
             Position -= Right * velocity;
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        if (window->GetKey(GLFW_KEY_D) == GLFW_PRESS)
             Position += Right * velocity;
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        if (window->GetKey(GLFW_KEY_Q) == GLFW_PRESS)
             Position += Up * velocity;
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        if (window->GetKey(GLFW_KEY_E) == GLFW_PRESS)
             Position -= Up * velocity;
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        if (window->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS)
             Position += Up * velocity;
-        if (glfwGetKey(window,GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        if (window->GetKey(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
             Position -= Up * velocity;
-
-    
     }
     // 切换模式
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+    if (window->GetKey(GLFW_KEY_1) == GLFW_PRESS) {
         if (keys[KEY_CHANGE] == false) {
             if (this->freedomView) {
                 // 释放鼠标
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                window->SetInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                 this->firstMouse = true;
             } else {
                 // 捕获鼠标
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                window->SetInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             }
             this->freedomView = !this->freedomView;
             keys[KEY_CHANGE] = true;
@@ -119,46 +104,46 @@ void Camera::processInput() {
 }
 
 void Camera::MouseCallback(double xpos, double ypos) {
-    if (!CameraInst->freedomView) return;
-    if (CameraInst->firstMouse) {
-        CameraInst->lastX = xpos;
-        CameraInst->lastY = ypos;
-        CameraInst->firstMouse = false;
+    if (!freedomView) return;
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
         // printf("first: %lf, %lf\n", xpos, ypos);
     }
 
-    float xoffset = xpos - CameraInst->lastX;
-    float yoffset = CameraInst->lastY - ypos;
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
     // printf("move: %lf, %lf\n", xpos, ypos);
     // printf("offset: %f, %f\n", xoffset, yoffset);
 
-    CameraInst->lastX = xpos;
-    CameraInst->lastY = ypos;
+    lastX = xpos;
+    lastY = ypos;
 
-    xoffset *= CameraInst->MouseSensitivity;
-    yoffset *= CameraInst->MouseSensitivity;
+    xoffset *= MouseSensitivity;
+    yoffset *= MouseSensitivity;
 
-    CameraInst->Yaw += xoffset;
-    CameraInst->Pitch += yoffset;
+    Yaw += xoffset;
+    Pitch += yoffset;
 
-    if (CameraInst->Pitch > 89.0f) CameraInst->Pitch = 89.0f;
-    if (CameraInst->Pitch < -89.0f) CameraInst->Pitch = -89.0f;
+    if (Pitch > 89.0f) Pitch = 89.0f;
+    if (Pitch < -89.0f) Pitch = -89.0f;
 
     glm::vec3 front;
-    front.x = cos(glm::radians(CameraInst->Yaw)) * cos(glm::radians(CameraInst->Pitch));
-    front.y = sin(glm::radians(CameraInst->Pitch));
-    front.z = sin(glm::radians(CameraInst->Yaw)) * cos(glm::radians(CameraInst->Pitch));
-    CameraInst->Front = glm::normalize(front);
-    CameraInst->Right = glm::normalize(glm::cross(CameraInst->Front, CameraInst->WorldUp));
-    CameraInst->Up = glm::normalize(glm::cross(CameraInst->Right, CameraInst->Front));
+    front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    front.y = sin(glm::radians(Pitch));
+    front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+    Front = glm::normalize(front);
+    Right = glm::normalize(glm::cross(Front, WorldUp));
+    Up = glm::normalize(glm::cross(Right, Front));
 }
 
 void Camera::ScrollCallback( double xoffset, double yoffset) {
-    if (!CameraInst->freedomView) return;
-    if (CameraInst->Zoom >= 1.0f && CameraInst->Zoom <= 45.0f)
-        CameraInst->Zoom -= yoffset;
-    if (CameraInst->Zoom <= 1.0f)
-        CameraInst->Zoom = 1.0f;
-    if (CameraInst->Zoom >= 45.0f)
-        CameraInst->Zoom = 45.0f;
+    if (!freedomView) return;
+    if (Zoom >= 1.0f && Zoom <= 45.0f)
+        Zoom -= yoffset;
+    if (Zoom <= 1.0f)
+        Zoom = 1.0f;
+    if (Zoom >= 45.0f)
+        Zoom = 45.0f;
 }

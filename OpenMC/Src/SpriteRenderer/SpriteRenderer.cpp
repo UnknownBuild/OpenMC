@@ -228,6 +228,10 @@ typedef map<int, map<int, map<int, RenderRegionData>>> XIterator;
 typedef map<int, map<int, RenderRegionData>> YIterator;
 typedef map<int, RenderRegionData> ZIterator;
 
+void SpriteRenderer::ClearBlock() {
+    this->renderRegion.clear();
+}
+
 void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
     this->renderFrame++;
     // 从远处开始渲染， 只渲染视角范围内的

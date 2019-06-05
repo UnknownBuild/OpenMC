@@ -1,10 +1,13 @@
 ﻿#pragma once
+#include <functional>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+
 #include "../Helpers/UtilTool.h"
+#include "../Systems/Input.h"
 
 // 默认参数
 const float YAW = -90.0f;
@@ -17,7 +20,18 @@ enum CameraKey { KEY_CHANGE };
 
 class Camera {
 public:
-    Camera(GLFWwindow* window);
+    Camera();
+
+    void Bind(Window* window) {
+        this->window = window;
+    }
+
+    template<typename unsigned int ID>
+    void Bind(Input<ID>* input) {
+        input->OnCursorPosChanged += std::bind(&Camera::MouseCallback, this, std::placeholders::_1, std::placeholders::_2);
+        input->OnScrollChanged += std::bind(&Camera::ScrollCallback, this, std::placeholders::_1, std::placeholders::_2);
+    }
+
     void Update();
 
     // Camera 属性
@@ -39,12 +53,10 @@ public:
 
     // 获取视图矩阵
     glm::mat4 GetViewMatrix();
-    // 返回单例
-    static Camera* getCameraInst();
     // 处理鼠标移动
-    static void MouseCallback(double xpos, double ypos);
+    void MouseCallback(double xpos, double ypos);
     // 处理滚轮滚动
-    static void ScrollCallback(double xoffset, double yoffset);
+   void ScrollCallback(double xoffset, double yoffset);
     // 设置固定视角
     void SetLookPostion(glm::vec3 pos, glm::vec3 look = glm::vec3(0, 0, 0));
     // 设置自由视角
@@ -53,13 +65,14 @@ public:
     void TransitionTo(glm::vec3 target, float p);
 
 private:
+    Window* window;
+
     void setAngle();
-    GLFWwindow* window;
     glm::vec3 oldPostion;
     bool keys[100];
 
     void processInput();
-    void upDateDeltaTime();
+    void updateDeltaTime();
 
     bool freedomView = false;
 
