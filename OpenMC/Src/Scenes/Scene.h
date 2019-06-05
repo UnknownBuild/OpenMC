@@ -11,6 +11,9 @@ public:
 
     void SetSceneChanging(bool sceneChanging);
 
+protected:
+    Window* window;
+
 private:
     bool sceneChanging = false;
 };

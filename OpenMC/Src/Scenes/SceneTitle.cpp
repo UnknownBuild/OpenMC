@@ -1,6 +1,7 @@
 ﻿#include <ctime>
 #include <imgui.h>
 
+#include "../Helpers/EnvPath.h"
 #include "SceneGame.h"
 #include "SceneManager.h"
 #include "SceneTitle.h"
@@ -8,33 +9,23 @@
 bool cursorOnButton;
 
 void SceneTitle::Start() {
-    window = Singleton<Window>::GetInstance();
-    camera = Singleton<Camera>::GetInstance();
-    renderer = Singleton<SpriteRenderer>::GetInstance();
-
-    // 初始化
+    // 初始化输入层
     Input<0> * input = Singleton<Input<0>>::GetInstance();
     input->Clear();
     Input<0>::OnCursorPosChanged += std::bind(&SceneTitle::cursorPosCallback, this, std::placeholders::_1, std::placeholders::_2);
     Input<0>::OnMouseButtonClick += std::bind(&SceneTitle::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-
-
+    // 初始化摄像机
+    camera = Singleton<Camera>::GetInstance();
+    // 初始化渲染器
+    renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
-    currentTime = glfwGetTime();
-    cursorOnButton = false;
-
-    srand(( int) time(0));
+    // 初始化资源
+    ResourceManager::LoadTexture(EnvPath::GameTitleImage, "title");
     initBlocks();
-
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_MULTISAMPLE);
 }
 
 void SceneTitle::initBlocks() {
-    // 草方块
+    srand(static_cast<unsigned int>(time(0)));
     vector<glm::vec3> grassPosition;
     for (int i = -30; i < 30; i++) {
         for (int j = -30; j < 30; j++) {
@@ -84,38 +75,51 @@ void SceneTitle::initBlocks() {
         blue_orchidPosition.push_back(glm::vec3(x, 0, z));
     }
 
-    //graphics = new Graphics();
-
-    //// add Sprite
-    //graphics->AddBlocks(BlockId::GrassBlock, grassPosition, 0, true);
-    //graphics->AddBlocks(BlockId::Dandelion, dandelionPosition, 0, true);
-    //graphics->AddBlocks(BlockId::BlueOrchid, blue_orchidPosition, 0, true);
-    //graphics->AddBlocks(BlockId::BrownMushroom, mushroomPosition, 0, true);
-    //graphics->AddBlocks(BlockId::OakLog, oakPosition, 0, true);
-    //graphics->AddBlocks(BlockId::OakLeaves, leavesPosition, 0, true);
-    //graphics->Add2DSprite("Resources/Textures/gui/minecraft_title.png", "minecraft_title", 320, 600, 2);
-
-    //graphics->Update();
+    renderer->DrawBlock(BlockId::GrassBlock, grassPosition, 0);
+    renderer->DrawBlock(BlockId::Dandelion, dandelionPosition, 0);
+    renderer->DrawBlock(BlockId::BlueOrchid, blue_orchidPosition, 0);
+    renderer->DrawBlock(BlockId::BrownMushroom, mushroomPosition, 0);
+    renderer->DrawBlock(BlockId::OakLog, oakPosition, 0);
+    renderer->DrawBlock(BlockId::OakLeaves, leavesPosition, 0);
 }
 
 void SceneTitle::cursorPosCallback(double xpos, double ypos) {
-    if (xpos >= 390 && xpos <= 600 && ypos >= 625 && ypos <= 677) {
-        cursorOnButton = true;
+    auto size = window->GetWindowSize();
+    if (xpos >= 50 && xpos <= 240 && size.Height - ypos >= 250 && size.Height - ypos <= 300) {
+        menuItem = MenuStart;
+    } else if (xpos >= 50 && xpos <= 200 && size.Height - ypos >= 200 && size.Height - ypos <= 250) {
+        menuItem = MenuLoad;
+    } else if (xpos >= 50 && xpos <= 330 && size.Height - ypos >= 150 && size.Height - ypos <= 200) {
+        menuItem = MenuSettings;
+    } else if (xpos >= 50 && xpos <= 185 && size.Height - ypos >= 100 && size.Height - ypos <= 150) {
+        menuItem = MenuExit;
     } else {
-        cursorOnButton = false;
+        menuItem = Null;
     }
 }
 
 void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
-    if (cursorOnButton && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        std::cout << "start game" << std::endl;
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
-        sceneManager->Goto(new SceneGame());
+        switch (menuItem) {
+        case MenuStart:
+            sceneManager->Goto(new SceneGame());
+            break;
+        case MenuLoad:
+            break;
+        case MenuSettings:
+            break;
+        case MenuExit:
+            sceneManager->Goto(nullptr);
+            break;
+        }
     }
 }
 
 void SceneTitle::Update() {
     auto size = window->GetWindowSize();
+
+    // 更新摄像机和渲染器
     float camPosX = sin(glfwGetTime() / 4) * 15;
     float camPosZ = cos(glfwGetTime() / 4) * 15;
     camera->SetLookPostion(glm::vec3(camPosX, 5, camPosZ), glm::vec3(0.0f, 2.0f, 0.0f));
@@ -124,45 +128,18 @@ void SceneTitle::Update() {
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 100.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
 
-    // 渲染文字
+    // 渲染FPS
     renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);
 
+    // 渲染标题
+    renderer->DrawTexture(ResourceManager::GetTexture("title"), glm::vec2(size.Width / 2 - 200, size.Height - 150), 2.0f);
     // 渲染菜单
-    switch (menuItem) {
-    case Null:
-        renderer->RenderText("Start", glm::vec2(390, 95), 1.0);
-        renderer->RenderText("Load", glm::vec2(400, 90), 1);
-        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
-        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
-        break;
-    case MenuStart:
-        renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
-        renderer->RenderText("Load", glm::vec2(400, 90), 1);
-        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
-        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
-        break;
-    case MenuLoad:
-        renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
-        renderer->RenderText("Load", glm::vec2(400, 90), 1);
-        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
-        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
-        break;
-    case MenuSettings:
-        renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
-        renderer->RenderText("Load", glm::vec2(400, 90), 1);
-        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
-        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
-        break;
-    case MenuExit:
-        renderer->RenderText("Start", glm::vec2(390, 95), 1.2);
-        renderer->RenderText("Load", glm::vec2(400, 90), 1);
-        renderer->RenderText("Settings", glm::vec2(400, 80), 1);
-        renderer->RenderText("Exit", glm::vec2(400, 70), 1);
-        break;
-    }
-
+    renderer->RenderText("Start", glm::vec2(50, 250), 1.0f, menuItem == MenuStart ? YELLOW : WHITE);
+    renderer->RenderText("Load", glm::vec2(50, 200), 1.0f, menuItem == MenuLoad ? YELLOW : WHITE);
+    renderer->RenderText("Settings", glm::vec2(50, 150), 1.0f, menuItem == MenuSettings ? YELLOW : WHITE);
+    renderer->RenderText("Exit", glm::vec2(50, 100), 1.0f, menuItem == MenuExit ? YELLOW : WHITE);
     // 渲染天空盒
-    // graphics->Update();
     renderer->RenderSkyBox();
+    // 渲染方块
     renderer->RenderBlock(false);
 }

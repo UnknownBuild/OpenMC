@@ -192,11 +192,11 @@
     <ClCompile Include="Src\Math\PerlinNoise.cpp" />
     <ClCompile Include="Src\ResourceManager\ResourceManager.cpp" />
     <ClCompile Include="Src\Scenes\Scene.cpp" />
+    <ClCompile Include="Src\Scenes\SceneGame.cpp" />
     <ClCompile Include="Src\Scenes\SceneManager.cpp" />
     <ClCompile Include="Src\Scenes\SceneMenu.cpp" />
     <ClCompile Include="Src\Scenes\SceneTitle.cpp" />
     <ClCompile Include="Src\SpriteRenderer\SpriteRenderer.cpp" />
-    <ClCompile Include="Src\Systems\Graphics.cpp" />
     <ClCompile Include="Src\Systems\Window.cpp" />
     <ClCompile Include="Src\World\Database\BlockManager.cpp" />
     <ClCompile Include="Src\World\Map\MapGenerator.cpp" />
@@ -220,9 +220,7 @@
     <ClInclude Include="Src\Scenes\SceneManager.h" />
     <ClInclude Include="Src\Scenes\SceneMenu.h" />
     <ClInclude Include="Src\Scenes\SceneTitle.h" />
-    <ClInclude Include="Src\SpriteRenderer\Sprite.h" />
     <ClInclude Include="Src\SpriteRenderer\SpriteRenderer.h" />
-    <ClInclude Include="Src\Systems\Graphics.h" />
     <ClInclude Include="Src\Systems\Input.h" />
     <ClInclude Include="Src\Systems\Window.h" />
     <ClInclude Include="Src\World\Characters\Character.h" />

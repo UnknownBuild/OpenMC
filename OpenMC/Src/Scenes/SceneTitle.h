@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "../Camera/Camera.h"
-#include "../SpriteRenderer/Sprite.h"
 #include "../SpriteRenderer/SpriteRenderer.h"
 #include "Scene.h"
 
@@ -13,16 +12,13 @@ public:
     void cursorPosCallback(double xpos, double ypos);
     void mouseButtonCallback(int button, int action, int mods);
 
-    //bool cursorOnButton;
-
 private:
     SpriteRenderer* renderer;
     Camera* camera;
-    Window* window;
 
     enum MenuItem { Null = 0, MenuStart, MenuLoad, MenuSettings, MenuExit };
     MenuItem menuItem;
-
-    int currentTime;
+    const glm::vec4 YELLOW = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+    const glm::vec4 WHITE = glm::vec4(1.0f);
 };
 

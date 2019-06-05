@@ -7,6 +7,7 @@
 #include "Scene.h"
 
 void Scene::Main(Window* window) {
+    this->window = window;
     Start();
     while (!window->IsClose() && !sceneChanging) {
         glfwPollEvents();

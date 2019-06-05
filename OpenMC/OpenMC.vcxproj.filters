@@ -77,9 +77,6 @@
     <ClCompile Include="Src\Scenes\SceneMenu.cpp">
       <Filter>Src\Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Systems\Graphics.cpp">
-      <Filter>Src\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="Src\World\Map\MapGenerator.cpp">
       <Filter>Src\World\Map</Filter>
     </ClCompile>
@@ -90,6 +87,9 @@
       <Filter>Src\Scenes</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scenes\Scene.cpp">
+      <Filter>Src\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scenes\SceneGame.cpp">
       <Filter>Src\Scenes</Filter>
     </ClCompile>
   </ItemGroup>
@@ -166,9 +166,6 @@
     <ClInclude Include="Src\Scenes\SceneManager.h">
       <Filter>Src\Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Systems\Graphics.h">
-      <Filter>Src\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="Src\World\Characters\Character.h">
       <Filter>Src\World\Characters</Filter>
     </ClInclude>
@@ -192,9 +189,6 @@
     </ClInclude>
     <ClInclude Include="Src\Scenes\SceneTitle.h">
       <Filter>Src\Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\SpriteRenderer\Sprite.h">
-      <Filter>Src\SpriteRenderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
