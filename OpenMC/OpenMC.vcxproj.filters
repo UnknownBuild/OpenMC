@@ -92,6 +92,9 @@
     <ClCompile Include="Src\Scenes\SceneGame.cpp">
       <Filter>Src\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Scenes\SceneSettings.cpp">
+      <Filter>Src\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">
@@ -188,6 +191,9 @@
       <Filter>Src\Math</Filter>
     </ClInclude>
     <ClInclude Include="Src\Scenes\SceneTitle.h">
+      <Filter>Src\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scenes\SceneSettings.h">
       <Filter>Src\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
