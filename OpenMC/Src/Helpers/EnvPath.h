@@ -4,11 +4,14 @@
 namespace EnvPath {
     const std::string ResourceDir = "Resources/";
     const std::string TextureDir = ResourceDir + "Textures/";
-    const std::string SaveDir = "Saves/";
 
     const std::string BlockInfoFile = ResourceDir + "Assets/blocks.json";
     const std::string ConfigFile = "OpenMC.json";
 
     // Resource
     const std::string GameTitleImage = TextureDir + "gui/minecraft_title.png";
+
+    // Save
+    const std::string SaveDir = "Saves/";
+    const std::string SaveConfigFile = "config.json";
 }

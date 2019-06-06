@@ -30,11 +30,11 @@ void MapGenerator::genBasicTerrain(Chunk* chunk, int32_t x, int32_t z) {
     srand(2019);
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
-            // heightMap[i][0][j] = simplex3((x + i + 0.1f) * 0.001f, 0.0f, (z + j + 0.1f) * 0.001f, 8, 0.5, 2);
-            // std::cout << heightMap[i][0][j] << std::endl;
+            heightMap[i][0][j] = depthNoise.Get((x + i + 0.1f) * 0.001f, (z + j + 0.1f) * 0.001f);
+            std::cout << heightMap[i][0][j] << std::endl;
         }
     }
-    depthNoise.Get(heightMap, glm::vec3((x + 0.1f) * 0.001f, 0.0f, (z + 0.1f) * 0.001f), glm::vec3(1.0f));
+    // depthNoise.Get(heightMap, glm::vec3((x + 0.1f) * 0.001f, 0.0f, (z + 0.1f) * 0.001f), glm::vec3(1.0f));
     for (int i = 0; i < 16; i++) {
         for (int k = 0; k < 16; k++) {
             int height = static_cast<int>((heightMap[i][0][k] + 0.5) * 62);

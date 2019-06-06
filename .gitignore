@@ -1,5 +1,6 @@
 ﻿## Custom Ignore Rules
 imgui.ini
+OpenMC/Saves/
 !OpenMC/Resources/**/*.obj
 
 ## Ignore Visual Studio temporary files, build results, and

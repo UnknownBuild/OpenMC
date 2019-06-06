@@ -1,5 +1,6 @@
 ﻿#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 #include "Scenes/SceneManager.h"
 #include "Scenes/SceneTitle.h"
@@ -10,7 +11,7 @@
 #include "World/Map/MapManager.h"
 
 int main() {
-    Singleton<MapManager>::GetInstance()->Init("test", 1);
+    std::cout << Singleton<MapManager>::GetInstance()->Init("test", 1) << std::endl;
 
     // 初始化配置文件
     Config* config = Singleton<Config>::GetInstance();
