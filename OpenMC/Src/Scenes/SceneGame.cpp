@@ -1,5 +1,6 @@
 ﻿#include <imgui.h>
 
+#include "../World/Map/MapGenerator.h"
 #include "SceneGame.h"
 
 void SceneGame::Start() {
@@ -14,6 +15,19 @@ void SceneGame::Start() {
     renderer->ClearBlock();
 
     // test begin
+    std::vector<glm::vec3> stones;
+    MapGenerator gen(2019);
+    Chunk* chunk = gen.GenChunk(0, 0);
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 256; j++) {
+            for (int k = 0; k < 16; k++) {
+                if (chunk->GetBlock(i, j, k).GetId() == BlockId::Stone) {
+                    stones.push_back(glm::vec3(i, j, k));
+                }
+            }
+        }
+    }
+
     vector<glm::vec3> grassPosition = {
         glm::vec3(1, 0, 1),
         glm::vec3(2, 0, 2),
@@ -207,6 +221,7 @@ void SceneGame::Start() {
     renderer->DrawBlock(BlockId::SeaLantern, sea_lanternPosition);
     // 渲染圆石
     renderer->DrawBlock(BlockId::Stone, stonePosition);
+    renderer->DrawBlock(BlockId::Stone, stones);
     // 渲染煤
     renderer->DrawBlock(BlockId::Dirt, dirtPosition);
     // 渲染鹅卵石

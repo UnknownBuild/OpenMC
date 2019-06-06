@@ -5,10 +5,12 @@
 
 class MapManager final {
 public:
-    void Load();
+    bool Init(std::string name, uint32_t seed);
+    void Load(std::string name);
     std::vector<RenderChunk> GetRenderChunks(int x, int z);
 
 private:
-    long long int mapSeed;
-    uint8_t visionLength;
+    std::string savePath;
+    uint32_t mapSeed;
+    uint8_t vision;
 };

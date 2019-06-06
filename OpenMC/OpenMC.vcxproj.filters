@@ -92,6 +92,9 @@
     <ClCompile Include="Src\Scenes\SceneGame.cpp">
       <Filter>Src\Scenes</Filter>
     </ClCompile>
+    <ClCompile Include="Src\World\Map\MapManager.cpp">
+      <Filter>Src\World\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">

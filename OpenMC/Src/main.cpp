@@ -7,8 +7,11 @@
 #include "Helpers/Singleton.h"
 #include "Systems/Input.h"
 #include "Systems/Window.h"
+#include "World/Map/MapManager.h"
 
 int main() {
+    Singleton<MapManager>::GetInstance()->Init("test", 1);
+
     // 初始化配置文件
     Config* config = Singleton<Config>::GetInstance();
     config->Load();
