@@ -9,4 +9,7 @@ public:
     bool IsFullScreen = false;
     int Width = 1366;
     int Height = 768;
+
+    // Render
+    int SightDistance;
 };

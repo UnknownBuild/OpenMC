@@ -3,6 +3,7 @@
 
 #include "../Helpers/EnvPath.h"
 #include "SceneGame.h"
+#include "SceneSettings.h"
 #include "SceneManager.h"
 #include "SceneTitle.h"
 
@@ -108,6 +109,7 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
         case MenuLoad:
             break;
         case MenuSettings:
+            sceneManager->Goto(new SceneSettings());
             break;
         case MenuExit:
             sceneManager->Goto(nullptr);

@@ -2,6 +2,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 #include <sstream>
+#include <iostream>
 
 #include "Config.h"
 
@@ -25,6 +26,11 @@ bool Config::Load() {
             ss >> Width;
             ss.get();
             ss >> Height;
+        }
+        else if (member.name == "window_sight_distance") {
+            if (!member.value.IsString()) return false;
+            std::stringstream ss(member.value.GetString());
+            ss >> SightDistance;
         }
     }
     return true;

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug-2017|Win32">
@@ -195,11 +195,13 @@
     <ClCompile Include="Src\Scenes\SceneGame.cpp" />
     <ClCompile Include="Src\Scenes\SceneManager.cpp" />
     <ClCompile Include="Src\Scenes\SceneMenu.cpp" />
+    <ClCompile Include="Src\Scenes\SceneSettings.cpp" />
     <ClCompile Include="Src\Scenes\SceneTitle.cpp" />
     <ClCompile Include="Src\SpriteRenderer\SpriteRenderer.cpp" />
     <ClCompile Include="Src\Systems\Window.cpp" />
     <ClCompile Include="Src\World\Database\BlockManager.cpp" />
     <ClCompile Include="Src\World\Map\MapGenerator.cpp" />
+    <ClCompile Include="Src\World\Map\MapManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Camera\Camera.h" />
@@ -219,6 +221,7 @@
     <ClInclude Include="Src\Scenes\SceneGame.h" />
     <ClInclude Include="Src\Scenes\SceneManager.h" />
     <ClInclude Include="Src\Scenes\SceneMenu.h" />
+    <ClInclude Include="Src\Scenes\SceneSettings.h" />
     <ClInclude Include="Src\Scenes\SceneTitle.h" />
     <ClInclude Include="Src\SpriteRenderer\SpriteRenderer.h" />
     <ClInclude Include="Src\Systems\Input.h" />

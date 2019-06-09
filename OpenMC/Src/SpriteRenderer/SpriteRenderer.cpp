@@ -1085,13 +1085,13 @@ void SpriteRenderer::RenderText(std::string text, glm::vec2 position, GLfloat sc
         GLfloat w = ch.Size.x * scale;
         GLfloat h = ch.Size.y * scale;
         GLfloat vertices[6][4] = {
-            { xpos,     ypos + h,   0.0, 0.0 },
-            { xpos,     ypos,       0.0, 1.0 },
-            { xpos + w, ypos,       1.0, 1.0 },
+            { xpos - w / 2,     ypos + h,   0.0, 0.0 },
+            { xpos - w / 2,     ypos,       0.0, 1.0 },
+            { xpos + w / 2, ypos,       1.0, 1.0 },
 
-            { xpos,     ypos + h,   0.0, 0.0 },
-            { xpos + w, ypos,       1.0, 1.0 },
-            { xpos + w, ypos + h,   1.0, 0.0 }
+            { xpos - w / 2,     ypos + h,   0.0, 0.0 },
+            { xpos + w / 2, ypos,       1.0, 1.0 },
+            { xpos + w / 2, ypos + h,   1.0, 0.0 }
         };
         glBindTexture(GL_TEXTURE_2D, ch.TextureID);
         glBindBuffer(GL_ARRAY_BUFFER, ResourceManager::fontVBO);
@@ -1208,13 +1208,13 @@ void SpriteRenderer::DrawTexture(Texture2D& texture, glm::vec2 position, float s
     GLfloat h = texture.Height * scale;
 
     float vertices[6][4] = {
-        { xpos,     ypos + h,   0.0, 0.0 }, // 左上角
-        { xpos,     ypos,       0.0, 1.0 }, // 左下角
-        { xpos + w, ypos,       1.0, 1.0 }, // 右下角
+        { xpos - w / 2,     ypos + h,   0.0, 0.0 }, // 左上角
+        { xpos - w / 2,     ypos,       0.0, 1.0 }, // 左下角
+        { xpos + w / 2, ypos,       1.0, 1.0 }, // 右下角
 
-        { xpos,     ypos + h,   0.0, 0.0 }, // 左上角
-        { xpos + w, ypos,       1.0, 1.0 }, // 右下角
-        { xpos + w, ypos + h,   1.0, 0.0 }  // 右上角
+        { xpos - w / 2,     ypos + h,   0.0, 0.0 }, // 左上角
+        { xpos + w / 2, ypos,       1.0, 1.0 }, // 右下角
+        { xpos + w / 2, ypos + h,   1.0, 0.0 }  // 右上角
     };
     glActiveTexture(GL_TEXTURE0);
     texture.Bind();
