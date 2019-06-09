@@ -201,7 +201,7 @@ void SceneGame::Start() {
         glm::vec3(0, 5, 0),
     };
 
-    renderer->SetLight(glm::vec3(1.0f, -1.0f, 1.0f));
+    renderer->SetLight(glm::vec3(0.5f, -0.3f, 0.4f));
     renderer->ClearPointLight();
     renderer->AddPointLight(glm::vec3(5, 0, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 40);
     renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 40);
