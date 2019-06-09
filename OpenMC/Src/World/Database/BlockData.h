@@ -39,9 +39,9 @@ enum class BlockId : uint8_t {
 enum class BlockType : uint8_t {
     None = 0,           // 无实体
     Liquid = 1,         // 液体
-    Soild = 2,          // 固体
+    Solid = 2,          // 固体
     Face = 3,           // 单面
-    TransSoild = 4,     // 透明固体
+    TransSolid = 4,     // 透明固体
     TransFace = 5,      // 透明单面
 };
 

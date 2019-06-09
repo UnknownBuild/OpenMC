@@ -1,10 +1,11 @@
 ﻿#pragma once
-
 #include "../ResourceManager/ResourceManager.h"
 #include "../World/Database/BlockManager.h"
 #include "../Helpers/EnvPath.h"
 #include "../Helpers/Singleton.h"
 #include <list>
+#define RENDER_SIZE 16
+#define OFFSET(x, y, z) (int)((x) * RENDER_SIZE * RENDER_SIZE + (y) * RENDER_SIZE + (z))
 
 struct PointList {
     int id;
@@ -29,14 +30,17 @@ struct BlockInst {
 
 struct BlockCell {
     BlockId id;
-    int light;
+    unsigned int light;
+    unsigned int blockIndex;
+    unsigned int posIndex;
 };
 
 // 渲染区块数据
 struct RenderRegionData {
-    list<BlockInst> blockData;
+    vector<BlockInst> blockData;
+    list<int> blockIndex;
     bool requireUpdate;
-    BlockCell* blocks;
+    BlockCell blocks[RENDER_SIZE * RENDER_SIZE * RENDER_SIZE];
 };
 
 
@@ -55,13 +59,16 @@ public:
         GLfloat rotate = 0.0f);
     // 渲染方块
     void DrawBlock(BlockId id, vector<glm::vec3>& position, int dir = 0);
-
+    // 更新光照
     void UpdateLight();
-
+    // 添加方块
     void DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
         RenderType type, const vector<glm::vec4>& position, int dir = 0, int iTexture = 0, Shader * shader = nullptr);
-
+    // 删除所有方块
     void ClearBlock();
+    // 删除指定位置方块
+    void RemoveBlock(glm::vec3 position);
+    // 渲染方块
     void RenderBlock(bool clear = true, Shader* shader = nullptr);
     // 渲染文本
     void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
@@ -75,7 +82,7 @@ public:
     // 设置参数
     void SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 viewPostion, glm::vec3 front);
     // 设置平行光源
-    void SetLight(glm::vec3 direction);
+    void SetLight(glm::vec3 direction, glm::vec3 strength = glm::vec3(0.3, 0.6, 0.2));
     // 添加点光源
     void AddPointLight(glm::vec3 pos, glm::vec3 a, glm::vec3 d, glm::vec3 s, float dis);
     // 清除点光源
@@ -120,10 +127,7 @@ private:
     unsigned int instanceVBO;
     unsigned int flatVBO;
 
-    std::list<BlockInst> renderData;
-    vector<BlockInst> lightBlock;
-
-    map<int, map<int, map<int, RenderRegionData>>> renderRegion;
+    map<int, map<int, map<int, RenderRegionData*>>> renderRegion;
 
     // 点光源
     PointList pointLight[10];
@@ -132,5 +136,4 @@ private:
     glm::vec3 viewPos;
     glm::vec3 viewFront;
 
-    const unsigned int RENDER_SIZE = 20;
 };

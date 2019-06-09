@@ -189,8 +189,8 @@ void SceneGame::Start() {
 
     renderer->SetLight(glm::vec3(1.0f, -1.0f, 1.0f));
     renderer->ClearPointLight();
-    renderer->AddPointLight(glm::vec3(5, 0, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
-    renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 100);
+    renderer->AddPointLight(glm::vec3(5, 0, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 40);
+    renderer->AddPointLight(glm::vec3(-3, 0, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 40);
 
     vector<glm::vec3> firePosition = { glm::vec3(-3, 0, 5) };
     // 渲染火
@@ -256,7 +256,7 @@ void SceneGame::Update() {
 
     camera->Update();
     renderer->SetWindowSize(size.Width, size.Height);
-    renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 100.0f),
+    renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 256.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
 
     // 渲染FPS

@@ -127,7 +127,7 @@
     "textures": ["*sea_lantern.png"],
     "colors": [],
     "animation": 5,
-    "light": 2
+    "light": 10
   },
   {
     "id": 13,
