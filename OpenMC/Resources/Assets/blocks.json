@@ -152,7 +152,7 @@
   {
     "id": 15,
     "name": "glass",
-    "type": 2,
+    "type": 4,
     "render": 12,
     "textures": ["glass.png"],
     "colors": [],
@@ -162,7 +162,7 @@
   {
     "id": 16,
     "name": "torch",
-    "type": 2,
+    "type": 0,
     "render": 5,
     "textures": ["torch.png"],
     "colors": [[1.0, 0.5, 0.2, 1.0]],

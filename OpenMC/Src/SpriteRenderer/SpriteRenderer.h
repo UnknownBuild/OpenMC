@@ -4,7 +4,7 @@
 #include "../Helpers/EnvPath.h"
 #include "../Helpers/Singleton.h"
 #include <list>
-#define RENDER_SIZE 16
+#define RENDER_SIZE 24
 #define OFFSET(x, y, z) (int)((x) * RENDER_SIZE * RENDER_SIZE + (y) * RENDER_SIZE + (z))
 
 struct PointList {
@@ -25,6 +25,13 @@ struct PointList {
 struct BlockInst {
     BlockData data;
     vector<glm::vec4> position;
+
+    vector<glm::vec4> aoTop;
+    vector<glm::vec4> aoBottom;    
+    vector<glm::vec4> aoLeft;
+    vector<glm::vec4> aoRight;
+    vector<glm::vec4> aoFront;
+    vector<glm::vec4> aoBack;
     int dir;
 };
 
@@ -63,7 +70,14 @@ public:
     void UpdateLight();
     // 添加方块
     void DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
-        RenderType type, const vector<glm::vec4>& position, int dir = 0, int iTexture = 0, Shader * shader = nullptr);
+        RenderType type, const vector<glm::vec4>& position,
+        const vector<glm::vec4>& aoTop,
+        const vector<glm::vec4>& aoBottom,
+        const vector<glm::vec4>& aoLeft,
+        const vector<glm::vec4>& aoRight,
+        const vector<glm::vec4>& aoFront,
+        const vector<glm::vec4>& aoBack,
+        int dir = 0, int iTexture = 0, Shader * shader = nullptr);
     // 删除所有方块
     void ClearBlock();
     // 删除指定位置方块

@@ -156,6 +156,13 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
         BlockInst& inst = regionInst[t.x][t.y][t.z];
         inst.position.push_back(glm::vec4(position, data.Light));
 
+        inst.aoTop.push_back(glm::vec4(1.0));
+        inst.aoBottom.push_back(glm::vec4(1.0));
+        inst.aoLeft.push_back(glm::vec4(1.0));
+        inst.aoRight.push_back(glm::vec4(1.0));
+        inst.aoFront.push_back(glm::vec4(1.0));
+        inst.aoBack.push_back(glm::vec4(1.0));
+
 
         RenderRegionData** region = &this->renderRegion[t.x][t.y][t.z];
         if (*region == nullptr) {
@@ -176,12 +183,145 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
                 int index = (*region)->blockData.size();
                 if (data.Type == BlockType::TransSolid || data.Type == BlockType::TransFace || data.Type == BlockType::Liquid) {
                     (*region)->blockIndex.push_back(index);
-                } else {
+                }
+                else {
                     (*region)->blockIndex.push_front(index);
                 }
+                int posIndex = -1;
                 for (auto& position : instZ.second.position) {
+                    posIndex++;
                     auto p = getRelaPostion(position);
                     (*region)->blocks[OFFSET(p.x, p.y, p.z)].blockIndex = index;
+                    // 计算AO
+                    if (false) {
+
+                        float aoValue = 0.3;
+                        if (p.y > 0) {
+                            if (p.x > 0) {
+                                auto blockId = (*region)->blocks[OFFSET(p.x - 1, p.y - 1, p.z)].id;
+                                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                                if (data.Type == BlockType::Solid) {
+                                    instZ.second.aoLeft[posIndex][0] *= aoValue;
+                                    instZ.second.aoLeft[posIndex][3] *= aoValue;
+                                    instZ.second.aoBottom[posIndex][2] *= aoValue;
+                                    instZ.second.aoBottom[posIndex][3] *= aoValue;
+                                }
+                            }
+                            if (p.x < RENDER_SIZE - 1) {
+                                auto blockId = (*region)->blocks[OFFSET(p.x + 1, p.y - 1, p.z)].id;
+                                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                                if (data.Type == BlockType::Solid) {
+                                    instZ.second.aoRight[posIndex][0] *= aoValue;
+                                    instZ.second.aoRight[posIndex][3] *= aoValue;
+                                    instZ.second.aoBottom[posIndex][0] *= aoValue;
+                                    instZ.second.aoBottom[posIndex][1] *= aoValue;
+                                }
+                            }
+                            if (p.z > 0) {
+                                auto blockId = (*region)->blocks[OFFSET(p.x, p.y - 1, p.z - 1)].id;
+                                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                                if (data.Type == BlockType::Solid) {
+                                    instZ.second.aoBack[posIndex][0] *= aoValue;
+                                    instZ.second.aoBack[posIndex][3] *= aoValue;
+                                    instZ.second.aoBottom[posIndex][0] *= aoValue;
+                                    instZ.second.aoBottom[posIndex][3] *= aoValue;
+                                }
+                            }
+                            if (p.z < RENDER_SIZE - 1) {
+                                auto blockId = (*region)->blocks[OFFSET(p.x, p.y - 1, p.z + 1)].id;
+                                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                                if (data.Type == BlockType::Solid) {
+                                    instZ.second.aoFront[posIndex][0] *= aoValue;
+                                    instZ.second.aoFront[posIndex][3] *= aoValue;
+                                    instZ.second.aoBottom[posIndex][1] *= aoValue;
+                                    instZ.second.aoBottom[posIndex][2] *= aoValue;
+                                }
+                            }
+                        }
+                        if (p.x > 0 && p.z > 0) {
+                            auto blockId = (*region)->blocks[OFFSET(p.x - 1, p.y, p.z - 1)].id;
+                            BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                            if (data.Type == BlockType::Solid) {
+                                instZ.second.aoBack[posIndex][0] *= aoValue;
+                                instZ.second.aoBack[posIndex][1] *= aoValue;
+                                instZ.second.aoLeft[posIndex][2] *= aoValue;
+                                instZ.second.aoLeft[posIndex][3] *= aoValue;
+                            }
+                        }
+                        if (p.x < RENDER_SIZE - 1 && p.z > 0) {
+                            auto blockId = (*region)->blocks[OFFSET(p.x + 1, p.y, p.z - 1)].id;
+                            BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                            if (data.Type == BlockType::Solid) {
+                                instZ.second.aoBack[posIndex][2] *= aoValue;
+                                instZ.second.aoBack[posIndex][3] *= aoValue;
+                                instZ.second.aoRight[posIndex][0] *= aoValue;
+                                instZ.second.aoRight[posIndex][1] *= aoValue;
+                            }
+                        }
+                        if (p.z < RENDER_SIZE - 1 && p.x > 0) {
+                            auto blockId = (*region)->blocks[OFFSET(p.x - 1, p.y, p.z + 1)].id;
+                            BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                            if (data.Type == BlockType::Solid) {
+                                instZ.second.aoFront[posIndex][2] *= aoValue;
+                                instZ.second.aoFront[posIndex][3] *= aoValue;
+                                instZ.second.aoLeft[posIndex][0] *= aoValue;
+                                instZ.second.aoLeft[posIndex][1] *= aoValue;
+                            }
+                        }
+                        if (p.z < RENDER_SIZE - 1 && p.x < RENDER_SIZE - 1) {
+                            auto blockId = (*region)->blocks[OFFSET(p.x + 1, p.y, p.z + 1)].id;
+                            BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                            if (data.Type == BlockType::Solid) {
+                                instZ.second.aoFront[posIndex][0] *= aoValue;
+                                instZ.second.aoFront[posIndex][1] *= aoValue;
+                                instZ.second.aoRight[posIndex][2] *= aoValue;
+                                instZ.second.aoRight[posIndex][3] *= aoValue;
+                            }
+                        }
+
+                        if (p.y < RENDER_SIZE - 1) {
+                            if (p.x > 0) {
+                                auto blockId = (*region)->blocks[OFFSET(p.x - 1, p.y + 1, p.z)].id;
+                                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                                if (data.Type == BlockType::Solid) {
+                                    instZ.second.aoLeft[posIndex][1] *= aoValue;
+                                    instZ.second.aoLeft[posIndex][2] *= aoValue;
+                                    instZ.second.aoTop[posIndex][2] *= aoValue;
+                                    instZ.second.aoTop[posIndex][3] *= aoValue;
+                                }
+                            }
+                            if (p.x < RENDER_SIZE - 1) {
+                                auto blockId = (*region)->blocks[OFFSET(p.x + 1, p.y + 1, p.z)].id;
+                                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                                if (data.Type == BlockType::Solid) {
+                                    instZ.second.aoRight[posIndex][1] *= aoValue;
+                                    instZ.second.aoRight[posIndex][2] *= aoValue;
+                                    instZ.second.aoTop[posIndex][0] *= aoValue;
+                                    instZ.second.aoTop[posIndex][1] *= aoValue;
+                                }
+                            }
+                            if (p.z > 0) {
+                                auto blockId = (*region)->blocks[OFFSET(p.x, p.y + 1, p.z - 1)].id;
+                                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                                if (data.Type == BlockType::Solid) {
+                                    instZ.second.aoBack[posIndex][1] *= aoValue;
+                                    instZ.second.aoBack[posIndex][2] *= aoValue;
+                                    instZ.second.aoTop[posIndex][1] *= aoValue;
+                                    instZ.second.aoTop[posIndex][2] *= aoValue;
+                                }
+                            }
+                            if (p.z < RENDER_SIZE - 1) {
+                                auto blockId = (*region)->blocks[OFFSET(p.x, p.y + 1, p.z + 1)].id;
+                                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
+                                if (data.Type == BlockType::Solid) {
+                                    instZ.second.aoFront[posIndex][1] *= aoValue;
+                                    instZ.second.aoFront[posIndex][2] *= aoValue;
+                                    instZ.second.aoTop[posIndex][0] *= aoValue;
+                                    instZ.second.aoTop[posIndex][3] *= aoValue;
+                                }
+                            }
+                        }
+                    }
                 }
                 (*region)->blockData.push_back(instZ.second);
             }
@@ -208,9 +348,11 @@ void SpriteRenderer::UpdateLight() {
                             uint8_t lightValue = (y == RENDER_SIZE - 1) ? 15 : (region->blocks[OFFSET(x, y + 1, z)].light);
                             if (data.Type == BlockType::None) {
                                 region->blocks[OFFSET(x, y, z)].light = lightValue;
-                            } else if (data.Type == BlockType::Face || data.Type == BlockType::TransFace || data.Type == BlockType::TransSolid) {
+                            }
+                            else if (data.Type == BlockType::Face || data.Type == BlockType::TransFace || data.Type == BlockType::TransSolid) {
                                 region->blocks[OFFSET(x, y, z)].light = lightValue - 1;
-                            } else {
+                            }
+                            else {
                                 region->blocks[OFFSET(x, y, z)].light = lightValue - 1;
                                 break;
                             }
@@ -399,41 +541,41 @@ void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
     bool fz = this->viewFront.z < 0;
 
     if (fx) traverseMap<XIterator::iterator>(this->renderRegion.begin(), this->renderRegion.end(), [&](XIterator::iterator ix) {
-                if (fy) traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
-                            if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
-                                        if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
-                                        });
-                            else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
-                                        if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
-                                        });
-                            });
-                else    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
-                            if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
-                                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
-                                });
-                            else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
-                                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
-                                });
-                            });
+        if (fy) traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+            if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
                 });
-    else    traverseMap<XIterator::reverse_iterator>(this->renderRegion.rbegin(), this->renderRegion.rend(), [&](XIterator::reverse_iterator ix) {
-            if (fy) traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
-                if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
-                    if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
-                    });
-                else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
-                    if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
-                    });
-                });
-            else    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
-                if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
-                    if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
-                    });
-                else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
-                    if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
-                    });
+            else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
                 });
             });
+        else    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+            if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                });
+            else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                });
+            });
+        });
+    else    traverseMap<XIterator::reverse_iterator>(this->renderRegion.rbegin(), this->renderRegion.rend(), [&](XIterator::reverse_iterator ix) {
+        if (fy) traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+            if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                });
+            else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                });
+            });
+        else    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+            if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                });
+            else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                });
+            });
+        });
 
     if (clear) {
         this->ClearBlock();
@@ -448,7 +590,14 @@ void SpriteRenderer::renderBlock(RenderRegionData region, Shader* shader) {
         if (block->data.Animation != 0) {
             frame = (this->renderFrame / block->data.Animation) % block->data.Textures.size();
         }
-        this->DrawBlock(block->data.Textures, block->data.Colors, block->data.Render, block->position, block->dir, frame, shader);
+        this->DrawBlock(block->data.Textures, block->data.Colors, block->data.Render, block->position,
+            block->aoTop,
+            block->aoBottom,
+            block->aoLeft,
+            block->aoRight,
+            block->aoFront,
+            block->aoBack,
+            block->dir, frame, shader);
     }
 }
 
@@ -517,7 +666,14 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
 
 // 通用渲染方法
 void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<glm::vec4>& colors,
-    RenderType type, const vector<glm::vec4>& position, int dir, int iTexture, Shader* shader) {
+    RenderType type, const vector<glm::vec4>& position,
+    const vector<glm::vec4>& aoTop,
+    const vector<glm::vec4>& aoBottom,
+    const vector<glm::vec4>& aoLeft,
+    const vector<glm::vec4>& aoRight,
+    const vector<glm::vec4>& aoFront,
+    const vector<glm::vec4>& aoBack,
+    int dir, int iTexture, Shader* shader) {
     int count = position.size();
     if (count == 0) return;
     if (shader == nullptr) shader = this->blockShader;
@@ -527,8 +683,16 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     shader->SetInteger("hasColor", false);
     shader->SetInteger("material.diffuse", 0); // 漫反射贴图
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
+
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4) * count, &position[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 32768, sizeof(glm::vec4) * count, &aoTop[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 32768 * 2, sizeof(glm::vec4) * count, &aoBottom[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 32768 * 3, sizeof(glm::vec4) * count, &aoLeft[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 32768 * 4, sizeof(glm::vec4) * count, &aoRight[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 32768 * 5, sizeof(glm::vec4) * count, &aoFront[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 32768 * 6, sizeof(glm::vec4) * count, &aoBack[0]);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 
     vector<Texture2D> textures = _textures;
     if (iTexture != 0) {
@@ -852,35 +1016,35 @@ void SpriteRenderer::initRenderData() {
     // 实例化数组
     glGenBuffers(1, &instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 65536, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 32768 * 7, NULL, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     float verticesQuad[] = {
         // 正面
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
         -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
         // 后面
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 右下角
         -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 右上角
         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 左上角
         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 左下角
         // 左边
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
         -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
         -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
         // 右边
         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 右下角
         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 右上角
         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 左上角
         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 左下角
         // 下面
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // 左下角
         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // 右下角
         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // 右上角
         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // 左上角
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // 左下角
         // 上面
         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // 右下角
         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // 右上角
@@ -900,15 +1064,15 @@ void SpriteRenderer::initRenderData() {
     // 立方体/正面
     this->quadVAO = this->makeVAO(verticesQuad, sizeof(verticesQuad), indicesQuad, sizeof(indicesQuad));
     // 后面
-    this->backVAO = this->makeVAO(&verticesQuad[8 * 4 * 1], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
+    this->backVAO = this->makeVAO(verticesQuad, sizeof(verticesQuad), &indicesQuad[6 * 1], 6 * sizeof(unsigned int));
     // 左面
-    this->leftVAO = this->makeVAO(&verticesQuad[8 * 4 * 2], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
+    this->leftVAO = this->makeVAO(verticesQuad, sizeof(verticesQuad), &indicesQuad[6 * 2], 6 * sizeof(unsigned int));
     // 右面
-    this->rightVAO = this->makeVAO(&verticesQuad[8 * 4 * 3], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
+    this->rightVAO = this->makeVAO(verticesQuad, sizeof(verticesQuad), &indicesQuad[6 * 3], 6 * sizeof(unsigned int));
     // 底部
-    this->bottomVAO = this->makeVAO(&verticesQuad[8 * 4 * 4], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
+    this->bottomVAO = this->makeVAO(verticesQuad, sizeof(verticesQuad), &indicesQuad[6 * 4], 6 * sizeof(unsigned int));
     // 顶部
-    this->topVAO = this->makeVAO(&verticesQuad[8 * 4 * 5], sizeof(float) * 8 * 4, indicesQuad, 6 * sizeof(unsigned int));
+    this->topVAO = this->makeVAO(verticesQuad, sizeof(verticesQuad), &indicesQuad[6 * 5], 6 * sizeof(unsigned int));
 
 
     // 中心交叉
@@ -1135,6 +1299,24 @@ unsigned int SpriteRenderer::makeVAO(float* vertices, int verticesLen, unsigned 
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)0);
     glVertexAttribDivisor(3, 1);
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)(sizeof(glm::vec4) * 32768));
+    glVertexAttribDivisor(4, 1);
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)(sizeof(glm::vec4) * 32768 * 2));
+    glVertexAttribDivisor(5, 1);
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)(sizeof(glm::vec4) * 32768 * 3));
+    glVertexAttribDivisor(6, 1);
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)(sizeof(glm::vec4) * 32768 * 4));
+    glVertexAttribDivisor(7, 1);
+    glEnableVertexAttribArray(8);
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)(sizeof(glm::vec4) * 32768 * 5));
+    glVertexAttribDivisor(8, 1);
+    glEnableVertexAttribArray(9);
+    glVertexAttribPointer(9, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)(sizeof(glm::vec4) * 32768 * 6));
+    glVertexAttribDivisor(9, 1);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

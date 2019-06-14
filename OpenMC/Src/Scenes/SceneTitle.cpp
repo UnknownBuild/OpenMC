@@ -134,7 +134,6 @@ void SceneTitle::Update() {
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 100.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
 
-
     // 渲染模型
     renderer->DrawSprite(ResourceManager::GetModel("duck"), glm::vec3(3, -0.5, 3), glm::vec3(2.0));
     renderer->DrawSprite(ResourceManager::GetModel("jjm2"), glm::vec3(4, -0.5, 4), glm::vec3(3.4), 3.14);

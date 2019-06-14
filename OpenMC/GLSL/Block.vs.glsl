@@ -4,6 +4,13 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec4 aOffset;
 
+layout (location = 4) in vec4 aoTop;
+layout (location = 5) in vec4 aoBottom;
+layout (location = 6) in vec4 aoLeft;
+layout (location = 7) in vec4 aoRight;
+layout (location = 8) in vec4 aoFront;
+layout (location = 9) in vec4 aoBack;
+
 #define NR_POINT_LIGHTS 20
 uniform mat4 model;
 uniform mat4 view;
@@ -107,4 +114,24 @@ void main() {
     // float dy = position.y - viewPos.y;
     // float dx = distance(position.xz, viewPos.xz);
     // fogHeight = (atan(dy, dx) + pi / 2) / pi;
+
+    if (gl_VertexID >= 0 && gl_VertexID < 4) {
+        lightColor = vec4(lightColor.xyz * aoFront[gl_VertexID % 4] ,lightColor.a);
+    }
+    if (gl_VertexID >= 4 && gl_VertexID < 8) {
+        lightColor = vec4(lightColor.xyz * aoBack[gl_VertexID % 4] ,lightColor.a);
+    }
+    if (gl_VertexID >= 8 && gl_VertexID < 12) {
+        lightColor = vec4(lightColor.xyz * aoLeft[gl_VertexID % 4] ,lightColor.a);
+    }
+    if (gl_VertexID >= 12 && gl_VertexID < 16) {
+        lightColor = vec4(lightColor.xyz * aoRight[gl_VertexID % 4] ,lightColor.a);
+    }
+    if (gl_VertexID >= 16 && gl_VertexID < 20) {
+        lightColor = vec4(lightColor.xyz * aoBottom[gl_VertexID % 4] ,lightColor.a);
+    }
+    if (gl_VertexID >= 20 && gl_VertexID < 24) {
+        lightColor = vec4(lightColor.xyz * aoTop[gl_VertexID % 4] ,lightColor.a);
+    }
+
 }
