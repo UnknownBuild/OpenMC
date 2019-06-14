@@ -22,6 +22,10 @@ void SceneTitle::Start() {
     renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
     // 初始化资源
     ResourceManager::LoadTexture(EnvPath::GameTitleImage, "title");
+
+    ResourceManager::LoadModel("Resources/Models/Duck/duck.obj", "duck");
+    ResourceManager::LoadModel("Resources/Models/JJMonster2/jj2.obj", "jjm2");
+
     initBlocks();
 }
 
@@ -129,6 +133,11 @@ void SceneTitle::Update() {
     renderer->SetWindowSize(size.Width, size.Height);
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 100.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
+
+
+    // 渲染模型
+    renderer->DrawSprite(ResourceManager::GetModel("duck"), glm::vec3(3, -0.5, 3), glm::vec3(2.0));
+    renderer->DrawSprite(ResourceManager::GetModel("jjm2"), glm::vec3(4, -0.5, 4), glm::vec3(3.4), 3.14);
 
     // 渲染FPS
     renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);

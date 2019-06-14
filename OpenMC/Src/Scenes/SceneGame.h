@@ -14,5 +14,5 @@ private:
     Camera* camera;
 
     // test
-    glm::vec3 testColor = glm::vec3(0.5, 0.5, 0.5);
+    glm::vec3 testColor = glm::vec3(2, 2, 2);
 };

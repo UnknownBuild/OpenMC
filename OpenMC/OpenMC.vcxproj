@@ -244,6 +244,8 @@
     <None Include="GLSL\Block.fs.glsl" />
     <None Include="GLSL\Block.gs.glsl" />
     <None Include="GLSL\Block.vs.glsl" />
+    <None Include="GLSL\Depth.fs.glsl" />
+    <None Include="GLSL\Depth.vs.glsl" />
     <None Include="GLSL\GBuffer.fs.glsl" />
     <None Include="GLSL\GBuffer.vs.glsl" />
     <None Include="GLSL\Object.fs.glsl" />

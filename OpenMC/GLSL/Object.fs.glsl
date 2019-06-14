@@ -28,7 +28,7 @@ struct DirLight {
     vec3 specular;
 };
 
-#define NR_POINT_LIGHTS 10
+#define NR_POINT_LIGHTS 20
 
 in vec2 TexCoords;
 in vec3 Normal;

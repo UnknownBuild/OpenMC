@@ -19,6 +19,8 @@ SpriteRenderer::SpriteRenderer() {
         "GLSL/Object.fs.glsl", "object");
     this->blockShader = &ResourceManager::LoadShader("GLSL/Block.vs.glsl",
         "GLSL/Block.fs.glsl", "block");
+    this->blockShadowShader = &ResourceManager::LoadShader("GLSL/Block.vs.glsl",
+        "GLSL/Block.fs.glsl", "block");
     this->flatShader = &ResourceManager::LoadShader("GLSL/2D.vs.glsl",
         "GLSL/2D.fs.glsl", "flat");
     this->fontShader = &ResourceManager::LoadShader("GLSL/Font.vs.glsl",
@@ -29,6 +31,8 @@ SpriteRenderer::SpriteRenderer() {
         "GLSL/GBuffer.fs.glsl", "GBuffer");
     this->SsaoBlurShader = &ResourceManager::LoadShader("GLSL/Ssao.vs.glsl",
         "GLSL/SsaoBlur.fs.glsl", "SSAOBlur");
+    this->DepthShader = &ResourceManager::LoadShader("GLSL/Depth.vs.glsl",
+        "GLSL/Depth.fs.glsl", "depth");
 
     this->SsaoBlurShader->Use().SetInteger("ssaoInput", 0);
 
@@ -60,6 +64,36 @@ SpriteRenderer::SpriteRenderer() {
 
     };
     this->skyBox = &ResourceManager::LoadTexture(faces, "skybox");
+
+
+    // 阴影 创建2D纹理
+    glGenFramebuffers(1, &depthMapFBO);
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    // 绑定深度缓冲
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    this->depthProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
+    glm::vec3 lightPos = glm::vec3(0, 10, 2);
+    glm::mat4 depthView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    this->DepthShader->Use();
+    this->DepthShader->SetMatrix4("view", depthView);
+    this->DepthShader->SetMatrix4("projection", depthProjection);
+    this->lightSpaceMatrix = depthProjection * depthView;
+    // this->blockShader->Use().SetVector3f("lightPos", lightPos);
 }
 
 
@@ -328,6 +362,33 @@ bool SpriteRenderer::isVisable(float x, float y, float z) {
     // 抛弃视锥之外
     return viewCos > 0.8;
 }
+
+
+void SpriteRenderer::RenderBlockWithShadow(bool clear, Shader* shader) {
+    glEnable(GL_DEPTH_TEST);
+    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_FRONT);
+    // 绘制阴影
+    this->RenderBlock(false, this->DepthShader);
+    glCullFace(GL_BACK);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // 重置视口
+    glViewport(0, 0, this->winWidth, this->winHeight);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // 绑定深度纹理
+    blockShader->Use();
+    glActiveTexture(GL_TEXTURE31);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    blockShader->SetMatrix4("lightSpaceMatrix", lightSpaceMatrix); // 光照变换
+    blockShader->SetInteger("shadowMap", 31); // 阴影深度图
+
+    this->RenderBlock(clear, shader);
+}
+
 void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
     this->renderFrame++;
     // 从远处开始渲染， 只渲染视角范围内的
@@ -382,12 +443,12 @@ void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
 
 void SpriteRenderer::renderBlock(RenderRegionData region, Shader* shader) {
     for (auto index : region.blockIndex) {
-        auto block = region.blockData[index];
+        auto block = &region.blockData[index];
         int frame = 0;
-        if (block.data.Animation != 0) {
-            frame = (this->renderFrame / block.data.Animation) % block.data.Textures.size();
+        if (block->data.Animation != 0) {
+            frame = (this->renderFrame / block->data.Animation) % block->data.Textures.size();
         }
-        this->DrawBlock(block.data.Textures, block.data.Colors, block.data.Render, block.position, block.dir, frame, shader);
+        this->DrawBlock(block->data.Textures, block->data.Colors, block->data.Render, block->position, block->dir, frame, shader);
     }
 }
 
@@ -409,6 +470,12 @@ void SpriteRenderer::SetLight(glm::vec3 direction, glm::vec3 strength) {
     this->GBufferShader->SetVector3f("dirLight.ambient", glm::vec3(strength.x));
     this->GBufferShader->SetVector3f("dirLight.diffuse", glm::vec3(strength.y));
     this->GBufferShader->SetVector3f("dirLight.specular", glm::vec3(strength.z));
+
+    this->objectShader->Use();
+    this->objectShader->SetVector3f("dirLight.direction", direction);
+    this->objectShader->SetVector3f("dirLight.ambient", glm::vec3(strength.x));
+    this->objectShader->SetVector3f("dirLight.diffuse", glm::vec3(strength.y));
+    this->objectShader->SetVector3f("dirLight.specular", glm::vec3(strength.z));
 }
 
 // 设置视图
@@ -417,6 +484,11 @@ void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 vie
     this->blockShader->SetMatrix4("projection", projection);
     this->blockShader->SetMatrix4("view", view);
     this->blockShader->SetVector3f("viewPos", viewPostion);
+
+    this->objectShader->Use();
+    this->objectShader->SetMatrix4("projection", projection);
+    this->objectShader->SetMatrix4("view", view);
+    this->objectShader->SetVector3f("viewPos", viewPostion);
 
     this->GBufferShader->Use();
     this->GBufferShader->SetMatrix4("projection", projection);
@@ -438,6 +510,8 @@ void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 vie
 void SpriteRenderer::SetWindowSize(int w, int h) {
     this->flatShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
     this->fontShader->Use().SetMatrix4("projection", glm::ortho(0.0f, (float)w, 0.0f, (float)h));
+    this->winHeight = h;
+    this->winWidth = w;
 }
 
 
@@ -762,15 +836,16 @@ void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec3 position, glm::vec
 
 // 渲染模型
 void SpriteRenderer::DrawSprite(Model& modelObj, glm::vec3 position, glm::vec3 size, GLfloat rotate) {
-    //this->objectShader->Use();
+    glDisable(GL_CULL_FACE);
+    this->objectShader->Use();
 
-    //glm::mat4 model = glm::mat4(1.0f);
-    //model = glm::translate(model, position);
-    //model = glm::rotate(model, rotate, glm::vec3(0.0f, 1.0f, 0.0f));
-    //model = glm::scale(model, size);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, position);
+    model = glm::rotate(model, rotate, glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::scale(model, size);
 
-    //this->objectShader->SetMatrix4("model", model);
-    //modelObj.Draw(this->objectShader);
+    this->objectShader->SetMatrix4("model", model);
+    modelObj.Draw(this->objectShader);
 }
 
 void SpriteRenderer::initRenderData() {
@@ -1172,14 +1247,32 @@ void SpriteRenderer::AddPointLight(glm::vec3 pos, glm::vec3 a, glm::vec3 d, glm:
     this->GBufferShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].specular").c_str(),
         this->pointLight[this->pointCount].specular);
 
+    this->objectShader->Use();
+    this->objectShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].constant").c_str(),
+        this->pointLight[this->pointCount].constant);
+    this->objectShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].linear").c_str(),
+        this->pointLight[this->pointCount].linear);
+    this->objectShader->SetFloat(("pointLights[" + to_string(this->pointCount) + "].quadratic").c_str(),
+        this->pointLight[this->pointCount].quadratic);
+    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].position").c_str(),
+        this->pointLight[this->pointCount].position);
+    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].ambient").c_str(),
+        this->pointLight[this->pointCount].ambient);
+    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].diffuse").c_str(),
+        this->pointLight[this->pointCount].diffuse);
+    this->objectShader->SetVector3f(("pointLights[" + to_string(this->pointCount) + "].specular").c_str(),
+        this->pointLight[this->pointCount].specular);
+
     this->pointCount++;
     this->blockShader->SetInteger("pointCount", this->pointCount, true);
+    this->objectShader->SetInteger("pointCount", this->pointCount, true);
     this->GBufferShader->SetInteger("pointCount", this->pointCount, true);
 }
 // 清除点光源
 void SpriteRenderer::ClearPointLight() {
     this->pointCount = 0;
     this->blockShader->SetInteger("pointCount", this->pointCount);
+    this->objectShader->SetInteger("pointCount", this->pointCount);
     this->GBufferShader->SetInteger("pointCount", this->pointCount);
 }
 // 渲染天空盒

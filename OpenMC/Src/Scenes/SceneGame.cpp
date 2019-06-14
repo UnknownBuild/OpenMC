@@ -221,7 +221,7 @@ void SceneGame::Start() {
     renderer->DrawBlock(BlockId::SeaLantern, sea_lanternPosition);
     // 渲染圆石
     renderer->DrawBlock(BlockId::Stone, stonePosition);
-    renderer->DrawBlock(BlockId::Stone, stones);
+    // renderer->DrawBlock(BlockId::Stone, stones);
     // 渲染煤
     renderer->DrawBlock(BlockId::Dirt, dirtPosition);
     // 渲染鹅卵石
@@ -264,6 +264,8 @@ void SceneGame::Start() {
     renderer->DrawBlock(BlockId::Beetroot, beetrootPostion, 0);
     // 更新光照
     renderer->UpdateLight();
+
+    // glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
 void SceneGame::Update() {
@@ -284,9 +286,9 @@ void SceneGame::Update() {
 
     {
         ImGui::Begin("Application", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::SliderFloat("testColorX", &testColor.x, 0, 1);
-        ImGui::SliderFloat("testColorY", &testColor.y, 0, 1);
-        ImGui::SliderFloat("testColorZ", &testColor.z, 0, 1);
+        ImGui::SliderFloat("testColorX", &testColor.x, 1, 5);
+        ImGui::SliderFloat("testColorY", &testColor.y, 1, 5);
+        ImGui::SliderFloat("testColorZ", &testColor.z, 1, 5);
         ImGui::End();
     }
 }

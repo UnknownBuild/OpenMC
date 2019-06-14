@@ -70,6 +70,8 @@ public:
     void RemoveBlock(glm::vec3 position);
     // 渲染方块
     void RenderBlock(bool clear = true, Shader* shader = nullptr);
+
+    void RenderBlockWithShadow(bool clear = true, Shader* shader = nullptr);
     // 渲染文本
     void RenderText(std::string text, glm::vec2 postion, GLfloat scale = 1.0,
         glm::vec4 color = glm::vec4(1));
@@ -94,13 +96,16 @@ public:
     Shader* SsaoShader;
     Shader* SsaoBlurShader;
     Shader* SsaoLightShader;
+    Shader* DepthShader;
+    Shader* blockShadowShader;
 private:
     void initRenderData();
     unsigned int makeVAO(float* vertices, int verticesLen, unsigned int* indices, int indicesLen);
     unsigned int renderFrame;
     bool isVisable(float x, float y, float z);
     void renderBlock(RenderRegionData region, Shader* shader);
-
+    int winHeight;
+    int winWidth;
 
     // 着色器
     Shader* objectShader;
@@ -136,4 +141,10 @@ private:
     glm::vec3 viewPos;
     glm::vec3 viewFront;
 
+    unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
+    unsigned int depthMapFBO;
+    unsigned int depthMap;
+
+    glm::mat4 depthProjection;
+    glm::mat4 lightSpaceMatrix;
 };

@@ -249,5 +249,11 @@
     <None Include="GLSL\SsaoLight.fs.glsl">
       <Filter>GLSL</Filter>
     </None>
+    <None Include="GLSL\Depth.fs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\Depth.vs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>
