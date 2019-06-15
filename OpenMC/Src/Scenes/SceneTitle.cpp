@@ -142,7 +142,7 @@ void SceneTitle::Update() {
     renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);
 
     // 渲染标题
-    renderer->DrawTexture(ResourceManager::GetTexture("title"), glm::vec2(size.Width / 2 - 200, size.Height - 150), 2.0f);
+    renderer->DrawTexture(ResourceManager::GetTexture("title"), glm::vec2(size.Width / 2, size.Height - 150), 2.0f);
     // 渲染菜单
     renderer->RenderText("Start", glm::vec2(50, 250), 1.0f, menuItem == MenuStart ? YELLOW : WHITE);
     renderer->RenderText("Load", glm::vec2(50, 200), 1.0f, menuItem == MenuLoad ? YELLOW : WHITE);
