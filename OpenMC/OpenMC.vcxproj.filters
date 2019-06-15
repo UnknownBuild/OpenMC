@@ -255,5 +255,11 @@
     <None Include="GLSL\Depth.vs.glsl">
       <Filter>GLSL</Filter>
     </None>
+    <None Include="GLSL\Font.fs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
+    <None Include="GLSL\Font.vs.glsl">
+      <Filter>GLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

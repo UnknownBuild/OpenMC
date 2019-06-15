@@ -11,6 +11,5 @@ public:
     BlockData GetBlockData(BlockId id);
 
 private:
-
     BlockData blocks[256];
 };
