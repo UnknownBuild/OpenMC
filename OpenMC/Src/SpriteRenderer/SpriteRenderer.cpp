@@ -194,7 +194,6 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
                     (*region)->blocks[OFFSET(p.x, p.y, p.z)].blockIndex = index;
                     // 计算AO
                     if (false) {
-
                         float aoValue = 0.3;
                         if (p.y > 0) {
                             if (p.x > 0) {
