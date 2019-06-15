@@ -161,7 +161,7 @@ struct PointLight {
 
 ![Snipaste_2019-06-02_13-26-17](Report/Snipaste_2019-06-02_13-26-17.jpg)
 
-实验发现这种方法带来的性能下降比较多，明显的一点是帧数大幅度下降了，而且其效果也一般般。
+实验发现这种方法带来的性能下降比较多，明显的一点是帧数大幅度下降了，而且其效果也一般般，某些地方还是不可以正确显示。
 
 然后，我们了解了我的世界中环境阴影的实现，实现了一种自定义的环境光遮蔽
 
@@ -523,7 +523,58 @@ glEnable(GL_MULTISAMPLE);
 
 选择性可视区块渲染
 
-// to write
+由于引入地图生成之后，在场景中可能回同时存在很多方块，可能会达到百万的数量级。如果对于所有方块都一一绘制，那样将会浪费很多带宽。因此，我们根据摄像机的位置，只渲染摄像机所看到的方块。
+
+首先，我们将地图空间分为若干个区块，每个区块中包含着$n\times n \times n$个方块。
+
+```c++
+// 获取区块索引
+glm::i32vec3 getRegionIndex(glm::vec3 pos) {
+    if (pos.x < 0) pos.x = pos.x - RENDER_SIZE;
+    if (pos.y < 0) pos.y = pos.y - RENDER_SIZE;
+    if (pos.z < 0) pos.z = pos.z - RENDER_SIZE;
+    return glm::i32vec3(pos) / glm::i32vec3(RENDER_SIZE);
+}
+
+// 获取区块中的位置
+glm::vec3 getRelaPostion(glm::vec3 pos) {
+    pos = glm::i32vec3(pos) % glm::i32vec3(RENDER_SIZE);
+    if (pos.x < 0) pos.x = RENDER_SIZE + pos.x;
+    if (pos.y < 0) pos.y = RENDER_SIZE + pos.y;
+    if (pos.z < 0) pos.z = RENDER_SIZE + pos.z;
+    return glm::vec3(pos);
+}
+```
+
+对于区块和方块之间的映射，我们设计两个函数，以原点为中心分割出固定大小的区块。
+
+使用三个Map的数据结构将地图数据存储起来
+
+`map<int, map<int, map<int, RenderRegionData*>>> renderRegion`
+
+然后就可以计算区块的可视性：
+
+```c++
+bool SpriteRenderer::isVisable(float x, float y, float z) {
+    x += this->viewFront.x * 3;
+    y += this->viewFront.y * 3;
+    z += this->viewFront.z * 3;
+    glm::vec3 regionPos = (glm::vec3(x, y, z)) * glm::vec3(RENDER_SIZE) - this->viewPos;
+    float regionDis = abs(regionPos.x) + abs(regionPos.y) + abs(regionPos.z);
+    // 抛弃远距离
+    if (regionDis > 450) return false;
+    glm::vec3 viewAngle = glm::normalize(regionPos) * this->viewFront;
+    float viewCos = viewAngle.x + viewAngle.y + viewAngle.z;
+    // 抛弃视锥之外
+    return viewCos > 0.8;
+}
+```
+
+由于传入的区块的位置是在中心点，如果直接按这个点进行计算，有可能造成摄像机过了这个中心点之后就判断这个区块不可见，因此需要把区块的中心点加上摄像机的方向的偏移，使得判断点在于摄像机视线中区块的最远处。
+
+![1560596752446](Report/1560596752446.png)
+
+然后计算摄像机和区块点的距离以及余弦值，将过远的区块抛弃，将摄像机的正方向和摄像机到区块点的余弦值，也就是视线的夹角大于一定值的区块抛弃。
 
 
 
@@ -531,23 +582,214 @@ glEnable(GL_MULTISAMPLE);
 
 实例化数组
 
-// to write
+在我的世界里面，存在大量重复的方块，如果一个个分别绘制的话，无疑会占用大量的带宽，每帧数十万的渲染函数调用会严重影响性能，因此使用了实例化数组来优化大量重复方块的场景。
 
+```c++
+glEnableVertexAttribArray(0);
+glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+glEnableVertexAttribArray(1);
+glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+glEnableVertexAttribArray(2);
+glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+// 实例化数组
+glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
+glEnableVertexAttribArray(3);
+glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)0);
+glVertexAttribDivisor(3, 1);
+```
 
+在定义立方体的顶点、法向量、纹理之后，附加一个实例化数组，用来传递方块的位置信息。
+
+实例化的核心就在于`glVertexAttribDivisor`，告诉了OpenGL如何更新实例化数组。
+
+在渲染的时候，一次性将所有的顶点位置都传递过去。
+
+```c++
+glBindBuffer(GL_ARRAY_BUFFER, this->instanceVBO);
+glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4) * count, &position[0]);
+glBindBuffer(GL_ARRAY_BUFFER, 0);
+```
+
+因为我们在外面还需要一些旋转或者缩放的操作，因此不能直接在顶点位置加上偏移，必须自己构建一个平移变换矩阵叠加到现有的变换之上：
+
+```clike
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoords;
+layout (location = 3) in vec4 aOffset;
+
+void main() {
+		mat4 offsetModel = mat4(1.0, 0.0, 0.0, 0.0,
+													0.0, 1.0, 0.0, 0.0,
+													0.0, 0.0, 1.0, 0.0,
+													aOffset.xyz, 1.0) * model;
+    vec4 position = offsetModel * vec4(aPos, 1.0);
+  	gl_Position = projection * view * position;
+}
+```
+
+使用实例化数组之后，即使同时渲染近十万的方块，性能也没有明显的下降，依旧十分流畅。
+
+![1560596920599](Report/1560596920599.png)
 
 ### Face Culling
 
 面剔除
 
-// to write
+在方块世界中，我们最多同时可以看到一个方块的三个面，因此有超过50%的面试不处于视图之内并且照样渲染了出来，因此需要使用面剔除来优化性能。
+
+在OpenGL中，我们可以将顶点按特定的顺序排列来使用面剔除
+
+![img](Report/faceculling_windingorder.png)
+
+简单来说，就是所有逆时针定义的三角形就会被处理为正向三角形，如上图的右边所示。
+
+因此，需要对立方体的VBO和VEO重新排布，使其满足这个需求
+
+```c++
+float verticesQuad[] = {
+  // 正面
+  0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 右下角
+  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 右上角
+  -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 左上角
+  -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 左下角
+  // 后面
+  // ...
+};
+
+unsigned int indicesQuad[] = {
+  0, 1, 2, 2, 3, 0,
+  4, 5, 6, 6, 7, 4,
+  8, 9, 10, 10, 11, 8,
+  12, 13, 14, 14, 15, 12,
+  16, 17, 18, 18, 19, 16,
+  20, 21, 22, 22, 23, 20
+};
+```
+
+在下面的效果图中可以看到，当我们走入仙人掌的内部的时候可以看到前面两个面就会处于背面状态是没有显示的。事实上，在游戏中我们也不会进入一个方块的内部，因此这两个面的渲染时不必要的。
+
+![face](Report/face.gif)
+
+但是对于一些透明方块来说，所有的面都需要渲染，这时候可以临时禁用面剔除
+
+```c++
+glDisable(GL_CULL_FACE);
+glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+glEnable(GL_CULL_FACE);
+```
 
 
 
 ### Blending
 
-混合
+混合是实现物体透明度的一种技术。
 
-// to write
+像树叶、草和花这种完全透明的方块，只需要将透明部分完全丢弃即可
+
+| 树叶                                                         | 草                                         | 花                                         |
+| ------------------------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
+| ![Snipaste_2019-06-15_19-32-56](Report/Snipaste_2019-06-15_19-32-56.jpg) | ![1560598402531](Report/1560598402531.png) | ![1560598451539](Report/1560598451539.png) |
+
+```clike
+if (objectColor.a < 0.1) {
+  discard;
+}
+```
+
+在着色器判断a通道的值将透明的直接丢弃。
+
+
+
+在我的世界中、水面、染色玻璃等物品都是具有透明度的方块，与完全透明的方块不同的是，透明度不能直接丢弃，必须叠加渲染
+
+| 染色玻璃                                                     | 水面                       |
+| ------------------------------------------------------------ | -------------------------- |
+| ![Snipaste_2019-06-14_21-51-08](Report/Snipaste_2019-06-14_21-51-08.jpg) | ![water](Report/water.gif) |
+
+使用`GL_BLEND`来启用混合
+
+```c++
+glEnable(GL_BLEND);
+glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+```
+
+混合按照以下的公式实现
+
+![1560598980402](Report/1560598980402.png)
+
+按照透明度，将两者的颜色叠加起来
+
+
+
+绘制半透明的有以下的原则：
+
+1. 先绘制所有不透明的物体。
+2. 对所有透明的物体排序。
+3. 按顺序绘制所有透明的物体。
+
+如果没有按照正确的顺序进行渲染，就会出现以下的结果：
+
+| 错误的渲染顺序                                               | 正确的渲染顺序                             |
+| ------------------------------------------------------------ | ------------------------------------------ |
+| ![Snipaste_2019-06-15_19-40-46](Report/Snipaste_2019-06-15_19-40-46.jpg) | ![1560598908377](Report/1560598908377.png) |
+
+但是在场景中排序物体是一个很困难的技术，我们这里使用了几个规则来保证了渲染的顺序
+
+
+
+首先在区块中，我们需要从远处的区块开始渲染，由于区块是 Map 结构，是存在顺序的
+
+`map<int, map<int, map<int, RenderRegionData*>>> renderRegion`
+
+因此只需要按照指定的顺序渲染区块即可
+
+```c++
+// 是否正向渲染
+bool fx = this->viewFront.x < 0;
+bool fy = this->viewFront.y < 0;
+bool fz = this->viewFront.z < 0;
+// 渲染区块
+```
+
+对于区块中的每个方块，我们采用了 `List` 的数据结构存储渲染顺序
+
+```c++
+// 渲染区块数据
+struct RenderRegionData {
+    vector<BlockInst> blockData;
+    list<int> blockIndex;
+    bool requireUpdate;
+    BlockCell blocks[RENDER_SIZE * RENDER_SIZE * RENDER_SIZE];
+};
+```
+
+在将方块放入渲染区块的时候，判断方块的渲染类型，如果是带有透明度的方块，则将其放到列表的后面，否则直接放入列表的前端。
+
+```c++
+RenderRegionData** region = &this->renderRegion[instX.first][instY.first][instZ.first];
+int index = (*region)->blockData.size();
+if (data.Type == BlockType::TransSolid || data.Type == BlockType::TransFace || data.Type == BlockType::Liquid) {
+	(*region)->blockIndex.push_back(index);
+} else {
+	(*region)->blockIndex.push_front(index);
+}
+```
+
+结合上面两种规则，可以最大限度地保证渲染顺序的正确性，但是对于多个透明方块的情况，还是不能正确显示。
+
+![1560599540878](Report/1560599540878.png)
+
+因此，对于方块中的位置，还需要根据当前摄像机的视线进行排序，从远到近进行渲染。
+
+```c++
+struct BlockInst {
+    BlockData data;
+    vector<glm::vec4> position;
+    int dir;
+};
+```
 
 
 
@@ -555,7 +797,22 @@ glEnable(GL_MULTISAMPLE);
 
 迷雾
 
-// to write
+在我的世界中，当我们看向远处的物体时，就会有一层迷雾，可以更真实地表示距离以及隐藏远处的方块
+
+![1560599654468](Report/1560599654468.png)
+
+具体的实现也不难，在顶点着色器中根据摄像机离方块的距离计算出浓雾的因子，将其缩放到0-1的范围内
+
+```clike
+float cameraDistance = distance(viewPos, vec3(position));
+fogFactor = 1 - pow(e, -pow(cameraDistance * 0.01, 2));
+```
+
+然后再片段着色器中使用`mix`将物体的实际颜色和雾的颜色进行混合即可。
+
+```clike
+ FragColor = mix(lightColor * objectColor, vec4(0.6, 0.8, 0.8, 1.0), fogFactor);
+```
 
 
 
@@ -571,8 +828,6 @@ glEnable(GL_MULTISAMPLE);
 
 // TODO
 
-
-
 ### Map System
 
 加载和存储地图
@@ -583,13 +838,13 @@ glEnable(GL_MULTISAMPLE);
 
 ## 遇到的问题和解决方案 
 
+遇到的问题和解决方法都在上面了。
 
+渲染部分主要是阴影、光照、混合以及超大数量的方块渲染。
 
 ## 小组成员分工
 
-
-
-
+陈荣真 - 负责渲染部分的工作
 
 
 
