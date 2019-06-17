@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "../Camera/Camera.h"
 #include "../SpriteRenderer/SpriteRenderer.h"
+#include "../World/World.h"
 #include "Scene.h"
 
 class SceneGame final : public Scene {
@@ -12,6 +13,7 @@ public:
 private:
     SpriteRenderer* renderer;
     Camera* camera;
+    World* world;
 
     // test
     glm::vec3 testColor = glm::vec3(2, 2, 2);

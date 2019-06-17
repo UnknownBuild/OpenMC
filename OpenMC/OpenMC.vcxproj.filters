@@ -98,6 +98,9 @@
     <ClCompile Include="Src\World\Map\MapManager.cpp">
       <Filter>Src\World\Map</Filter>
     </ClCompile>
+    <ClCompile Include="Src\World\World.cpp">
+      <Filter>Src\World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">
