@@ -6,12 +6,16 @@ void SceneGame::Start() {
     // 初始化输入层
     Input<0> * input = Singleton<Input<0>>::GetInstance();
     input->Clear();
+    Input<0>::OnCursorPosChanged += std::bind(&SceneGame::cursorPosCallback, this, std::placeholders::_1, std::placeholders::_2);
+    Input<0>::OnMouseButtonClick += std::bind(&SceneGame::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
+    // 初始化资源
+    ResourceManager::LoadTexture(EnvPath::FocusImage, "focus");
     // 初始化世界
     world = Singleton<World>::GetInstance();
     if (!world->Init("test")) {
@@ -262,6 +266,9 @@ void SceneGame::Start() {
     renderer->UpdateLight();
 
     // glEnable(GL_FRAMEBUFFER_SRGB);
+
+    lookingAt = camera->Front;
+    position = glm::vec3((int)camera->Position.x, (int)camera->Position.y, (int)camera->Position.z);
 }
 
 void SceneGame::Update() {
@@ -272,8 +279,22 @@ void SceneGame::Update() {
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 256.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
 
+    position = camera->Position;
+    lookingAt = camera->Front;
+
     // 渲染FPS
     renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);
+
+    std::stringstream ss;
+    ss << (int)this->lookingAt.x << ", " << (int)this->lookingAt.y << ", " << (int)this->lookingAt.z;
+    // 渲染Looking At
+    renderer->RenderText("looking: " + ss.str(), glm::vec2(size.Width - 400, size.Height - 20), 0.4);
+    std::stringstream ss2;
+    ss2 << (int)this->position.x << ", " << (int)this->position.y << ", " << (int)this->position.z;
+    renderer->RenderText("position: " + ss2.str(), glm::vec2(size.Width - 400, size.Height - 40), 0.4);
+
+    // 渲染准星
+    renderer->DrawTexture(ResourceManager::GetTexture("focus"), glm::vec2(size.Width / 2, size.Height / 2), 0.4f);
 
     // 渲染天空盒
     renderer->RenderSkyBox();
@@ -290,4 +311,17 @@ void SceneGame::Update() {
 }
 
 void SceneGame::Terminate() {
+}
+
+void SceneGame::cursorPosCallback(double xpos, double ypos) {
+    
+}
+
+void SceneGame::mouseButtonCallback(int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+
+    }
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+        renderer->RemoveBlock(position);
+    }
 }

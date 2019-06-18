@@ -10,10 +10,15 @@ public:
     virtual void Update() override;
     virtual void Terminate() override;
 
+    void cursorPosCallback(double xpos, double ypos);
+    void mouseButtonCallback(int button, int action, int mods);
 private:
     SpriteRenderer* renderer;
     Camera* camera;
     World* world;
+
+    glm::vec3 lookingAt;
+    glm::vec3 position;
 
     // test
     glm::vec3 testColor = glm::vec3(2, 2, 2);
