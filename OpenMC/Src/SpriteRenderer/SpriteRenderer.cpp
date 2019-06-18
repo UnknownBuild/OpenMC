@@ -619,36 +619,36 @@ void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
     if (fx) traverseMap<XIterator::iterator>(this->renderRegion.begin(), this->renderRegion.end(), [&](XIterator::iterator ix) {
         if (fy) traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
             if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
-                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
                 });
             else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
-                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
                 });
             });
         else    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
             if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
-                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
                 });
             else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
-                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
                 });
             });
         });
     else    traverseMap<XIterator::reverse_iterator>(this->renderRegion.rbegin(), this->renderRegion.rend(), [&](XIterator::reverse_iterator ix) {
         if (fy) traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
             if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
-                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
                 });
             else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
-                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
                 });
             });
         else    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
             if (fz) traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
-                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
                 });
             else    traverseMap<ZIterator::reverse_iterator>((*iy).second.rbegin(), (*iy).second.rend(), [&](ZIterator::reverse_iterator iz) {
-                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock(*(*iz).second, shader);
+                if (isVisable((*ix).first, (*iy).first, (*iz).first)) this->renderBlock((*iz).second, shader);
                 });
             });
         });
@@ -659,9 +659,10 @@ void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
 }
 
 
-void SpriteRenderer::renderBlock(RenderRegionData region, Shader* shader) {
-    for (auto index : region.blockIndex) {
-        auto block = &region.blockData[index];
+void SpriteRenderer::renderBlock(RenderRegionData* region, Shader* shader) {
+    if (region == nullptr) return;
+    for (auto index : region->blockIndex) {
+        auto block = &region->blockData[index];
         int frame = 0;
         if (block->data.Animation != 0) {
             frame = (this->renderFrame / block->data.Animation) % block->data.Textures.size();

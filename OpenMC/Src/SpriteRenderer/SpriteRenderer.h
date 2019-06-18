@@ -130,7 +130,7 @@ private:
     unsigned int makeVAO(float* vertices, int verticesLen, unsigned int* indices, int indicesLen);
     unsigned int renderFrame;
     bool isVisable(float x, float y, float z);
-    void renderBlock(RenderRegionData region, Shader* shader);
+    void renderBlock(RenderRegionData* region, Shader* shader);
     int winHeight;
     int winWidth;
 
