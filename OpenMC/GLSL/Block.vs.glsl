@@ -1,4 +1,4 @@
-#version 330 core
+﻿#version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
@@ -86,6 +86,8 @@ const float pi = 3.14159265;
 const float e = 2.71828182845904523536028747135266249;
 
 void main() {
+
+
 	mat4 offsetModel = mat4(1.0, 0.0, 0.0, 0.0,
 													0.0, 1.0, 0.0, 0.0,
 													0.0, 0.0, 1.0, 0.0,
@@ -100,38 +102,37 @@ void main() {
 	vec3 viewDir = normalize(viewPos - FragPos);
 
 	lightColor = CalcDirLight(dirLight, norm, viewDir);
-	// 计算点光源 增加 20% 的性能消耗
-	for (int i = 0; i < pointCount; i++) {
-		lightColor += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
-	}
-	// lightColor = vec4(lightColor.xyz * (aOffset.a / 15.0 + 0.2) ,lightColor.a);
-	lightColor = vec4(lightColor.xyz * (1.0) ,lightColor.a);
-
+	
     float cameraDistance = distance(viewPos, vec3(position));
-    // fogFactor = pow(clamp(cameraDistance / fogDistance, 0.0, 1.0), 4.0);
     fogFactor = 1 - pow(e, -pow(cameraDistance * 0.01, 2));
+    // 近距离光照阴影计算
+    if (cameraDistance < 100) {
 
-    // float dy = position.y - viewPos.y;
-    // float dx = distance(position.xz, viewPos.xz);
-    // fogHeight = (atan(dy, dx) + pi / 2) / pi;
+        // 计算点光源 增加 20% 的性能消耗
+        for (int i = 0; i < pointCount; i++) {
+            lightColor += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
+        }
+        // lightColor = vec4(lightColor.xyz * (aOffset.a / 15.0 + 0.2) ,lightColor.a);
+        // lightColor = vec4(lightColor.xyz * (1.0) ,lightColor.a);
 
-    if (gl_VertexID >= 0 && gl_VertexID < 4) {
-        lightColor = vec4(lightColor.xyz * aoFront[gl_VertexID % 4] ,lightColor.a);
-    }
-    if (gl_VertexID >= 4 && gl_VertexID < 8) {
-        lightColor = vec4(lightColor.xyz * aoBack[gl_VertexID % 4] ,lightColor.a);
-    }
-    if (gl_VertexID >= 8 && gl_VertexID < 12) {
-        lightColor = vec4(lightColor.xyz * aoLeft[gl_VertexID % 4] ,lightColor.a);
-    }
-    if (gl_VertexID >= 12 && gl_VertexID < 16) {
-        lightColor = vec4(lightColor.xyz * aoRight[gl_VertexID % 4] ,lightColor.a);
-    }
-    if (gl_VertexID >= 16 && gl_VertexID < 20) {
-        lightColor = vec4(lightColor.xyz * aoBottom[gl_VertexID % 4] ,lightColor.a);
-    }
-    if (gl_VertexID >= 20 && gl_VertexID < 24) {
-        lightColor = vec4(lightColor.xyz * aoTop[gl_VertexID % 4] ,lightColor.a);
-    }
 
+        if (gl_VertexID >= 0 && gl_VertexID < 4) {
+            lightColor = vec4(lightColor.xyz * aoFront[gl_VertexID % 4] ,lightColor.a);
+        }
+        if (gl_VertexID >= 4 && gl_VertexID < 8) {
+            lightColor = vec4(lightColor.xyz * aoBack[gl_VertexID % 4] ,lightColor.a);
+        }
+        if (gl_VertexID >= 8 && gl_VertexID < 12) {
+            lightColor = vec4(lightColor.xyz * aoLeft[gl_VertexID % 4] ,lightColor.a);
+        }
+        if (gl_VertexID >= 12 && gl_VertexID < 16) {
+            lightColor = vec4(lightColor.xyz * aoRight[gl_VertexID % 4] ,lightColor.a);
+        }
+        if (gl_VertexID >= 16 && gl_VertexID < 20) {
+            lightColor = vec4(lightColor.xyz * aoBottom[gl_VertexID % 4] ,lightColor.a);
+        }
+        if (gl_VertexID >= 20 && gl_VertexID < 24) {
+            lightColor = vec4(lightColor.xyz * aoTop[gl_VertexID % 4] ,lightColor.a);
+        }
+    }
 }
