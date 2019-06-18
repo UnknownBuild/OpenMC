@@ -64,7 +64,7 @@ public:
     // 渲染模型
     void DrawSprite(Model& model, glm::vec3 position,
         glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f),
-        GLfloat rotate = 0.0f);
+        GLfloat rotate = 0.0f, bool explode = false);
     // 添加方块
     void DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
         RenderType type, const vector<glm::vec4>& position,
@@ -143,6 +143,7 @@ private:
     Shader* flatShader;
     Shader* fontShader;
     Shader* lineShader;
+    // Shader* explodeObjectShader;
     // 纹理
     Texture2D* skyBox;
 

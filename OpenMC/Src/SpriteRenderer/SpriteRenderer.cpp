@@ -33,8 +33,8 @@ SpriteRenderer::SpriteRenderer() {
         "GLSL/SsaoBlur.fs.glsl", "SSAOBlur");
     this->DepthShader = &ResourceManager::LoadShader("GLSL/Depth.vs.glsl",
         "GLSL/Depth.fs.glsl", "depth");
-    //this->lineShader = &ResourceManager::LoadShader("GLSL/Line.vs.glsl",
-    //    "GLSL/Line.fs.glsl", "Line");
+    //this->explodeObjectShader = &ResourceManager::LoadShader("GLSL/Object.vs.glsl",
+    //    "GLSL/Object.fs.glsl", "Explode", "GLSL/Object.gs.glsl");
 
     this->SsaoBlurShader->Use().SetInteger("ssaoInput", 0);
 
@@ -721,6 +721,12 @@ void SpriteRenderer::SetLight(glm::vec3 direction, glm::vec3 strength) {
     this->objectShader->SetVector3f("dirLight.ambient", glm::vec3(strength.x));
     this->objectShader->SetVector3f("dirLight.diffuse", glm::vec3(strength.y));
     this->objectShader->SetVector3f("dirLight.specular", glm::vec3(strength.z));
+
+    //this->explodeObjectShader->Use();
+    //this->explodeObjectShader->SetVector3f("dirLight.direction", direction);
+    //this->explodeObjectShader->SetVector3f("dirLight.ambient", glm::vec3(strength.x));
+    //this->explodeObjectShader->SetVector3f("dirLight.diffuse", glm::vec3(strength.y));
+    //this->explodeObjectShader->SetVector3f("dirLight.specular", glm::vec3(strength.z));
 }
 
 // 设置视图
@@ -738,6 +744,11 @@ void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 vie
     this->objectShader->SetMatrix4("projection", projection);
     this->objectShader->SetMatrix4("view", view);
     this->objectShader->SetVector3f("viewPos", viewPostion);
+
+    //this->explodeObjectShader->Use();
+    //this->explodeObjectShader->SetMatrix4("projection", projection);
+    //this->explodeObjectShader->SetMatrix4("view", view);
+    //this->explodeObjectShader->SetVector3f("viewPos", viewPostion);
 
     this->GBufferShader->Use();
     this->GBufferShader->SetMatrix4("projection", projection);
@@ -813,7 +824,7 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     glm::mat4 model = glm::mat4(1.0);
     if (type == RenderType::Select) {
         type = RenderType::OneTexture;
-        model = glm::scale(model, glm::vec3(1.2));
+        model = glm::scale(model, glm::vec3(1.1));
         shader->SetMatrix4("model", model);
     }
     switch (type) {
@@ -1105,17 +1116,22 @@ void SpriteRenderer::DrawSprite(Texture2D& texture, glm::vec3 position, glm::vec
 }
 
 // 渲染模型
-void SpriteRenderer::DrawSprite(Model& modelObj, glm::vec3 position, glm::vec3 size, GLfloat rotate) {
+void SpriteRenderer::DrawSprite(Model& modelObj, glm::vec3 position, glm::vec3 size, GLfloat rotate, bool explode) {
     glDisable(GL_CULL_FACE);
-    this->objectShader->Use();
+    Shader* shader = this->objectShader;
+    //if (explode) {
+    //    shader = this->explodeObjectShader;
+    //}
+    shader->Use();
+    shader->SetFloat("time", glfwGetTime());
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model = glm::rotate(model, rotate, glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, size);
 
-    this->objectShader->SetMatrix4("model", model);
-    modelObj.Draw(this->objectShader);
+    shader->SetMatrix4("model", model);
+    modelObj.Draw(shader);
 }
 
 void SpriteRenderer::initRenderData() {
