@@ -2,6 +2,9 @@
 
 #include "SceneGame.h"
 
+glm::vec3 normal[6] = { glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), glm::vec3(-1, 0, 0),
+                        glm::vec3(1, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 0, -1) };
+
 void SceneGame::Start() {
     // 初始化输入层
     Input<0> * input = Singleton<Input<0>>::GetInstance();
@@ -279,8 +282,8 @@ void SceneGame::Update() {
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 256.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
 
-    position = camera->Position;
-    lookingAt = camera->Front;
+    position = glm::vec3((int)camera->Position.x, (int)camera->Position.y, (int)camera->Position.z);
+    lookingAt = caculateLookingAt();
 
     // 渲染FPS
     renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);
@@ -310,6 +313,34 @@ void SceneGame::Update() {
     }
 }
 
+glm::vec3 SceneGame::caculateLookingAt() {
+    glm::vec3 result = position;
+    for (int i = 0; i < 5; i++) {
+        result.x += camera->Front.x * 1.0;
+        result.y += camera->Front.y * 1.0;
+        result.z += camera->Front.z * 1.0;
+        BlockData block = renderer->GetBlock(glm::vec3((int)result.x, (int)result.y, (int)result.z));
+
+        if (block.Id != BlockId::Air) {
+            break;
+        }
+    }
+
+    result.x = (int)result.x;
+    result.y = (int)result.y;
+    result.z = (int)result.z;
+    return result;
+}
+
+glm::vec3 SceneGame::getNewBlockPosition() {
+    glm::vec3 result = position;
+
+    for (int i = 0; i < 6; i++) {
+
+    }
+    return result;
+}
+
 void SceneGame::Terminate() {
 }
 
@@ -322,6 +353,6 @@ void SceneGame::mouseButtonCallback(int button, int action, int mods) {
 
     }
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-        renderer->RemoveBlock(position);
+        renderer->RemoveBlock(lookingAt);
     }
 }

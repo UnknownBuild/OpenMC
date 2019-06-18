@@ -12,6 +12,9 @@ public:
 
     void cursorPosCallback(double xpos, double ypos);
     void mouseButtonCallback(int button, int action, int mods);
+    glm::vec3 caculateLookingAt();
+    glm::vec3 getNewBlockPosition();
+
 private:
     SpriteRenderer* renderer;
     Camera* camera;
