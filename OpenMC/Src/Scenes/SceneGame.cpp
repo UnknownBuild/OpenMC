@@ -390,6 +390,9 @@ void SceneGame::showBlockPicture() {
     case BlockId::OakPlanks:
         renderer->DrawTexture(ResourceManager::GetTexture("OakPlanks"), glm::vec2(size.Width - 180, 180), 0.5f);
         break;
+    case BlockId::OakLeaves:
+        renderer->DrawTexture(ResourceManager::GetTexture("OakLeaves"), glm::vec2(size.Width - 180, 180), 0.5f);
+        break;
     default:
         break;
     }
