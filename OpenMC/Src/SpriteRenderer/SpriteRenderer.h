@@ -115,7 +115,7 @@ public:
     // 更改渲染范围
     void SetWindowSize(int w, int h);
 
-    void SetShowBlock(glm::vec3 pos);
+    void SetShowBlock(glm::vec3 pos, int dir = 0);
 
     Shader* GBufferShader;
     Shader* SsaoShader;
@@ -179,5 +179,6 @@ private:
     glm::mat4 lightSpaceMatrix;
 
     glm::vec3 showBlock;
+    int showDir;
     bool enableShow = false;
 };

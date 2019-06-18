@@ -294,7 +294,7 @@ void SceneGame::Update() {
 
     position = glm::vec3((int)camera->Position.x, (int)camera->Position.y, (int)camera->Position.z);
     lookingAt = caculateLookingAt();
-    renderer->SetShowBlock(lookingAt);
+    renderer->SetShowBlock(lookingAt, 4);
 
     // 渲染FPS
     renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);

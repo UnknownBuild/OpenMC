@@ -308,8 +308,9 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
     }
 }
 
-void SpriteRenderer::SetShowBlock(glm::vec3 pos) {
+void SpriteRenderer::SetShowBlock(glm::vec3 pos, int dir) {
     this->enableShow = true;
+    this->showDir = dir;
     this->showBlock = pos;
 }
 
@@ -675,7 +676,7 @@ void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
             {glm::vec4(1.0)},
             {glm::vec4(1.0)},
             {glm::vec4(1.0)},
-            0, 0, nullptr);
+            this->showDir, 0, nullptr);
     }
 
     if (clear) {
@@ -828,12 +829,32 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     glActiveTexture(GL_TEXTURE0);
 
     glm::mat4 model = glm::mat4(1.0);
-    if (type == RenderType::Select) {
-        type = RenderType::OneTexture;
-        model = glm::scale(model, glm::vec3(1.1));
-        shader->SetMatrix4("model", model);
-    }
     switch (type) {
+    case RenderType::Select: // 选择指示器
+        model = glm::scale(model, glm::vec3(1.1));
+        textures[0].Bind();
+        // 指示面颜色
+        shader->SetInteger("hasColor", true);
+        shader->SetVector4f("material.color", colors[0]);
+        if (dir == 0) { // 上
+
+        } else if (dir == 1) { // 下
+            model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1, 0, 0));
+        } else { // 四周
+            model = glm::rotate(model, glm::radians(90.0f * (dir - 2)), glm::vec3(0, 1, 0));
+
+        }
+        shader->SetMatrix4("model", model);
+        glBindVertexArray(this->topVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        shader->SetVector4f("material.color", colors[1]);
+        glBindVertexArray(this->quadVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 24, GL_UNSIGNED_INT, 0, count);
+        glBindVertexArray(this->bottomVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, count);
+
+        break;
     case RenderType::OneTexture: // 单纹理方块
         if (colors.size() > 0) {
             shader->SetInteger("hasColor", true);
