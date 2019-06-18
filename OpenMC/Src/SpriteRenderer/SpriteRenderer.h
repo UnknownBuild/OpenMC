@@ -82,6 +82,9 @@ public:
     void ClearBlock();
     // 删除指定位置方块
     void RemoveBlock(glm::vec3 position);
+
+    // 获取指定位置方块信息 O(1)
+    BlockData GetBlock(glm::vec3 position);
     // 渲染方块
     void RenderBlock(bool clear = true, Shader* shader = nullptr);
 

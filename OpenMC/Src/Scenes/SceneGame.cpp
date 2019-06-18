@@ -256,6 +256,14 @@ void SceneGame::Start() {
     // 更新光照
     renderer->UpdateLight();
 
+
+    auto testBlock = renderer->GetBlock(glm::vec3(-3, 1, 5));
+
+    renderer->RemoveBlock(glm::vec3(-3, 1, 5));
+
+    testBlock = renderer->GetBlock(glm::vec3(-3, 1, 5));
+
+    renderer->RemoveBlock(glm::vec3(-3, 1, 5));
     // glEnable(GL_FRAMEBUFFER_SRGB);
 }
 

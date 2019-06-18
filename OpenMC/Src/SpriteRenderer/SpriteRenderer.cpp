@@ -118,6 +118,17 @@ glm::vec3 getRelaPostion(glm::vec3 pos) {
     return glm::vec3(pos);
 }
 
+BlockData SpriteRenderer::GetBlock(glm::vec3 position) {
+    BlockData block;
+    block.Id = BlockId::Air;
+    glm::i32vec3 t = getRegionIndex(position);
+    RenderRegionData* data = this->renderRegion[t.x][t.y][t.z];
+    if (data == nullptr) return block;
+    position = getRelaPostion(position);
+    auto cell = &data->blocks[OFFSET(position.x, position.y, position.z)];
+    return Singleton<BlockManager>::GetInstance()->GetBlockData(cell->id);
+}
+
 void SpriteRenderer::RemoveBlock(glm::vec3 position) {
     glm::i32vec3 t = getRegionIndex(position);
     RenderRegionData* data = this->renderRegion[t.x][t.y][t.z];
@@ -125,8 +136,8 @@ void SpriteRenderer::RemoveBlock(glm::vec3 position) {
     position = getRelaPostion(position);
     auto cell = &data->blocks[OFFSET(position.x, position.y, position.z)];
     if (cell->id == BlockId::Air) return;
-    auto block = data->blockData[cell->blockIndex];
-    block.position.erase(block.position.begin() + cell->posIndex);
+    auto block = &data->blockData[cell->blockIndex];
+    block->position.erase(block->position.begin() + cell->posIndex);
     cell->id = BlockId::Air;
 }
 
@@ -171,9 +182,19 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
         }
         // 计算偏移量
         position = getRelaPostion(position);
-        (*region)->blocks[OFFSET(position.x, position.y, position.z)].id = id;
-        (*region)->blocks[OFFSET(position.x, position.y, position.z)].light = data.Light;
-        (*region)->blocks[OFFSET(position.x, position.y, position.z)].posIndex = inst.position.size() - 1;
+        BlockCell* cell = &(*region)->blocks[OFFSET(position.x, position.y, position.z)];
+        if (cell->id != BlockId::Air) {
+            // 移除旧方块
+            vector<glm::vec4>* positions = &(*region)->blockData[cell->blockIndex].position;
+            positions->erase(positions->begin() + cell->blockIndex);
+            if (positions->size() == 0) {
+                vector<BlockInst>* blockInsts = &(*region)->blockData;
+                blockInsts->erase(blockInsts->begin() + cell->blockIndex);
+            }
+        }
+        cell->id = id;
+        cell->light = data.Light;
+        cell->posIndex = inst.position.size() - 1;
     }
 
     for (auto& instX : regionInst) {
