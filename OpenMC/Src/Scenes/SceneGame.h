@@ -22,6 +22,7 @@ private:
 
     glm::vec3 lookingAt;
     glm::vec3 position;
+    vector<BlockId> blockType;
 
     // test
     glm::vec3 testColor = glm::vec3(2, 2, 2);
