@@ -198,7 +198,7 @@ void SceneGame::Start() {
             glm::vec3(4, 1, 4) };
 
     vector<glm::vec3> beetrootPostion = {
-        glm::vec3(0, 6, 0),
+        glm::vec3(13, 1, 13),
     };
 
     renderer->SetLight(glm::vec3(0.5f, -0.3f, 0.4f));
