@@ -15,12 +15,13 @@ void SceneGame::Start() {
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
     // 初始化资源
-    ResourceManager::LoadTexture(EnvPath::FocusImage, "focus");
+    ResourceManager::LoadTexture(EnvPath::FocusImage, "focus"); 
     // 初始化世界
     world = Singleton<World>::GetInstance();
     if (!world->Init("test")) {
         window->Dialog("World Error", "Failed to initializate world.");
     }
+    world->Draw(renderer);
 
     // test begin
     vector<glm::vec3> grassPosition = {

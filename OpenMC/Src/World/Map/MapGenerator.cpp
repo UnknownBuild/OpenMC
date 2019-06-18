@@ -21,7 +21,7 @@ MapGenerator::MapGenerator(uint32_t seed) :
 
 Chunk* MapGenerator::GenChunk(int32_t x, int32_t z) {
     Chunk* chunk = new Chunk();
-    chunk->Set(x, z);
+    chunk->SetXZ(x, z);
     genBasicTerrain(chunk, x, z);
     return chunk;
 }
@@ -31,7 +31,7 @@ void MapGenerator::genBasicTerrain(Chunk* chunk, int32_t x, int32_t z) {
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
             heightMap[i][0][j] = depthNoise.Get((x + i + 0.1f) * 0.001f, (z + j + 0.1f) * 0.001f);
-            std::cout << heightMap[i][0][j] << std::endl;
+            // std::cout << heightMap[i][0][j] << std::endl;
         }
     }
     // depthNoise.Get(heightMap, glm::vec3((x + 0.1f) * 0.001f, 0.0f, (z + 0.1f) * 0.001f), glm::vec3(1.0f));

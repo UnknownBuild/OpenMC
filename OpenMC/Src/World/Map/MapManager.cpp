@@ -88,24 +88,27 @@ bool MapManager::Load(std::string name) {
     return true;
 }
 
-std::vector<Chunk*> MapManager::GetChunks(int32_t x, int32_t z, int vision) {
+std::vector<Chunk*> MapManager::GetActiveChunks(int32_t x, int32_t z, int vision) {
     std::vector<Chunk*> v;
     x = x / 16;
     z = z / 16;
-    for (int32_t i = -vision; i <= vision; i++) {
-        for (int32_t j = -vision; j <= vision; j++) {
-            //if (chunks.count(x + i) && chunks[x + i].count(z + j)) {
-            //    v.push_back(chunks[x + i][z + j]);
-            //} else {
-            //    Chunk* chunk = loadChunk(x, z);
-            //    chunks[x][z] = chunk;
-            //    v.push_back(chunk);
-            //}
+    for (int32_t x0 = x - vision; x0 <= x + vision; x0++) {
+        for (int32_t z0 = z - vision; z0 <= z + vision; z0++) {
+            if (chunks.count({ x0, z0 })) {
+                Chunk* chunk = chunks[{ x0, z0 }];
+                if (chunk->IsUpdate()) {
+                    v.push_back(chunk);
+                }
+            } else {
+                Chunk* chunk = loadChunk(x0, z0);
+                chunks[{ x0, z0 }] = chunk;
+                v.push_back(chunk);
+            }
         }
     }
     return v;
 }
 
 Chunk* MapManager::loadChunk(int32_t x, int32_t z) {
-    return gen->GenChunk(x, z);
+    return gen->GenChunk(x * 16, z * 16);
 }
