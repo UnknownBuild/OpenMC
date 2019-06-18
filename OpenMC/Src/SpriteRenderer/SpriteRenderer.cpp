@@ -33,6 +33,8 @@ SpriteRenderer::SpriteRenderer() {
         "GLSL/SsaoBlur.fs.glsl", "SSAOBlur");
     this->DepthShader = &ResourceManager::LoadShader("GLSL/Depth.vs.glsl",
         "GLSL/Depth.fs.glsl", "depth");
+    //this->lineShader = &ResourceManager::LoadShader("GLSL/Line.vs.glsl",
+    //    "GLSL/Line.fs.glsl", "Line");
 
     this->SsaoBlurShader->Use().SetInteger("ssaoInput", 0);
 
@@ -169,6 +171,8 @@ void SpriteRenderer::DrawBlock(BlockId id, glm::vec3 position, int dir) {
         *region = new RenderRegionData();
         memset((*region)->blocks, 0, sizeof((*region)->blocks));
     } else {
+        // 删除旧方块
+        this->RemoveBlock(position);
         int blockIndex = -1;
         for (auto& block : (*region)->blockData) {
             blockIndex++;
@@ -248,29 +252,27 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
         inst->aoFront.push_back(glm::vec4(1.0));
         inst->aoBack.push_back(glm::vec4(1.0));
 
-
         RenderRegionData** region = &this->renderRegion[t.x][t.y][t.z];
         if (*region == nullptr) {
             *region = new RenderRegionData();
             memset((*region)->blocks, 0, sizeof((*region)->blocks));
         }
         // 计算偏移量
-        position = getRelaPostion(position);
-        BlockCell* cell = &(*region)->blocks[OFFSET(position.x, position.y, position.z)];
+        auto relaPosition = getRelaPostion(position);
+        BlockCell* cell = &(*region)->blocks[OFFSET(relaPosition.x, relaPosition.y, relaPosition.z)];
         if (cell->id != BlockId::Air) {
             // 移除旧方块
-            //if (cell->init) {
-            //    vector<glm::vec4>* positions = &(*region)->blockData[cell->blockIndex].position;
-            //    positions->erase(positions->begin() + cell->posIndex);
-            //    if (positions->size() == 0) {
-            //        vector<BlockInst>* blockInsts = &(*region)->blockData;
-            //        blockInsts->erase(blockInsts->begin() + cell->blockIndex);
-            //    }
-            //}
-            //else {
-            //    BlockInst* tmp_region = &regionInst[t.x][t.y][t.z];
-            //    tmp_region->position.erase(tmp_region->position.begin() + +cell->posIndex);
-            //}
+            if (cell->init) {
+                this->RemoveBlock(position);
+            } else {
+                //vector<glm::vec4>* positions = &(inst->position);
+                //// 重建索引
+                //for (int posIndex = cell->posIndex + 1; posIndex < positions->size(); posIndex++) {
+                //    auto pos = getRelaPostion((*positions)[posIndex]);
+                //    (*region)->blocks[OFFSET(pos.x, pos.y, pos.z)].posIndex = posIndex - 1;
+                //}
+                //positions->erase(positions->begin() + cell->posIndex);
+            }
         }
         cell->id = id;
         cell->light = data.Light;
@@ -298,6 +300,11 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
             }
         }
     }
+}
+
+void SpriteRenderer::SetShowBlock(glm::vec3 pos) {
+    this->enableShow = true;
+    this->showBlock = pos;
 }
 
 void SpriteRenderer::updateRegionLight(RenderRegionData* region) {
@@ -581,7 +588,6 @@ bool SpriteRenderer::isVisable(float x, float y, float z) {
     return viewCos > 0.8;
 }
 
-
 void SpriteRenderer::RenderBlockWithShadow(bool clear, Shader* shader) {
     glEnable(GL_DEPTH_TEST);
     glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -653,6 +659,19 @@ void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
             });
         });
 
+    // 选择区块
+    if (enableShow) {
+        BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(BlockId::Select);
+        this->DrawBlock(data.Textures, data.Colors, data.Render, { glm::vec4(this->showBlock, 10)},
+            { glm::vec4(1.0) },
+            {glm::vec4(1.0)},
+            {glm::vec4(1.0)},
+            {glm::vec4(1.0)},
+            {glm::vec4(1.0)},
+            {glm::vec4(1.0)},
+            0, 0, nullptr);
+    }
+
     if (clear) {
         this->ClearBlock();
     }
@@ -711,6 +730,10 @@ void SpriteRenderer::SetView(glm::mat4 projection, glm::mat4 view, glm::vec3 vie
     this->blockShader->SetMatrix4("view", view);
     this->blockShader->SetVector3f("viewPos", viewPostion);
 
+    //this->lineShader->Use();
+    //this->lineShader->SetMatrix4("projection", projection);
+    //this->lineShader->SetMatrix4("view", view);
+
     this->objectShader->Use();
     this->objectShader->SetMatrix4("projection", projection);
     this->objectShader->SetMatrix4("view", view);
@@ -743,7 +766,8 @@ void SpriteRenderer::SetWindowSize(int w, int h) {
 
 // 通用渲染方法
 void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<glm::vec4>& colors,
-    RenderType type, const vector<glm::vec4>& position,
+    RenderType type,
+    const vector<glm::vec4>& position,
     const vector<glm::vec4>& aoTop,
     const vector<glm::vec4>& aoBottom,
     const vector<glm::vec4>& aoLeft,
@@ -787,6 +811,11 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
     glActiveTexture(GL_TEXTURE0);
 
     glm::mat4 model = glm::mat4(1.0);
+    if (type == RenderType::Select) {
+        type = RenderType::OneTexture;
+        model = glm::scale(model, glm::vec3(1.2));
+        shader->SetMatrix4("model", model);
+    }
     switch (type) {
     case RenderType::OneTexture: // 单纹理方块
         if (colors.size() > 0) {

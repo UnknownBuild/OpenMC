@@ -268,6 +268,8 @@ void SceneGame::Start() {
 
     renderer->UpdateLight();
 
+    renderer->SetShowBlock(glm::vec3(1, 2, 0));
+
     // glEnable(GL_FRAMEBUFFER_SRGB);
 
     lookingAt = camera->Front;
