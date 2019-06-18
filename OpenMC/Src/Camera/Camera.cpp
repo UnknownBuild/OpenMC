@@ -75,10 +75,10 @@ void Camera::processInput() {
             Position -= Right * velocity;
         if (window->GetKey(GLFW_KEY_D) == GLFW_PRESS)
             Position += Right * velocity;
-        if (window->GetKey(GLFW_KEY_Q) == GLFW_PRESS)
-            Position += Up * velocity;
-        if (window->GetKey(GLFW_KEY_E) == GLFW_PRESS)
-            Position -= Up * velocity;
+        //if (window->GetKey(GLFW_KEY_Q) == GLFW_PRESS)
+        //    Position += Up * velocity;
+        //if (window->GetKey(GLFW_KEY_E) == GLFW_PRESS)
+        //    Position -= Up * velocity;
         if (window->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS)
             Position += Up * velocity;
         if (window->GetKey(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)

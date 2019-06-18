@@ -11,6 +11,7 @@ void SceneGame::Start() {
     input->Clear();
     Input<0>::OnCursorPosChanged += std::bind(&SceneGame::cursorPosCallback, this, std::placeholders::_1, std::placeholders::_2);
     Input<0>::OnMouseButtonClick += std::bind(&SceneGame::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    Input<0>::OnKeyClick += std::bind(&SceneGame::keyCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
@@ -19,6 +20,18 @@ void SceneGame::Start() {
     renderer->ClearBlock();
     // 初始化资源
     ResourceManager::LoadTexture(EnvPath::FocusImage, "focus");
+    ResourceManager::LoadTexture(EnvPath::GrassBlockImage, "GrassBlock");
+    ResourceManager::LoadTexture(EnvPath::SandImage, "Sand");
+    ResourceManager::LoadTexture(EnvPath::OakPlanksImage, "OakPlanks");
+    ResourceManager::LoadTexture(EnvPath::OakLogImage, "OakLog");
+    ResourceManager::LoadTexture(EnvPath::GlassImage, "GlassBlock");
+    ResourceManager::LoadTexture(EnvPath::SpruceLeavesImage, "OakLeaves");
+    ResourceManager::LoadTexture(EnvPath::CraftingTableImage, "CraftingTable");
+    ResourceManager::LoadTexture(EnvPath::LitFurnaceImage, "Furnace");
+    ResourceManager::LoadTexture(EnvPath::MelonImage, "Melon");
+    ResourceManager::LoadTexture(EnvPath::PumpkinImage, "Pumpkin");
+    ResourceManager::LoadTexture(EnvPath::StoneImage, "CrackedStoneBricks");
+    ResourceManager::LoadTexture(EnvPath::CobblestoneImage, "CobbleStone");
     // 初始化世界
     world = Singleton<World>::GetInstance();
     if (!world->Init("test")) {
@@ -276,10 +289,14 @@ void SceneGame::Start() {
     position = glm::vec3((int)camera->Position.x, (int)camera->Position.y, (int)camera->Position.z);
     blockType.push_back(BlockId::GrassBlock);
     blockType.push_back(BlockId::CobbleStone);
-    blockType.push_back(BlockId::GrassBlock);
+    blockType.push_back(BlockId::OakPlanks);
+    blockType.push_back(BlockId::OakLeaves);
+    blockType.push_back(BlockId::CrackedStoneBricks);
     blockType.push_back(BlockId::OakLog);
     blockType.push_back(BlockId::Sand);
-    blockType.push_back(BlockId::BlueStainedGlassPane);
+    blockType.push_back(BlockId::CraftingTable);
+    blockType.push_back(BlockId::Furnace);
+    current_index = 0;
     
 }
 
@@ -309,18 +326,21 @@ void SceneGame::Update() {
     // 渲染准星
     renderer->DrawTexture(ResourceManager::GetTexture("focus"), glm::vec2(size.Width / 2, size.Height / 2), 0.4f);
 
+    // 渲染低配背包
+    showBlockPicture();
+
     // 渲染天空盒
     renderer->RenderSkyBox();
     // 渲染方块
     renderer->RenderBlock(false);
 
-    {
+    /*{
         ImGui::Begin("Application", NULL, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::SliderFloat("testColorX", &testColor.x, 2, 5);
         ImGui::SliderFloat("testColorY", &testColor.y, 2, 5);
         ImGui::SliderFloat("testColorZ", &testColor.z, 2, 5);
         ImGui::End();
-    }
+    }*/
 }
 
 glm::vec3 SceneGame::caculateLookingAt() {
@@ -342,6 +362,39 @@ glm::vec3 SceneGame::caculateLookingAt() {
     return result;
 }
 
+void SceneGame::showBlockPicture() {
+    auto size = window->GetWindowSize();
+    switch (blockType[current_index])
+    {
+    case BlockId::GrassBlock:
+        renderer->DrawTexture(ResourceManager::GetTexture("GrassBlock"), glm::vec2(size.Width - 180, 180), 0.5f);
+        break;
+    case BlockId::CobbleStone:
+        renderer->DrawTexture(ResourceManager::GetTexture("CobbleStone"), glm::vec2(size.Width - 180, 180), 0.5f);
+        break;
+    case BlockId::CrackedStoneBricks:
+        renderer->DrawTexture(ResourceManager::GetTexture("CrackedStoneBricks"), glm::vec2(size.Width - 180, 180), 0.5f);
+        break;
+    case BlockId::OakLog:
+        renderer->DrawTexture(ResourceManager::GetTexture("OakLog"), glm::vec2(size.Width - 180, 180), 0.5f);
+        break;
+    case BlockId::Sand:
+        renderer->DrawTexture(ResourceManager::GetTexture("Sand"), glm::vec2(size.Width - 180, 180), 0.5f);
+        break;
+    case BlockId::CraftingTable:
+        renderer->DrawTexture(ResourceManager::GetTexture("CraftingTable"), glm::vec2(size.Width - 180, 180), 0.5f);
+        break;
+    case BlockId::Furnace:
+        renderer->DrawTexture(ResourceManager::GetTexture("Furnace"), glm::vec2(size.Width - 180, 180), 0.5f);
+        break;
+    case BlockId::OakPlanks:
+        renderer->DrawTexture(ResourceManager::GetTexture("OakPlanks"), glm::vec2(size.Width - 180, 180), 0.5f);
+        break;
+    default:
+        break;
+    }
+}
+
 glm::vec3 SceneGame::getNewBlockPosition() {
     glm::vec3 result = position;
 
@@ -360,9 +413,20 @@ void SceneGame::cursorPosCallback(double xpos, double ypos) {
 
 void SceneGame::mouseButtonCallback(int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        renderer->DrawBlock(BlockId::OakPlanks, lookingAt);
+        renderer->DrawBlock(blockType[current_index], lookingAt);
     }
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         renderer->RemoveBlock(lookingAt);
+    }
+}
+
+void SceneGame::keyCallback(int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_E && action == GLFW_PRESS) {
+        current_index++;
+        current_index %= blockType.size();
+    }
+    if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
+        current_index--;
+        current_index = current_index < 0 ? current_index + blockType.size() : current_index;
     }
 }
