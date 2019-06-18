@@ -10,6 +10,7 @@ namespace EnvPath {
 
     // Resource
     const std::string GameTitleImage = TextureDir + "gui/minecraft_title.png";
+    const std::string FocusImage = TextureDir + "gui/focus.png";
 
     // Save
     const std::string SaveDir = "Saves/";
