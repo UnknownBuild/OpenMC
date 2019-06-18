@@ -169,6 +169,8 @@ void SpriteRenderer::DrawBlock(BlockId id, glm::vec3 position, int dir) {
         *region = new RenderRegionData();
         memset((*region)->blocks, 0, sizeof((*region)->blocks));
     } else {
+        // 删除旧方块
+        this->RemoveBlock(position);
         int blockIndex = -1;
         for (auto& block : (*region)->blockData) {
             blockIndex++;
@@ -255,22 +257,21 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
             memset((*region)->blocks, 0, sizeof((*region)->blocks));
         }
         // 计算偏移量
-        position = getRelaPostion(position);
-        BlockCell* cell = &(*region)->blocks[OFFSET(position.x, position.y, position.z)];
+        auto relaPosition = getRelaPostion(position);
+        BlockCell* cell = &(*region)->blocks[OFFSET(relaPosition.x, relaPosition.y, relaPosition.z)];
         if (cell->id != BlockId::Air) {
             // 移除旧方块
-            //if (cell->init) {
-            //    vector<glm::vec4>* positions = &(*region)->blockData[cell->blockIndex].position;
-            //    positions->erase(positions->begin() + cell->posIndex);
-            //    if (positions->size() == 0) {
-            //        vector<BlockInst>* blockInsts = &(*region)->blockData;
-            //        blockInsts->erase(blockInsts->begin() + cell->blockIndex);
-            //    }
-            //}
-            //else {
-            //    BlockInst* tmp_region = &regionInst[t.x][t.y][t.z];
-            //    tmp_region->position.erase(tmp_region->position.begin() + +cell->posIndex);
-            //}
+            if (cell->init) {
+                this->RemoveBlock(position);
+            } else {
+                vector<glm::vec4>* positions = &(inst->position);
+                // 重建索引
+                for (int posIndex = cell->posIndex + 1; posIndex < positions->size(); posIndex++) {
+                    auto pos = getRelaPostion((*positions)[posIndex]);
+                    (*region)->blocks[OFFSET(pos.x, pos.y, pos.z)].posIndex = posIndex - 1;
+                }
+                positions->erase(positions->begin() + cell->posIndex);
+            }
         }
         cell->id = id;
         cell->light = data.Light;
