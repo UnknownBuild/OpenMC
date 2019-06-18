@@ -2,11 +2,16 @@
 #include <fstream>
 #include <io.h>
 #include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/writer.h>
 
 #include "../../Helpers/EnvPath.h"
 #include "MapManager.h"
+
+#ifdef _MSC_VER
+#undef GetObject
+#endif
 
 bool MapManager::Init(std::string name, uint32_t seed) {
     // 判断存档文件夹是否存在，若不存在则创建
@@ -40,7 +45,9 @@ bool MapManager::Init(std::string name, uint32_t seed) {
 
     this->savePath = EnvPath::SaveDir + name + "/";
     this->mapSeed = seed;
+    if (this->gen) delete this->gen;
     this->gen = new MapGenerator(this->mapSeed);
+    chunks.clear();
 
     for (int x = -16; x < 16; x++) {
         for (int z = -16; z < 16; z++) {
@@ -52,19 +59,48 @@ bool MapManager::Init(std::string name, uint32_t seed) {
     return true;
 }
 
+bool MapManager::Load(std::string name) {
+    std::ifstream ifs(EnvPath::SaveDir + name + "/" + EnvPath::SaveConfigFile);
+    if (!ifs.is_open()) {
+        return false;
+    }
+    rapidjson::IStreamWrapper isw(ifs);
+    rapidjson::Document d;
+    d.ParseStream(isw);
+    if (d.HasParseError()) {
+        return false;
+    } else if (!d.IsObject()) {
+        return false;
+    }
+    for (auto& member : d.GetObject()) {
+        if (member.name == "name") {
+            if (!member.value.IsString()) return false;
+            if (name != member.value.GetString()) return false;
+        } else if (member.name == "seed") {
+            if (!member.value.IsInt()) return false;
+            this->mapSeed = member.value.GetInt();
+        }
+    }
+    this->savePath = EnvPath::SaveDir + name + "/";
+    if (this->gen) delete this->gen;
+    this->gen = new MapGenerator(this->mapSeed);
+    chunks.clear();
+    return true;
+}
+
 std::vector<Chunk*> MapManager::GetChunks(int32_t x, int32_t z, int vision) {
     std::vector<Chunk*> v;
     x = x / 16;
     z = z / 16;
     for (int32_t i = -vision; i <= vision; i++) {
         for (int32_t j = -vision; j <= vision; j++) {
-            if (chunks.count(x + i) && chunks[x + i].count(z + j)) {
-                v.push_back(chunks[x + i][z + j]);
-            } else {
-                Chunk* chunk = loadChunk(x, z);
-                chunks[x][z] = chunk;
-                v.push_back(chunk);
-            }
+            //if (chunks.count(x + i) && chunks[x + i].count(z + j)) {
+            //    v.push_back(chunks[x + i][z + j]);
+            //} else {
+            //    Chunk* chunk = loadChunk(x, z);
+            //    chunks[x][z] = chunk;
+            //    v.push_back(chunk);
+            //}
         }
     }
     return v;

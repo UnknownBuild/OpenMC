@@ -1,6 +1,5 @@
 ﻿#include <imgui.h>
 
-#include "../World/Map/MapGenerator.h"
 #include "SceneGame.h"
 
 void SceneGame::Start() {
@@ -13,21 +12,13 @@ void SceneGame::Start() {
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
-
-    // test begin
-    std::vector<glm::vec3> stones;
-    MapGenerator gen(2019);
-    Chunk* chunk = gen.GenChunk(0, 0);
-    for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < 256; j++) {
-            for (int k = 0; k < 16; k++) {
-                if (chunk->GetBlock(i, j, k).GetId() == BlockId::Stone) {
-                    stones.push_back(glm::vec3(i, j, k));
-                }
-            }
-        }
+    // 初始化世界
+    world = Singleton<World>::GetInstance();
+    if (!world->Init("test")) {
+        window->Dialog("World Error", "Failed to initializate world.");
     }
 
+    // test begin
     vector<glm::vec3> grassPosition = {
         glm::vec3(1, 1, 1),
         glm::vec3(2, 1, 2),

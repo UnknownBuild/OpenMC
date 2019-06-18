@@ -1,5 +1,6 @@
 ﻿#pragma once
 
-class Character {
-
-};
+//class Character {
+//public:
+//
+//};

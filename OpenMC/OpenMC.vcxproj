@@ -208,6 +208,7 @@
     <ClCompile Include="Src\World\Database\BlockManager.cpp" />
     <ClCompile Include="Src\World\Map\MapGenerator.cpp" />
     <ClCompile Include="Src\World\Map\MapManager.cpp" />
+    <ClCompile Include="Src\World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Camera\Camera.h" />
