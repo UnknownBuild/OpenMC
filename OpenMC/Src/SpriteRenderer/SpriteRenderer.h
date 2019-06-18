@@ -40,6 +40,7 @@ struct BlockCell {
     unsigned int light;
     unsigned int blockIndex;
     unsigned int posIndex;
+    bool init;
 };
 
 // 渲染区块数据
@@ -77,14 +78,16 @@ public:
 
     // 方块相关-----------
 
-    // 渲染方块
+    // 批量渲染方块
     void DrawBlock(BlockId id, vector<glm::vec3>& position, int dir = 0);
+    // 添加单个方块并更新区块光照
+    void DrawBlock(BlockId id, glm::vec3 position, int dir = 0);
+    // 删除指定位置方块并更新区块光照
+    void RemoveBlock(glm::vec3 position);
     // 更新光照
     void UpdateLight();
     // 删除所有方块
     void ClearBlock();
-    // 删除指定位置方块
-    void RemoveBlock(glm::vec3 position);
     // 获取指定位置方块信息 O(1)
     BlockData GetBlock(glm::vec3 position);
     // 渲染方块
@@ -121,6 +124,9 @@ public:
     Shader* blockShadowShader;
 private:
     void initRenderData();
+    void updateRegionLight(RenderRegionData *r);
+
+
     unsigned int makeVAO(float* vertices, int verticesLen, unsigned int* indices, int indicesLen);
     unsigned int renderFrame;
     bool isVisable(float x, float y, float z);
