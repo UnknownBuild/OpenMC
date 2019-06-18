@@ -116,6 +116,8 @@ public:
     // 更改渲染范围
     void SetWindowSize(int w, int h);
 
+    void SetShowBlock(glm::vec3 pos);
+
     Shader* GBufferShader;
     Shader* SsaoShader;
     Shader* SsaoBlurShader;
@@ -140,6 +142,7 @@ private:
     Shader* skyShader;
     Shader* flatShader;
     Shader* fontShader;
+    Shader* lineShader;
     // 纹理
     Texture2D* skyBox;
 
@@ -174,4 +177,7 @@ private:
 
     glm::mat4 depthProjection;
     glm::mat4 lightSpaceMatrix;
+
+    glm::vec3 showBlock;
+    bool enableShow = false;
 };
