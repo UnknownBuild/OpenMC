@@ -24,7 +24,7 @@ void SceneGame::Start() {
     if (!world->Init("test")) {
         window->Dialog("World Error", "Failed to initializate world.");
     }
-    world->Draw(renderer);
+    //world->Draw(renderer);
 
     // test begin
     vector<glm::vec3> grassPosition = {

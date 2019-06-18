@@ -92,8 +92,8 @@ std::vector<Chunk*> MapManager::GetActiveChunks(int32_t x, int32_t z, int vision
     std::vector<Chunk*> v;
     x = x / 16;
     z = z / 16;
-    for (int32_t x0 = x - vision; x0 <= x + vision; x0++) {
-        for (int32_t z0 = z - vision; z0 <= z + vision; z0++) {
+    for (int32_t x0 = x - vision + 1; x0 < x + vision; x0++) {
+        for (int32_t z0 = z - vision + 1; z0 < z + vision; z0++) {
             if (chunks.count({ x0, z0 })) {
                 Chunk* chunk = chunks[{ x0, z0 }];
                 if (chunk->IsUpdate()) {

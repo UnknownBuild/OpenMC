@@ -37,7 +37,7 @@ void MapGenerator::genBasicTerrain(Chunk* chunk, int32_t x, int32_t z) {
     // depthNoise.Get(heightMap, glm::vec3((x + 0.1f) * 0.001f, 0.0f, (z + 0.1f) * 0.001f), glm::vec3(1.0f));
     for (int i = 0; i < 16; i++) {
         for (int k = 0; k < 16; k++) {
-            int height = static_cast<int>((heightMap[i][0][k] + 0.5) * 62);
+            int height = static_cast<int>((heightMap[i][0][k] + 0.5) * 21);
             // std::cout << height << std::endl;
             for (int j = 0; j < height; j++) {
                 chunk->SetBlock(x + i, j, z + k, BlockId::Stone);

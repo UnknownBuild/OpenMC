@@ -15,7 +15,7 @@ bool World::Init(std::string name, uint32_t seed) {
 
 
 void World::Draw(SpriteRenderer* renderer) {
-    std::vector<Chunk*> chunks = Singleton<MapManager>::GetInstance()->GetActiveChunks(0, 0, 4);
+    std::vector<Chunk*> chunks = Singleton<MapManager>::GetInstance()->GetActiveChunks(0, 0, 1);
     // std::cout << "Gen" << std::endl;
     std::vector<glm::vec3> positions;
     for (auto& chunk : chunks) {
