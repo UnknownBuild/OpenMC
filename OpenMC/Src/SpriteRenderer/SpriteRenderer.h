@@ -64,10 +64,6 @@ public:
     void DrawSprite(Model& model, glm::vec3 position,
         glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f),
         GLfloat rotate = 0.0f);
-    // 渲染方块
-    void DrawBlock(BlockId id, vector<glm::vec3>& position, int dir = 0);
-    // 更新光照
-    void UpdateLight();
     // 添加方块
     void DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
         RenderType type, const vector<glm::vec4>& position,
@@ -78,15 +74,23 @@ public:
         const vector<glm::vec4>& aoFront,
         const vector<glm::vec4>& aoBack,
         int dir = 0, int iTexture = 0, Shader * shader = nullptr);
+
+    // 方块相关-----------
+
+    // 渲染方块
+    void DrawBlock(BlockId id, vector<glm::vec3>& position, int dir = 0);
+    // 更新光照
+    void UpdateLight();
     // 删除所有方块
     void ClearBlock();
     // 删除指定位置方块
     void RemoveBlock(glm::vec3 position);
-
     // 获取指定位置方块信息 O(1)
     BlockData GetBlock(glm::vec3 position);
     // 渲染方块
     void RenderBlock(bool clear = true, Shader* shader = nullptr);
+
+    // ------------------
 
     void RenderBlockWithShadow(bool clear = true, Shader* shader = nullptr);
     // 渲染文本

@@ -89,16 +89,25 @@ void SceneGame::Start() {
     vector<glm::vec3> sandPosition = {
         glm::vec3(1, 1, -2),
         glm::vec3(1, 1, -1),
-        glm::vec3(1, 2, 0),
+        glm::vec3(2, 2, 0),
+        glm::vec3(1, 1, 0),
         glm::vec3(2, 1, 0),
     };
     vector<glm::vec3> oakPostions = {
+        glm::vec3(-3, 1, 2),
         glm::vec3(-3, 1, 3),
-        glm::vec3(-3, 1, 4),
-        glm::vec3(-3, 2, 4),
-        glm::vec3(-4, 1, 4),
+        glm::vec3(-3, 2, 3),
+        glm::vec3(-4, 1, 3),
+        glm::vec3(-4, 1, -4),
+        glm::vec3(-4, 2, -4),
+        glm::vec3(-4, 3, -4),
+        glm::vec3(-3, 1, -4),
+        glm::vec3(-3, 2, -4),
+        glm::vec3(-3, 3, -4),
+        glm::vec3(-5, 1, -4),
+        glm::vec3(-5, 2, -4),
+        glm::vec3(-5, 3, -4),
         glm::vec3(-4, 1, -3),
-        glm::vec3(-4, 2, -3),
         glm::vec3(-4, 3, -3),
         glm::vec3(-3, 1, -3),
         glm::vec3(-3, 2, -3),
@@ -114,14 +123,6 @@ void SceneGame::Start() {
         glm::vec3(-5, 1, -2),
         glm::vec3(-5, 2, -2),
         glm::vec3(-5, 3, -2),
-        glm::vec3(-4, 1, -1),
-        glm::vec3(-4, 3, -1),
-        glm::vec3(-3, 1, -1),
-        glm::vec3(-3, 2, -1),
-        glm::vec3(-3, 3, -1),
-        glm::vec3(-5, 1, -1),
-        glm::vec3(-5, 2, -1),
-        glm::vec3(-5, 3, -1),
     };
     vector<glm::vec3> blue_orchidPosition = {
         glm::vec3(12, 1, 11),
@@ -139,16 +140,16 @@ void SceneGame::Start() {
         glm::vec3(8, 1, -4),
     };
     vector<glm::vec3> tablePosition = {
-        glm::vec3(0, 2, 0),
+        glm::vec3(1, 2, 0),
     };
     vector<glm::vec3> furnacePosition = {
         glm::vec3(3, 3, 3),
     };
     vector<glm::vec3> oakPosition = {
-        glm::vec3(0, 1, 9),
-        glm::vec3(0, 2, 9),
-        glm::vec3(0, 3, 9),
-        glm::vec3(0, 4, 9),
+        glm::vec3(1, 1, 9),
+        glm::vec3(1, 2, 9),
+        glm::vec3(1, 3, 9),
+        glm::vec3(1, 4, 9),
     };
     vector<glm::vec3> cactusPosition = {
         glm::vec3(10, 1, 10),
@@ -158,19 +159,19 @@ void SceneGame::Start() {
         glm::vec3(10, 5, 10),
     };
     vector<glm::vec3> leavePosition = {
-        glm::vec3(0, 5, 9),
         glm::vec3(1, 5, 9),
-        glm::vec3(-1, 5, 9),
-        glm::vec3(0, 5, 8),
-        glm::vec3(0, 5, 10),
+        glm::vec3(2, 5, 9),
+        glm::vec3(0, 5, 9),
         glm::vec3(1, 5, 8),
         glm::vec3(1, 5, 10),
-        glm::vec3(-1, 5, 8),
-        glm::vec3(-1, 5, 10),
-        glm::vec3(0, 6, 9),
-        glm::vec3(0, 6, 8),
-        glm::vec3(0, 6, 10),
+        glm::vec3(2, 5, 8),
+        glm::vec3(2, 5, 10),
+        glm::vec3(0, 5, 8),
+        glm::vec3(0, 5, 10),
+        glm::vec3(1, 6, 9),
         glm::vec3(1, 6, 8),
+        glm::vec3(1, 6, 10),
+        glm::vec3(2, 6, 8),
     };
     vector<glm::vec3> doorPosition = {
         glm::vec3(6, 1, 6),
@@ -256,14 +257,6 @@ void SceneGame::Start() {
     // 更新光照
     renderer->UpdateLight();
 
-
-    auto testBlock = renderer->GetBlock(glm::vec3(-3, 1, 5));
-
-    renderer->RemoveBlock(glm::vec3(-3, 1, 5));
-
-    testBlock = renderer->GetBlock(glm::vec3(-3, 1, 5));
-
-    renderer->RemoveBlock(glm::vec3(-3, 1, 5));
     // glEnable(GL_FRAMEBUFFER_SRGB);
 }
 

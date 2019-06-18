@@ -9,6 +9,10 @@ end_of_line = crlf
 charset = utf-8
 end_of_line = crlf
 
+[*.{json}]
+charset = utf-8
+end_of_line = crlf
+
 [*.{c,cpp,h,hpp}]
 indent_style = space
 indent_size = 4
