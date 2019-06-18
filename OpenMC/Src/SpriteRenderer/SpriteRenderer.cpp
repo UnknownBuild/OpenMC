@@ -178,13 +178,15 @@ void SpriteRenderer::DrawBlock(BlockId id, glm::vec3 position, int dir) {
             blockIndex++;
             if (block.data.Id == id && block.dir == dir) {
                 // 直接插入现有项
-                block.position.push_back(glm::vec4(getRelaPostion(position), data.Light));
-                block.aoTop.push_back(glm::vec4(1.0));
-                block.aoBottom.push_back(glm::vec4(1.0));
-                block.aoLeft.push_back(glm::vec4(1.0));
-                block.aoRight.push_back(glm::vec4(1.0));
-                block.aoFront.push_back(glm::vec4(1.0));
-                block.aoBack.push_back(glm::vec4(1.0));
+                block.position.push_back(glm::vec4(position, data.Light));
+                if (block.aoTop.size() < block.position.size()) {
+                    block.aoTop.push_back(glm::vec4(1.0));
+                    block.aoBottom.push_back(glm::vec4(1.0));
+                    block.aoLeft.push_back(glm::vec4(1.0));
+                    block.aoRight.push_back(glm::vec4(1.0));
+                    block.aoFront.push_back(glm::vec4(1.0));
+                    block.aoBack.push_back(glm::vec4(1.0));
+                }
 
                 position = getRelaPostion(position);
                 BlockCell* cell = &(*region)->blocks[OFFSET(position.x, position.y, position.z)];
@@ -204,19 +206,20 @@ void SpriteRenderer::DrawBlock(BlockId id, glm::vec3 position, int dir) {
     inst.data = data;
     inst.dir = dir;
     inst.position.push_back(glm::vec4(position, data.Light));
-    inst.aoTop.push_back(glm::vec4(1.0));
-    inst.aoBottom.push_back(glm::vec4(1.0));
-    inst.aoLeft.push_back(glm::vec4(1.0));
-    inst.aoRight.push_back(glm::vec4(1.0));
-    inst.aoFront.push_back(glm::vec4(1.0));
-    inst.aoBack.push_back(glm::vec4(1.0));
+    if (inst.aoTop.size() < inst.position.size()) {
+        inst.aoTop.push_back(glm::vec4(1.0));
+        inst.aoBottom.push_back(glm::vec4(1.0));
+        inst.aoLeft.push_back(glm::vec4(1.0));
+        inst.aoRight.push_back(glm::vec4(1.0));
+        inst.aoFront.push_back(glm::vec4(1.0));
+        inst.aoBack.push_back(glm::vec4(1.0));
+    }
 
     position = getRelaPostion(position);
     BlockCell* cell = &(*region)->blocks[OFFSET(position.x, position.y, position.z)];
     cell->id = id;
     cell->light = data.Light;
     cell->posIndex = 0;
-    cell->blockIndex = 0;
     cell->init = true;
 
     // 加入新区块
@@ -227,6 +230,7 @@ void SpriteRenderer::DrawBlock(BlockId id, glm::vec3 position, int dir) {
     else {
         (*region)->blockIndex.push_front(index);
     }
+    cell->blockIndex = index;
     (*region)->blockData.push_back(inst);
     this->updateRegionLight(*region);
 }
@@ -245,12 +249,14 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
         }
         inst->position.push_back(glm::vec4(position, data.Light));
 
-        inst->aoTop.push_back(glm::vec4(1.0));
-        inst->aoBottom.push_back(glm::vec4(1.0));
-        inst->aoLeft.push_back(glm::vec4(1.0));
-        inst->aoRight.push_back(glm::vec4(1.0));
-        inst->aoFront.push_back(glm::vec4(1.0));
-        inst->aoBack.push_back(glm::vec4(1.0));
+        if (inst->aoTop.size() < inst->position.size()) {
+            inst->aoTop.push_back(glm::vec4(1.0));
+            inst->aoBottom.push_back(glm::vec4(1.0));
+            inst->aoLeft.push_back(glm::vec4(1.0));
+            inst->aoRight.push_back(glm::vec4(1.0));
+            inst->aoFront.push_back(glm::vec4(1.0));
+            inst->aoBack.push_back(glm::vec4(1.0));
+        }
 
         RenderRegionData** region = &this->renderRegion[t.x][t.y][t.z];
         if (*region == nullptr) {

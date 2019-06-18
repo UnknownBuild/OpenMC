@@ -274,7 +274,7 @@
     "name": "select",
     "type": 0,
     "render": 15,
-    "textures": ["white_stained_glass.png"],
+    "textures": ["cauldron_top.png"],
     "colors": [[1.0, 1.0, 1.0, 0.2]],
     "animation": 0,
     "light": 0

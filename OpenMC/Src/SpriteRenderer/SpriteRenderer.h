@@ -21,9 +21,9 @@ struct PointList {
     float quadratic;
 };
 
-//  this->DrawBlock(block.Textures, block.Colors, block.Render, &position[0], position.size(), dir, frame);
 struct BlockInst {
     BlockData data;
+    int dir;
     vector<glm::vec4> position;
 
     vector<glm::vec4> aoTop;
@@ -32,7 +32,6 @@ struct BlockInst {
     vector<glm::vec4> aoRight;
     vector<glm::vec4> aoFront;
     vector<glm::vec4> aoBack;
-    int dir;
 };
 
 struct BlockCell {
