@@ -222,7 +222,7 @@
   {
     "id": 22,
     "name": "iron_door",
-    "type": 2,
+    "type": 3,
     "render": 9,
     "textures": ["iron_door_top.png", "iron_door_bottom.png"],
     "colors": [[0.675, 0.691, 0.675, 0.95]],

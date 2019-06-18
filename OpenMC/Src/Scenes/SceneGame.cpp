@@ -212,7 +212,7 @@ void SceneGame::Start() {
     // 渲染海晶灯
     renderer->DrawBlock(BlockId::SeaLantern, sea_lanternPosition);
     // 渲染圆石
-    renderer->DrawBlock(BlockId::Stone, stonePosition);
+    // renderer->DrawBlock(BlockId::Stone, stonePosition);
     // renderer->DrawBlock(BlockId::Stone, stones);
     // 渲染煤
     renderer->DrawBlock(BlockId::Dirt, dirtPosition);
@@ -255,6 +255,10 @@ void SceneGame::Start() {
     // 渲染胡萝卜
     renderer->DrawBlock(BlockId::Beetroot, beetrootPostion, 0);
     // 更新光照
+
+    renderer->RemoveBlock(glm::vec3(-5, 1, -4));
+    renderer->DrawBlock(BlockId::CraftingTable, glm::vec3(-5, 1, -8),2);
+
     renderer->UpdateLight();
 
     // glEnable(GL_FRAMEBUFFER_SRGB);
