@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "../Camera/Camera.h"
 #include "../SpriteRenderer/SpriteRenderer.h"
+#include "../World/Characters/Player.h"
 #include "../World/World.h"
 #include "Scene.h"
 
@@ -19,6 +20,7 @@ private:
     SpriteRenderer* renderer;
     Camera* camera;
     World* world;
+    Player* player;
 
     glm::vec3 lookingAt;
     glm::vec3 position;

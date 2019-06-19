@@ -11,16 +11,21 @@ void SceneGame::Start() {
     input->Clear();
     Input<0>::OnCursorPosChanged += std::bind(&SceneGame::cursorPosCallback, this, std::placeholders::_1, std::placeholders::_2);
     Input<0>::OnMouseButtonClick += std::bind(&SceneGame::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    // 初始化人物
+    player = Singleton<Player>::GetInstance();
+    player->setPostion(glm::vec3(0, 10, 0));
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
     camera->isGravity = false;
-    camera->SetLookPostion(glm::vec3(10, 5, 10), glm::vec3(0.0));
+    camera->SetLookPostion(player->Position, glm::vec3(0, 10, 3));
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
     // 初始化资源
     ResourceManager::LoadTexture(EnvPath::FocusImage, "focus");
+    // 初始化模型
+    ResourceManager::LoadModel("Resources/Models/JJMonster2/jj2.obj", "jjm2");
     // 初始化世界
     world = Singleton<World>::GetInstance();
     if (!world->Init("test")) {
@@ -291,6 +296,17 @@ void SceneGame::Update() {
     auto size = window->GetWindowSize();
 
     camera->Update();
+    player->setFrontAndRight(camera->Front, camera->Right);
+    player->Update();
+    // 渲染模型
+    if (camera->perspective == Camera::Perspective::Third) {
+        renderer->DrawSprite(ResourceManager::GetModel("jjm2"), player->Position + glm::vec3(0, -1.5f, 0), glm::vec3(3.4), -glm::radians(camera->Yaw) - glm::radians(90.0f), true);
+        camera->Position = player->Position - glm::vec3(player->Front.x * 3, player->Front.y * 3, player->Front.z * 3);
+    }
+    else if(camera->perspective == Camera::Perspective::First){
+        camera->Position = player->Position;
+    }
+
     renderer->SetWindowSize(size.Width, size.Height);
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 256.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);

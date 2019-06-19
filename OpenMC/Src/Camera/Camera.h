@@ -62,6 +62,9 @@ public:
     float acceleration;
     // 重力
     bool isGravity;
+    // 视角
+    enum Perspective { First, Third };
+    Perspective perspective;
 
     enum State { Ground, Air };
     State state;
@@ -90,7 +93,8 @@ private:
 
     void processInput();
     void updateDeltaTime();
-    void updateVelocity();
+
+    bool isPerspective;
 
     bool freedomView = false;
 
