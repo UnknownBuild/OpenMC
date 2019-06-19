@@ -99,6 +99,7 @@ void Camera::TransitionTo(glm::vec3 target, float p) {
 }
 
 void Camera::updateDeltaTime() {
+    if (lastFrame == 0) lastFrame = glfwGetTime();
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;

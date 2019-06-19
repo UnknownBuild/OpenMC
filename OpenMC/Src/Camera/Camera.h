@@ -61,7 +61,7 @@ public:
     // 加速度
     float acceleration;
     // 重力
-    bool isGravity;
+    bool isGravity = false;
 
     enum State { Ground, Air };
     State state;
@@ -78,6 +78,11 @@ public:
     void SetViewPostion(glm::vec3 pos, glm::vec3 front, glm::vec3 up = glm::vec3(0, 1, 0));
     // 平滑过渡摄像机位置
     void TransitionTo(glm::vec3 target, float p);
+
+    // 初始化
+    void InitFrame() {
+        this->lastFrame = 0;
+    }
 
 private:
     Window* window;

@@ -14,7 +14,7 @@ void SceneGame::Start() {
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
-    camera->isGravity = false;
+    camera->isGravity = true;
     camera->SetLookPostion(glm::vec3(10, 26, 10), glm::vec3(0.0));
     // 初始化渲染器
 
@@ -286,12 +286,12 @@ void SceneGame::Start() {
     blockType.push_back(BlockId::Sand);
     blockType.push_back(BlockId::BlueStainedGlassPane);
 
+    camera->InitFrame();
 }
 
 void SceneGame::Update() {
     auto size = window->GetWindowSize();
 
-    camera->Update();
     renderer->SetWindowSize(size.Width, size.Height);
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 256.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
@@ -319,7 +319,6 @@ void SceneGame::Update() {
     // 渲染方块
     renderer->RenderBlock(false);
 
-    camera->isGravity = true;
     {
         ImGui::Begin("Application", NULL, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::SliderFloat("testColorX", &testColor.x, 2, 5);
@@ -327,6 +326,7 @@ void SceneGame::Update() {
         ImGui::SliderFloat("testColorZ", &testColor.z, 2, 5);
         ImGui::End();
     }
+    camera->Update();
 }
 
 glm::vec3 SceneGame::caculateLookingAt() {
