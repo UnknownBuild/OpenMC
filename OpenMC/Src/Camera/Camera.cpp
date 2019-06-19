@@ -15,6 +15,12 @@ Camera::Camera() {
     this->gravity = new Gravity();
     this->collision = new Collision();
     this->isGravity = false;
+    this->FrontVelocity = 0.0f;
+    this->BackVelocity = 0.0f;
+    this->RightVelocity = 0.0f;
+    this->LeftVelocity = 0.0f;
+    this->acceleration = 20.0f;
+    this->state = Air;
 }
 
 glm::mat4 Camera::GetViewMatrix() {
@@ -22,8 +28,9 @@ glm::mat4 Camera::GetViewMatrix() {
 }
 
 void Camera::Update() {
-    this->processInput();
     this->updateDeltaTime();
+    this->processInput();
+    this->updateVelocity();
 
     // 碰撞检测处理
     if (this->collision->checkNegativeX(Position)) {
@@ -39,11 +46,15 @@ void Camera::Update() {
         Position.z = floor(Position.z);
     }
     // 地板检测
-    if (this->collision->checkDown(Position)) {
-        this->gravity->setVelocity(0.0f);
-        Position.y = floor(Position.y + 0.5f);
+    if (this->collision->checkDown(Position) && this->state == Air && this->gravity->getVelocity() < 0) {
+        this->state = Ground;
     }
-    else if(this->isGravity){
+
+    if (!this->collision->checkDown(Position)) {
+        this->state = Air;
+    }
+
+    if (this->isGravity && this->state == Air) {
         Position += WorldUp * this->gravity->UpdateVelocity(deltaTime);
     }
     // 头顶检测
@@ -93,27 +104,54 @@ void Camera::updateDeltaTime() {
     lastFrame = currentFrame;
 }
 
+void Camera::updateVelocity()
+{
+    Position += glm::vec3(Front.x, 0.0f, Front.z) * this->FrontVelocity * deltaTime;
+    Position -= glm::vec3(Front.x, 0.0f, Front.z) * this->BackVelocity * deltaTime;
+    Position += glm::vec3(Right.x, 0.0f, Right.z) * this->RightVelocity * deltaTime;
+    Position -= glm::vec3(Right.x, 0.0f, Right.z) * this->LeftVelocity * deltaTime;
+
+    this->FrontVelocity = this->FrontVelocity - this->acceleration * deltaTime;
+    if (this->FrontVelocity < 0.0f) this->FrontVelocity = 0.0f;
+    this->BackVelocity = this->BackVelocity - this->acceleration * deltaTime;
+    if (this->BackVelocity < 0.0f) this->BackVelocity = 0.0f;
+    this->RightVelocity = this->RightVelocity - this->acceleration * deltaTime;
+    if (this->RightVelocity < 0.0f) this->RightVelocity = 0.0f;
+    this->LeftVelocity = this->LeftVelocity - this->acceleration * deltaTime;
+    if (this->LeftVelocity < 0.0f) this->LeftVelocity = 0.0f;
+    
+}
+
 void Camera::processInput() {
     // 自由视角下键盘控制摄像机方向
     if (this->freedomView) {
-        float velocity = MovementSpeed * deltaTime;
-        if (window->GetKey(GLFW_KEY_W) == GLFW_PRESS)
-            Position += glm::vec3(Front.x, 0.0f, Front.z) * velocity;
-        if (window->GetKey(GLFW_KEY_S) == GLFW_PRESS)
-            Position -= glm::vec3(Front.x, 0.0f, Front.z) * velocity;
-        if (window->GetKey(GLFW_KEY_A) == GLFW_PRESS)
-            Position -= glm::vec3(Right.x, 0.0f, Right.z) * velocity;
-        if (window->GetKey(GLFW_KEY_D) == GLFW_PRESS)
-            Position += glm::vec3(Right.x, 0.0f, Right.z) * velocity;
+        if (window->GetKey(GLFW_KEY_W) == GLFW_PRESS) {
+            this->FrontVelocity = SPEED;
+            this->BackVelocity = 0.0f;
+        }
+        if (window->GetKey(GLFW_KEY_S) == GLFW_PRESS) {
+            this->BackVelocity = SPEED;
+            this->FrontVelocity = 0.0f;
+        }
+        if (window->GetKey(GLFW_KEY_A) == GLFW_PRESS) {
+            this->LeftVelocity = SPEED;
+            this->RightVelocity = 0.0f;
+        }
+        if (window->GetKey(GLFW_KEY_D) == GLFW_PRESS){
+            this->RightVelocity = SPEED;
+            this->LeftVelocity = 0.0f;
+        }
         if (window->GetKey(GLFW_KEY_Q) == GLFW_PRESS)
-            Position += Up * velocity;
+            Position += Up;
         if (window->GetKey(GLFW_KEY_E) == GLFW_PRESS)
-            Position -= Up * velocity;
-        if (window->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS)
-            this->gravity->setVelocity(7.0f);
-            //Position += Up * velocity;
+            Position -= Up;
+        if (window->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS) {
+            this->state = Air;
+            this->gravity->setVelocity(8.0f);
+            this->isGravity = true;
+        }
         if (window->GetKey(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-            Position -= Up * velocity;
+            Position -= Up;
     }
     // 切换模式
     if (window->GetKey(GLFW_KEY_1) == GLFW_PRESS) {
