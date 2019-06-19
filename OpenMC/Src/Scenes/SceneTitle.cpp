@@ -120,7 +120,7 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
             sceneManager->Goto(new SceneLoad());
             break;
         case MenuSettings:
-            sceneManager->Goto(new SceneSettings());
+            this->loadGame = 3;
             break;
         case MenuExit:
             sceneManager->Goto(nullptr);
@@ -139,6 +139,15 @@ void SceneTitle::Update() {
     else if (this->loadGame == 2) {
         SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
         sceneManager->Goto(new SceneGame());
+        return;
+    }
+    else if (this->loadGame == 3) {
+        this->loadGame = 4;
+        return;
+    }
+    else if (this->loadGame == 4) {
+        SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+        sceneManager->Goto(new SceneSettings());
         return;
     }
 

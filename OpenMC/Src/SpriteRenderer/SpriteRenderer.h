@@ -4,6 +4,7 @@
 #include "../Helpers/EnvPath.h"
 #include "../Helpers/Singleton.h"
 #include <list>
+#include <thread>
 #define RENDER_SIZE 32
 #define OFFSET(x, y, z) (int)((x) * RENDER_SIZE * RENDER_SIZE + (y) * RENDER_SIZE + (z))
 
@@ -115,6 +116,7 @@ public:
     // 更改渲染范围
     void SetWindowSize(int w, int h);
 
+    void HideShowBlock();
     void SetShowBlock(glm::vec3 pos, int dir = 0);
 
     Shader* GBufferShader;
@@ -181,4 +183,6 @@ private:
     glm::vec3 showBlock;
     int showDir;
     bool enableShow = false;
+
+    std::thread aoThread;
 };

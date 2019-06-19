@@ -194,7 +194,7 @@
     "name": "oak_log",
     "type": 2,
     "render": 1,
-    "textures": ["oak_log.png", "oak_log.png", "oak_log_top.png"],
+    "textures": ["oak_log_top.png", "oak_log.png", "oak_log_top.png"],
     "colors": [],
     "animation": 0,
     "light": 0
@@ -276,6 +276,26 @@
     "render": 15,
     "textures": ["cauldron_top.png"],
     "colors": [[1.0, 1.0, 1.0, 0.5],[1.0, 1.0, 1.0, 0.15]],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 27,
+    "name": "pumpkin",
+    "type": 2,
+    "render": 1,
+    "textures": ["pumpkin_top.png", "pumpkin_side.png", "pumpkin_top.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
+  },
+  {
+    "id": 28,
+    "name": "melon",
+    "type": 2,
+    "render": 1,
+    "textures": ["melon_top.png", "melon_side.png", "melon_top.png"],
+    "colors": [],
     "animation": 0,
     "light": 0
   }

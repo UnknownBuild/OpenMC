@@ -169,7 +169,9 @@ void SpriteRenderer::ClearBlock() {
             traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
                 delete (*iz).second;
                 });
+            (*iy).second.clear();
             });
+        (*ix).second.clear();
         });
     this->renderRegion.clear();
 }
@@ -326,6 +328,10 @@ void SpriteRenderer::SetShowBlock(glm::vec3 pos, int dir) {
     this->enableShow = true;
     this->showDir = dir;
     this->showBlock = pos;
+}
+
+void SpriteRenderer::HideShowBlock() {
+    this->enableShow = false;
 }
 
 void calcAO(BlockInst* inst, RenderRegionData* region, int posIndex) {
@@ -537,6 +543,7 @@ void calcAO(BlockInst* inst, RenderRegionData* region, int posIndex) {
     }
 }
 
+
 void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 position) {
 
     bool enableLight = false;
@@ -579,7 +586,6 @@ void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 posit
         }
     }
 
-
     // 计算指定方块附近AO
     if (!region->requireUpdate) {
         auto p = getRelaPostion(position);
@@ -594,7 +600,7 @@ void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 posit
                             calcAO(&region->blockData[cell.blockIndex], region, cell.posIndex);
                         }
 
-                   }
+                    }
                 }
             }
         }
@@ -893,7 +899,8 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         } else if (dir == 1) { // 下
             model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1, 0, 0));
         } else { // 四周
-            model = glm::rotate(model, glm::radians(90.0f * (dir - 2)), glm::vec3(0, 1, 0));
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+            model = glm::rotate(model, glm::radians(90.0f * (dir - 2)), glm::vec3(0, 0, 1));
 
         }
         shader->SetMatrix4("model", model);

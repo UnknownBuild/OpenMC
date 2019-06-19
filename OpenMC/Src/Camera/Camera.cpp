@@ -172,6 +172,15 @@ void Camera::processInput() {
     } else {
         keys[KEY_CHANGE] = false;
     }
+    if (window->GetKey(GLFW_KEY_2) == GLFW_PRESS) {
+        if (keys[KEY_GRAVITY] == false) {
+            this->isGravity = !this->isGravity;
+            keys[KEY_GRAVITY] = true;
+        }
+        else {
+            keys[KEY_GRAVITY] = false;
+        }
+    }
 }
 
 void Camera::MouseCallback(double xpos, double ypos) {
@@ -210,11 +219,11 @@ void Camera::MouseCallback(double xpos, double ypos) {
 }
 
 void Camera::ScrollCallback( double xoffset, double yoffset) {
-    if (!freedomView) return;
+    /*if (!freedomView) return;
     if (Zoom >= 1.0f && Zoom <= 45.0f)
         Zoom -= yoffset;
     if (Zoom <= 1.0f)
         Zoom = 1.0f;
     if (Zoom >= 45.0f)
-        Zoom = 45.0f;
+        Zoom = 45.0f;*/
 }
