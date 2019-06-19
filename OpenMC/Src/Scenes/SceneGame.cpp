@@ -15,9 +15,10 @@ void SceneGame::Start() {
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
-    camera->isGravity = false;
-    camera->SetLookPostion(glm::vec3(10, 5, 10), glm::vec3(0.0));
+    camera->isGravity = true;
+    camera->SetLookPostion(glm::vec3(10, 12, 10), glm::vec3(0.0));
     // 初始化渲染器
+
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
     //
@@ -42,7 +43,7 @@ void SceneGame::Start() {
     if (!world->Init("test")) {
         window->Dialog("World Error", "Failed to initializate world.");
     }
-    //world->Draw(renderer);
+    // world->Draw(renderer);
 
     // test begin
     vector<glm::vec3> grassPosition = {
@@ -286,7 +287,7 @@ void SceneGame::Start() {
     renderer->RemoveBlock(glm::vec3(-5, 1, -4));
     renderer->DrawBlock(BlockId::CraftingTable, glm::vec3(-5, 1, -8),2);
 
-    renderer->UpdateLight();
+    //renderer->UpdateLight();
 
     renderer->SetShowBlock(glm::vec3(1, 2, 0));
 
@@ -313,13 +314,15 @@ void SceneGame::Start() {
         buildingHelper->buildTree(glm::vec3(35, 1, -35 + i * 4), i);
     }
     buildingHelper->buildTree(glm::vec3(30, 1, -35), 10);
+    blockType.push_back(BlockId::BlueStainedGlassPane);
+
+    camera->InitFrame();
 }
 
 void SceneGame::Update() {
     auto size = window->GetWindowSize();
 
-    camera->Update();
-    renderer->SetWindowSize(size.Width, size.Height); 
+    renderer->SetWindowSize(size.Width, size.Height);
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 256.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
 
@@ -364,6 +367,7 @@ void SceneGame::Update() {
         ImGui::SliderFloat("testColorZ", &testColor.z, 2, 5);
         ImGui::End();
     }*/
+    camera->Update();
 }
 
 glm::vec3 SceneGame::caculateLookingAt() {
@@ -509,7 +513,7 @@ void SceneGame::Terminate() {
 }
 
 void SceneGame::cursorPosCallback(double xpos, double ypos) {
-    
+
 }
 
 void SceneGame::mouseButtonCallback(int button, int action, int mods) {

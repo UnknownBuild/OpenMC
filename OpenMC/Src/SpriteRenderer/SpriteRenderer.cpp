@@ -1,6 +1,7 @@
 ﻿#include "SpriteRenderer.h"
 #include "../World/Database/BlockData.h"
 #include <functional>
+#include <chrono>
 
 typedef map<int, map<int, map<int, RenderRegionData*>>> XIterator;
 typedef map<int, map<int, RenderRegionData*>> YIterator;
@@ -131,12 +132,12 @@ BlockData SpriteRenderer::GetBlock(glm::vec3 position) {
     return Singleton<BlockManager>::GetInstance()->GetBlockData(cell->id);
 }
 
-void SpriteRenderer::RemoveBlock(glm::vec3 position) {
+void SpriteRenderer::RemoveBlock(glm::vec3 position, bool update) {
     glm::i32vec3 t = getRegionIndex(position);
     RenderRegionData* data = this->renderRegion[t.x][t.y][t.z];
     if (data == nullptr) return;
-    position = getRelaPostion(position);
-    auto cell = &data->blocks[OFFSET(position.x, position.y, position.z)];
+    auto relaPosition = getRelaPostion(position);
+    auto cell = &data->blocks[OFFSET(relaPosition.x, relaPosition.y, relaPosition.z)];
     if (cell->id == BlockId::Air) return;
     auto block = &data->blockData[cell->blockIndex];
     // 重建索引
@@ -145,10 +146,21 @@ void SpriteRenderer::RemoveBlock(glm::vec3 position) {
         data->blocks[OFFSET(pos.x, pos.y, pos.z)].posIndex = posIndex - 1;
     }
     block->position.erase(block->position.begin() + cell->posIndex);
+    block->aoTop.erase(block->aoTop.begin() + cell->posIndex);
+    block->aoBottom.erase(block->aoBottom.begin() + cell->posIndex);
+    block->aoBack.erase(block->aoBack.begin() + cell->posIndex);
+    block->aoFront.erase(block->aoFront.begin() + cell->posIndex);
+    block->aoLeft.erase(block->aoLeft.begin() + cell->posIndex);
+    block->aoRight.erase(block->aoRight.begin() + cell->posIndex);
     cell->id = BlockId::Air;
     cell->blockIndex = 0;
     cell->posIndex = 0;
-    this->updateRegionLight(data);
+    if (update) {
+        this->updateRegionLight(data, position);
+
+    } else {
+        data->requireUpdate = true;
+    }
 }
 
 void SpriteRenderer::ClearBlock() {
@@ -188,15 +200,15 @@ void SpriteRenderer::DrawBlock(BlockId id, glm::vec3 position, int dir) {
                     block.aoBack.push_back(glm::vec4(1.0));
                 }
 
-                position = getRelaPostion(position);
-                BlockCell* cell = &(*region)->blocks[OFFSET(position.x, position.y, position.z)];
+                auto relaPosition = getRelaPostion(position);
+                BlockCell* cell = &(*region)->blocks[OFFSET(relaPosition.x, relaPosition.y, relaPosition.z)];
                 cell->id = id;
                 cell->light = data.Light;
                 cell->posIndex = block.position.size() - 1;
                 cell->blockIndex = blockIndex;
                 cell->init = true;
 
-                this->updateRegionLight(*region);
+                this->updateRegionLight(*region, position);
                 return;
             }
         }
@@ -215,8 +227,8 @@ void SpriteRenderer::DrawBlock(BlockId id, glm::vec3 position, int dir) {
         inst.aoBack.push_back(glm::vec4(1.0));
     }
 
-    position = getRelaPostion(position);
-    BlockCell* cell = &(*region)->blocks[OFFSET(position.x, position.y, position.z)];
+    auto relaPosition = getRelaPostion(position);
+    BlockCell* cell = &(*region)->blocks[OFFSET(relaPosition.x, relaPosition.y, relaPosition.z)];
     cell->id = id;
     cell->light = data.Light;
     cell->posIndex = 0;
@@ -232,7 +244,8 @@ void SpriteRenderer::DrawBlock(BlockId id, glm::vec3 position, int dir) {
     }
     cell->blockIndex = index;
     (*region)->blockData.push_back(inst);
-    this->updateRegionLight(*region);
+    this->updateRegionLight(*region, position);
+
 }
 
 void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir) {
@@ -269,7 +282,7 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
         if (cell->id != BlockId::Air) {
             // 移除旧方块
             if (cell->init) {
-                this->RemoveBlock(position);
+                this->RemoveBlock(position, false);
             } else {
                 //vector<glm::vec4>* positions = &(inst->position);
                 //// 重建索引
@@ -303,6 +316,7 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
                     (*region)->blocks[OFFSET(p.x, p.y, p.z)].init = true;
                 }
                 (*region)->blockData.push_back(instZ.second);
+                (*region)->requireUpdate = true;
             }
         }
     }
@@ -319,6 +333,217 @@ void SpriteRenderer::HideShowBlock() {
 }
 
 void SpriteRenderer::updateRegionLight(RenderRegionData* region) {
+void calcAO(BlockInst* inst, RenderRegionData* region, int posIndex) {
+    BlockManager* blockManager = Singleton<BlockManager>::GetInstance();
+    auto p = getRelaPostion(inst->position[posIndex]);
+    inst->aoTop[posIndex] = glm::vec4(1.0);
+    inst->aoBottom[posIndex] = glm::vec4(1.0);
+    inst->aoLeft[posIndex] = glm::vec4(1.0);
+    inst->aoRight[posIndex] = glm::vec4(1.0);
+    inst->aoFront[posIndex] = glm::vec4(1.0);
+    inst->aoBack[posIndex] = glm::vec4(1.0);
+    float aoValue = 0.6;
+    if (p.y > 0) {
+        if (p.x > 0) {
+            auto blockId = region->blocks[OFFSET(p.x - 1, p.y - 1, p.z)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoLeft[posIndex][0] *= aoValue;
+                inst->aoLeft[posIndex][3] *= aoValue;
+                inst->aoBottom[posIndex][2] *= aoValue;
+                inst->aoBottom[posIndex][3] *= aoValue;
+            }
+        }
+        if (p.x < RENDER_SIZE - 1) {
+            auto blockId = region->blocks[OFFSET(p.x + 1, p.y - 1, p.z)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoRight[posIndex][0] *= aoValue;
+                inst->aoRight[posIndex][3] *= aoValue;
+                inst->aoBottom[posIndex][0] *= aoValue;
+                inst->aoBottom[posIndex][1] *= aoValue;
+            }
+        }
+        if (p.z > 0) {
+            auto blockId = region->blocks[OFFSET(p.x, p.y - 1, p.z - 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoBack[posIndex][0] *= aoValue;
+                inst->aoBack[posIndex][3] *= aoValue;
+                inst->aoBottom[posIndex][0] *= aoValue;
+                inst->aoBottom[posIndex][3] *= aoValue;
+            }
+        }
+        if (p.z < RENDER_SIZE - 1) {
+            auto blockId = region->blocks[OFFSET(p.x, p.y - 1, p.z + 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoFront[posIndex][0] *= aoValue;
+                inst->aoFront[posIndex][3] *= aoValue;
+                inst->aoBottom[posIndex][1] *= aoValue;
+                inst->aoBottom[posIndex][2] *= aoValue;
+            }
+        }
+        if (p.x > 0 && p.z > 0) {
+            auto blockId = region->blocks[OFFSET(p.x - 1, p.y - 1, p.z - 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoBack[posIndex][0] *= aoValue;
+                inst->aoBottom[posIndex][3] *= aoValue;
+                inst->aoLeft[posIndex][3] *= aoValue;
+            }
+        }
+        if (p.x < RENDER_SIZE - 1 && p.z > 0) {
+            auto blockId = region->blocks[OFFSET(p.x + 1, p.y - 1, p.z - 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoBottom[posIndex][0] *= aoValue;
+                inst->aoBack[posIndex][3] *= aoValue;
+                inst->aoRight[posIndex][0] *= aoValue;
+            }
+        }
+        if (p.z < RENDER_SIZE - 1 && p.x > 0) {
+            auto blockId = region->blocks[OFFSET(p.x - 1, p.y - 1, p.z + 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoFront[posIndex][3] *= aoValue;
+                inst->aoLeft[posIndex][0] *= aoValue;
+                inst->aoBottom[posIndex][2] *= aoValue;
+            }
+        }
+        if (p.z < RENDER_SIZE - 1 && p.x < RENDER_SIZE - 1) {
+            auto blockId = region->blocks[OFFSET(p.x + 1, p.y - 1, p.z + 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoBottom[posIndex][1] *= aoValue;
+                inst->aoFront[posIndex][0] *= aoValue;
+                inst->aoRight[posIndex][3] *= aoValue;
+            }
+        }
+    }
+    if (p.x > 0 && p.z > 0) {
+        auto blockId = region->blocks[OFFSET(p.x - 1, p.y, p.z - 1)].id;
+        BlockData data = blockManager->GetBlockData(blockId);
+        if (data.Type == BlockType::Solid) {
+            inst->aoBack[posIndex][0] *= aoValue;
+            inst->aoBack[posIndex][1] *= aoValue;
+            inst->aoLeft[posIndex][2] *= aoValue;
+            inst->aoLeft[posIndex][3] *= aoValue;
+        }
+    }
+    if (p.x < RENDER_SIZE - 1 && p.z > 0) {
+        auto blockId = region->blocks[OFFSET(p.x + 1, p.y, p.z - 1)].id;
+        BlockData data = blockManager->GetBlockData(blockId);
+        if (data.Type == BlockType::Solid) {
+            inst->aoBack[posIndex][2] *= aoValue;
+            inst->aoBack[posIndex][3] *= aoValue;
+            inst->aoRight[posIndex][0] *= aoValue;
+            inst->aoRight[posIndex][1] *= aoValue;
+        }
+    }
+    if (p.z < RENDER_SIZE - 1 && p.x > 0) {
+        auto blockId = region->blocks[OFFSET(p.x - 1, p.y, p.z + 1)].id;
+        BlockData data = blockManager->GetBlockData(blockId);
+        if (data.Type == BlockType::Solid) {
+            inst->aoFront[posIndex][2] *= aoValue;
+            inst->aoFront[posIndex][3] *= aoValue;
+            inst->aoLeft[posIndex][0] *= aoValue;
+            inst->aoLeft[posIndex][1] *= aoValue;
+        }
+    }
+    if (p.z < RENDER_SIZE - 1 && p.x < RENDER_SIZE - 1) {
+        auto blockId = region->blocks[OFFSET(p.x + 1, p.y, p.z + 1)].id;
+        BlockData data = blockManager->GetBlockData(blockId);
+        if (data.Type == BlockType::Solid) {
+            inst->aoFront[posIndex][0] *= aoValue;
+            inst->aoFront[posIndex][1] *= aoValue;
+            inst->aoRight[posIndex][2] *= aoValue;
+            inst->aoRight[posIndex][3] *= aoValue;
+        }
+    }
+
+    if (p.y < RENDER_SIZE - 1) {
+        if (p.x > 0) {
+            auto blockId = region->blocks[OFFSET(p.x - 1, p.y + 1, p.z)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoLeft[posIndex][1] *= aoValue;
+                inst->aoLeft[posIndex][2] *= aoValue;
+                inst->aoTop[posIndex][2] *= aoValue;
+                inst->aoTop[posIndex][3] *= aoValue;
+            }
+        }
+        if (p.x < RENDER_SIZE - 1) {
+            auto blockId = region->blocks[OFFSET(p.x + 1, p.y + 1, p.z)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoRight[posIndex][1] *= aoValue;
+                inst->aoRight[posIndex][2] *= aoValue;
+                inst->aoTop[posIndex][0] *= aoValue;
+                inst->aoTop[posIndex][1] *= aoValue;
+            }
+        }
+        if (p.z > 0) {
+            auto blockId = region->blocks[OFFSET(p.x, p.y + 1, p.z - 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoBack[posIndex][1] *= aoValue;
+                inst->aoBack[posIndex][2] *= aoValue;
+                inst->aoTop[posIndex][1] *= aoValue;
+                inst->aoTop[posIndex][2] *= aoValue;
+            }
+        }
+        if (p.z < RENDER_SIZE - 1) {
+            auto blockId = region->blocks[OFFSET(p.x, p.y + 1, p.z + 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoFront[posIndex][1] *= aoValue;
+                inst->aoFront[posIndex][2] *= aoValue;
+                inst->aoTop[posIndex][0] *= aoValue;
+                inst->aoTop[posIndex][3] *= aoValue;
+            }
+        }
+        if (p.x > 0 && p.z > 0) {
+            auto blockId = region->blocks[OFFSET(p.x - 1, p.y + 1, p.z - 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoBack[posIndex][1] *= aoValue;
+                inst->aoTop[posIndex][2] *= aoValue;
+                inst->aoLeft[posIndex][2] *= aoValue;
+            }
+        }
+        if (p.x < RENDER_SIZE - 1 && p.z > 0) {
+            auto blockId = region->blocks[OFFSET(p.x + 1, p.y + 1, p.z - 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoTop[posIndex][1] *= aoValue;
+                inst->aoBack[posIndex][2] *= aoValue;
+                inst->aoRight[posIndex][1] *= aoValue;
+            }
+        }
+        if (p.z < RENDER_SIZE - 1 && p.x > 0) {
+            auto blockId = region->blocks[OFFSET(p.x - 1, p.y + 1, p.z + 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoFront[posIndex][2] *= aoValue;
+                inst->aoLeft[posIndex][1] *= aoValue;
+                inst->aoTop[posIndex][3] *= aoValue;
+            }
+        }
+        if (p.z < RENDER_SIZE - 1 && p.x < RENDER_SIZE - 1) {
+            auto blockId = region->blocks[OFFSET(p.x + 1, p.y + 1, p.z + 1)].id;
+            BlockData data = blockManager->GetBlockData(blockId);
+            if (data.Type == BlockType::Solid) {
+                inst->aoTop[posIndex][0] *= aoValue;
+                inst->aoFront[posIndex][1] *= aoValue;
+                inst->aoRight[posIndex][2] *= aoValue;
+            }
+        }
+    }
+}
+
+void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 position) {
+
     bool enableLight = false;
     if (enableLight) {
         for (int x = 0; x < RENDER_SIZE; x++) {
@@ -359,216 +584,34 @@ void SpriteRenderer::updateRegionLight(RenderRegionData* region) {
         }
     }
 
-    // 计算实体方块AO
+
+    // 计算指定方块附近AO
+    if (!region->requireUpdate) {
+        auto p = getRelaPostion(position);
+        for (int x = p.x - 1; x <= p.x + 1; x++) {
+            for (int y = p.y - 1; y <= p.y + 1; y++) {
+                for (int z = p.z - 1; z <= p.z + 1; z++) {
+                    if (x >= 0 && x < RENDER_SIZE &&
+                        y >= 0 && y < RENDER_SIZE &&
+                        z >= 0 && z < RENDER_SIZE) {
+                        BlockCell& cell = region->blocks[OFFSET(x, y, z)];
+                        if (cell.id != BlockId::Air) {
+                            calcAO(&region->blockData[cell.blockIndex], region, cell.posIndex);
+                        }
+
+                   }
+                }
+            }
+        }
+        return;
+    }
+    region->requireUpdate = false;
+
+    // 计算所有实体方块AO
     for (auto& blockInst : region->blockData) {
         if (blockInst.data.Type != BlockType::Solid) continue;
         for (int posIndex = 0; posIndex < blockInst.position.size(); posIndex++) {
-            auto p = getRelaPostion(blockInst.position[posIndex]);
-
-            blockInst.aoTop[posIndex] = glm::vec4(1.0);
-            blockInst.aoBottom[posIndex] = glm::vec4(1.0);
-            blockInst.aoLeft[posIndex] = glm::vec4(1.0);
-            blockInst.aoRight[posIndex] = glm::vec4(1.0);
-            blockInst.aoFront[posIndex] = glm::vec4(1.0);
-            blockInst.aoBack[posIndex] = glm::vec4(1.0);
-            float aoValue = 0.6;
-            if (p.y > 0) {
-                if (p.x > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x - 1, p.y - 1, p.z)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoLeft[posIndex][0] *= aoValue;
-                        blockInst.aoLeft[posIndex][3] *= aoValue;
-                        blockInst.aoBottom[posIndex][2] *= aoValue;
-                        blockInst.aoBottom[posIndex][3] *= aoValue;
-                    }
-                }
-                if (p.x < RENDER_SIZE - 1) {
-                    auto blockId = region->blocks[OFFSET(p.x + 1, p.y - 1, p.z)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoRight[posIndex][0] *= aoValue;
-                        blockInst.aoRight[posIndex][3] *= aoValue;
-                        blockInst.aoBottom[posIndex][0] *= aoValue;
-                        blockInst.aoBottom[posIndex][1] *= aoValue;
-                    }
-                }
-                if (p.z > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x, p.y - 1, p.z - 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoBack[posIndex][0] *= aoValue;
-                        blockInst.aoBack[posIndex][3] *= aoValue;
-                        blockInst.aoBottom[posIndex][0] *= aoValue;
-                        blockInst.aoBottom[posIndex][3] *= aoValue;
-                    }
-                }
-                if (p.z < RENDER_SIZE - 1) {
-                    auto blockId = region->blocks[OFFSET(p.x, p.y - 1, p.z + 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoFront[posIndex][0] *= aoValue;
-                        blockInst.aoFront[posIndex][3] *= aoValue;
-                        blockInst.aoBottom[posIndex][1] *= aoValue;
-                        blockInst.aoBottom[posIndex][2] *= aoValue;
-                    }
-                }
-                if (p.x > 0 && p.z > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x - 1, p.y - 1, p.z - 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoBack[posIndex][0] *= aoValue;
-                        blockInst.aoBottom[posIndex][3] *= aoValue;
-                        blockInst.aoLeft[posIndex][3] *= aoValue;
-                    }
-                }
-                if (p.x < RENDER_SIZE - 1 && p.z > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x + 1, p.y - 1, p.z - 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoBottom[posIndex][0] *= aoValue;
-                        blockInst.aoBack[posIndex][3] *= aoValue;
-                        blockInst.aoRight[posIndex][0] *= aoValue;
-                    }
-                }
-                if (p.z < RENDER_SIZE - 1 && p.x > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x - 1, p.y - 1, p.z + 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoFront[posIndex][3] *= aoValue;
-                        blockInst.aoLeft[posIndex][0] *= aoValue;
-                        blockInst.aoBottom[posIndex][2] *= aoValue;
-                    }
-                }
-                if (p.z < RENDER_SIZE - 1 && p.x < RENDER_SIZE - 1) {
-                    auto blockId = region->blocks[OFFSET(p.x + 1, p.y - 1, p.z + 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoBottom[posIndex][1] *= aoValue;
-                        blockInst.aoFront[posIndex][0] *= aoValue;
-                        blockInst.aoRight[posIndex][3] *= aoValue;
-                    }
-                }
-            }
-            if (p.x > 0 && p.z > 0) {
-                auto blockId = region->blocks[OFFSET(p.x - 1, p.y, p.z - 1)].id;
-                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                if (data.Type == BlockType::Solid) {
-                    blockInst.aoBack[posIndex][0] *= aoValue;
-                    blockInst.aoBack[posIndex][1] *= aoValue;
-                    blockInst.aoLeft[posIndex][2] *= aoValue;
-                    blockInst.aoLeft[posIndex][3] *= aoValue;
-                }
-            }
-            if (p.x < RENDER_SIZE - 1 && p.z > 0) {
-                auto blockId = region->blocks[OFFSET(p.x + 1, p.y, p.z - 1)].id;
-                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                if (data.Type == BlockType::Solid) {
-                    blockInst.aoBack[posIndex][2] *= aoValue;
-                    blockInst.aoBack[posIndex][3] *= aoValue;
-                    blockInst.aoRight[posIndex][0] *= aoValue;
-                    blockInst.aoRight[posIndex][1] *= aoValue;
-                }
-            }
-            if (p.z < RENDER_SIZE - 1 && p.x > 0) {
-                auto blockId = region->blocks[OFFSET(p.x - 1, p.y, p.z + 1)].id;
-                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                if (data.Type == BlockType::Solid) {
-                    blockInst.aoFront[posIndex][2] *= aoValue;
-                    blockInst.aoFront[posIndex][3] *= aoValue;
-                    blockInst.aoLeft[posIndex][0] *= aoValue;
-                    blockInst.aoLeft[posIndex][1] *= aoValue;
-                }
-            }
-            if (p.z < RENDER_SIZE - 1 && p.x < RENDER_SIZE - 1) {
-                auto blockId = region->blocks[OFFSET(p.x + 1, p.y, p.z + 1)].id;
-                BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                if (data.Type == BlockType::Solid) {
-                    blockInst.aoFront[posIndex][0] *= aoValue;
-                    blockInst.aoFront[posIndex][1] *= aoValue;
-                    blockInst.aoRight[posIndex][2] *= aoValue;
-                    blockInst.aoRight[posIndex][3] *= aoValue;
-                }
-            }
-
-            if (p.y < RENDER_SIZE - 1) {
-                if (p.x > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x - 1, p.y + 1, p.z)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoLeft[posIndex][1] *= aoValue;
-                        blockInst.aoLeft[posIndex][2] *= aoValue;
-                        blockInst.aoTop[posIndex][2] *= aoValue;
-                        blockInst.aoTop[posIndex][3] *= aoValue;
-                    }
-                }
-                if (p.x < RENDER_SIZE - 1) {
-                    auto blockId = region->blocks[OFFSET(p.x + 1, p.y + 1, p.z)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoRight[posIndex][1] *= aoValue;
-                        blockInst.aoRight[posIndex][2] *= aoValue;
-                        blockInst.aoTop[posIndex][0] *= aoValue;
-                        blockInst.aoTop[posIndex][1] *= aoValue;
-                    }
-                }
-                if (p.z > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x, p.y + 1, p.z - 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoBack[posIndex][1] *= aoValue;
-                        blockInst.aoBack[posIndex][2] *= aoValue;
-                        blockInst.aoTop[posIndex][1] *= aoValue;
-                        blockInst.aoTop[posIndex][2] *= aoValue;
-                    }
-                }
-                if (p.z < RENDER_SIZE - 1) {
-                    auto blockId = region->blocks[OFFSET(p.x, p.y + 1, p.z + 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoFront[posIndex][1] *= aoValue;
-                        blockInst.aoFront[posIndex][2] *= aoValue;
-                        blockInst.aoTop[posIndex][0] *= aoValue;
-                        blockInst.aoTop[posIndex][3] *= aoValue;
-                    }
-                }
-                if (p.x > 0 && p.z > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x - 1, p.y + 1, p.z - 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoBack[posIndex][1] *= aoValue;
-                        blockInst.aoTop[posIndex][2] *= aoValue;
-                        blockInst.aoLeft[posIndex][2] *= aoValue;
-                    }
-                }
-                if (p.x < RENDER_SIZE - 1 && p.z > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x + 1, p.y + 1, p.z - 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoTop[posIndex][1] *= aoValue;
-                        blockInst.aoBack[posIndex][2] *= aoValue;
-                        blockInst.aoRight[posIndex][1] *= aoValue;
-                    }
-                }
-                if (p.z < RENDER_SIZE - 1 && p.x > 0) {
-                    auto blockId = region->blocks[OFFSET(p.x - 1, p.y + 1, p.z + 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoFront[posIndex][2] *= aoValue;
-                        blockInst.aoLeft[posIndex][1] *= aoValue;
-                        blockInst.aoTop[posIndex][3] *= aoValue;
-                    }
-                }
-                if (p.z < RENDER_SIZE - 1 && p.x < RENDER_SIZE - 1) {
-                    auto blockId = region->blocks[OFFSET(p.x + 1, p.y + 1, p.z + 1)].id;
-                    BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(blockId);
-                    if (data.Type == BlockType::Solid) {
-                        blockInst.aoTop[posIndex][0] *= aoValue;
-                        blockInst.aoFront[posIndex][1] *= aoValue;
-                        blockInst.aoRight[posIndex][2] *= aoValue;
-                    }
-                }
-            }
+            calcAO(&blockInst, region, posIndex);
         }
     }
 }
@@ -576,13 +619,13 @@ void SpriteRenderer::updateRegionLight(RenderRegionData* region) {
 // 更新光照
 void SpriteRenderer::UpdateLight() {
     // 遍历每个渲染区块
-    traverseMap<XIterator::iterator>(this->renderRegion.begin(), this->renderRegion.end(), [&](XIterator::iterator ix) {
-        traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
-            traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator block) {
-                this->updateRegionLight((*block).second);
-                });
-            });
-        });
+    //traverseMap<XIterator::iterator>(this->renderRegion.begin(), this->renderRegion.end(), [&](XIterator::iterator ix) {
+    //    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+    //        traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator block) {
+    //            this->updateRegionLight((*block).second);
+    //            });
+    //        });
+    //    });
 }
 
 bool SpriteRenderer::isVisable(float x, float y, float z) {
@@ -693,6 +736,16 @@ void SpriteRenderer::renderBlock(RenderRegionData* region, Shader* shader) {
     if (region == nullptr) return;
     for (auto index : region->blockIndex) {
         auto block = &region->blockData[index];
+        if (region->requireUpdate && block->position.size() != 0) {
+            glm::vec3 regionPos = block->position[0] - glm::vec4(this->viewPos, 0);
+            float regionDis = abs(regionPos.x) + abs(regionPos.y) + abs(regionPos.z);
+            // 按需更新近距离AO
+            if (regionDis < RENDER_SIZE * 3) {
+                printf("Start Update AO\n");
+                this->updateRegionLight(region);
+                printf("Finish Update AO\n");
+            }
+        }
         int frame = 0;
         if (block->data.Animation != 0) {
             frame = (this->renderFrame / block->data.Animation) % block->data.Textures.size();

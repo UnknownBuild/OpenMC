@@ -1,4 +1,4 @@
-﻿#version 330 core
+#version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
@@ -102,7 +102,7 @@ void main() {
 	vec3 viewDir = normalize(viewPos - FragPos);
 
 	lightColor = CalcDirLight(dirLight, norm, viewDir);
-	
+
     float cameraDistance = distance(viewPos, vec3(position));
     fogFactor = 1 - pow(e, -pow(cameraDistance * 0.01, 2));
     // 近距离光照阴影计算

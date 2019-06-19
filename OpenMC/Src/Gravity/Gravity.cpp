@@ -3,7 +3,7 @@
 Gravity::Gravity()
 {
     this->able = true;
-    this->a = 30.0f;
+    this->a = 60.0f;
     this->velocity = 0.0f;
 }
 
