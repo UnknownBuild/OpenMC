@@ -21,9 +21,9 @@ struct PointList {
     float quadratic;
 };
 
-//  this->DrawBlock(block.Textures, block.Colors, block.Render, &position[0], position.size(), dir, frame);
 struct BlockInst {
     BlockData data;
+    int dir;
     vector<glm::vec4> position;
 
     vector<glm::vec4> aoTop;
@@ -32,7 +32,6 @@ struct BlockInst {
     vector<glm::vec4> aoRight;
     vector<glm::vec4> aoFront;
     vector<glm::vec4> aoBack;
-    int dir;
 };
 
 struct BlockCell {
@@ -64,7 +63,7 @@ public:
     // 渲染模型
     void DrawSprite(Model& model, glm::vec3 position,
         glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f),
-        GLfloat rotate = 0.0f);
+        GLfloat rotate = 0.0f, bool explode = false);
     // 添加方块
     void DrawBlock(const vector<Texture2D>& textures, const vector<glm::vec4>& colors,
         RenderType type, const vector<glm::vec4>& position,
@@ -116,6 +115,8 @@ public:
     // 更改渲染范围
     void SetWindowSize(int w, int h);
 
+    void SetShowBlock(glm::vec3 pos);
+
     Shader* GBufferShader;
     Shader* SsaoShader;
     Shader* SsaoBlurShader;
@@ -140,6 +141,8 @@ private:
     Shader* skyShader;
     Shader* flatShader;
     Shader* fontShader;
+    Shader* lineShader;
+    // Shader* explodeObjectShader;
     // 纹理
     Texture2D* skyBox;
 
@@ -174,4 +177,7 @@ private:
 
     glm::mat4 depthProjection;
     glm::mat4 lightSpaceMatrix;
+
+    glm::vec3 showBlock;
+    bool enableShow = false;
 };
