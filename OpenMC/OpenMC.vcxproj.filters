@@ -48,6 +48,12 @@
     <Filter Include="Src\Math">
       <UniqueIdentifier>{9ef60024-8ed6-4228-a325-cb3c427361b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Src\Gravity">
+      <UniqueIdentifier>{89649b2c-6440-4f59-9afb-c98b329ab626}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Collision">
+      <UniqueIdentifier>{92a4ac15-2515-4874-8fe7-065e2001c10f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\main.cpp">
@@ -100,6 +106,12 @@
     </ClCompile>
     <ClCompile Include="Src\World\World.cpp">
       <Filter>Src\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Gravity\Gravity.cpp">
+      <Filter>Src\Gravity</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Collision\Collision.cpp">
+      <Filter>Src\Collision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -201,6 +213,12 @@
     </ClInclude>
     <ClInclude Include="Src\Scenes\SceneSettings.h">
       <Filter>Src\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Gravity\Gravity.h">
+      <Filter>Src\Gravity</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Collision\Collision.h">
+      <Filter>Src\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -14,16 +14,18 @@ void SceneGame::Start() {
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
+    camera->isGravity = true;
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
     // 初始化资源
-    ResourceManager::LoadTexture(EnvPath::FocusImage, "focus");
+    ResourceManager::LoadTexture(EnvPath::FocusImage, "focus"); 
     // 初始化世界
     world = Singleton<World>::GetInstance();
     if (!world->Init("test")) {
         window->Dialog("World Error", "Failed to initializate world.");
     }
+    //world->Draw(renderer);
 
     // test begin
     vector<glm::vec3> grassPosition = {
@@ -304,7 +306,7 @@ void SceneGame::Update() {
     // 渲染Looking At
     renderer->RenderText("looking: " + ss.str(), glm::vec2(size.Width - 400, size.Height - 20), 0.4);
     std::stringstream ss2;
-    ss2 << (int)this->position.x << ", " << (int)this->position.y << ", " << (int)this->position.z;
+    ss2 << this->position.x << ", " << this->position.y << ", " << this->position.z;
     renderer->RenderText("position: " + ss2.str(), glm::vec2(size.Width - 400, size.Height - 40), 0.4);
 
     // 渲染准星

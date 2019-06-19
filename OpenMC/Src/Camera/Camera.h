@@ -8,11 +8,13 @@
 
 #include "../Helpers/UtilTool.h"
 #include "../Systems/Input.h"
+#include "../Gravity/Gravity.h"
+#include "../Collision/Collision.h"
 
 // 默认参数
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 10.0f;
+const float SPEED = 8.0f;
 const float SENSITIVITY = 0.05f;
 const float ZOOM = 45.0f;
 
@@ -51,6 +53,9 @@ public:
     // 滚轮缩放
     float Zoom;
 
+    // 重力
+    bool isGravity;
+
     // 获取视图矩阵
     glm::mat4 GetViewMatrix();
     // 处理鼠标移动
@@ -66,6 +71,8 @@ public:
 
 private:
     Window* window;
+    Gravity* gravity;
+    Collision* collision;
 
     void setAngle();
     glm::vec3 oldPostion;

@@ -193,6 +193,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\Camera\Camera.cpp" />
+    <ClCompile Include="Src\Collision\Collision.cpp" />
+    <ClCompile Include="Src\Gravity\Gravity.cpp" />
     <ClCompile Include="Src\Helpers\Config.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Math\PerlinNoise.cpp" />
@@ -212,6 +214,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Camera\Camera.h" />
+    <ClInclude Include="Src\Collision\Collision.h" />
+    <ClInclude Include="Src\Gravity\Gravity.h" />
     <ClInclude Include="Src\Helpers\Config.h" />
     <ClInclude Include="Src\Helpers\EnvPath.h" />
     <ClInclude Include="Src\Helpers\Singleton.h" />
