@@ -37,6 +37,7 @@ enum class BlockId : uint8_t {
     Select = 255,
     Pumpkin = 27,
     Melon = 28,
+    Quartz = 29,
 };
 
 enum class BlockType : uint8_t {

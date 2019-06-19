@@ -37,6 +37,7 @@ void SceneGame::Start() {
     ResourceManager::LoadTexture(EnvPath::PumpkinImage, "Pumpkin");
     ResourceManager::LoadTexture(EnvPath::StoneImage, "CrackedStoneBricks");
     ResourceManager::LoadTexture(EnvPath::CobblestoneImage, "CobbleStone");
+    ResourceManager::LoadTexture(EnvPath::QuartzImage, "Quartz");
     ResourceManager::LoadTexture(EnvPath::FocusImage, "focus"); 
     // 初始化世界
     world = Singleton<World>::GetInstance();
@@ -307,15 +308,16 @@ void SceneGame::Start() {
     blockType.push_back(BlockId::Pumpkin);
     blockType.push_back(BlockId::Melon);
     blockType.push_back(BlockId::Glass);
+    blockType.push_back(BlockId::Quartz);
     current_index = 0;
     newBlockDirection = 0;
     newBlockPosition = glm::vec3(0, 0, 0);
 
     for (int i = 1; i <= 4; i++) {
-        buildingHelper->buildTree(glm::vec3(35, 1, -35 + i * 4), i);
+        buildingHelper->buildTree(glm::vec3(35, 2, -35 + i * 4), i);
     }
-    buildingHelper->buildTree(glm::vec3(30, 1, -35), 10);
- 
+    buildingHelper->buildTree(glm::vec3(30, 2, -35), 10);
+    buildingHelper->buildHouse(glm::vec3(20, 2, -20));
 
     camera->InitFrame();
 }
@@ -437,6 +439,9 @@ void SceneGame::showBlockPicture() {
         break;
     case BlockId::Glass:
         renderer->DrawTexture(ResourceManager::GetTexture("Glass"), glm::vec2(size.Width - 120, 120), 0.3f);
+        break;
+    case BlockId::Quartz:
+        renderer->DrawTexture(ResourceManager::GetTexture("Quartz"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     default:
         break;

@@ -24,6 +24,7 @@ namespace EnvPath {
     const std::string PumpkinImage = TextureDir + "gui/Pumpkin.png";
     const std::string StoneImage = TextureDir + "gui/Stone.png";
     const std::string CobblestoneImage = TextureDir + "gui/Cobblestone.png";
+    const std::string QuartzImage = TextureDir + "gui/Block_of_Quartz.png";
 
     // Save
     const std::string SaveDir = "Saves/";
