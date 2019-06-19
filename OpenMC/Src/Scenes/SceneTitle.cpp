@@ -86,7 +86,7 @@ void SceneTitle::initBlocks() {
     renderer->DrawBlock(BlockId::BrownMushroom, mushroomPosition, 0);
     renderer->DrawBlock(BlockId::OakLog, oakPosition, 0);
     renderer->DrawBlock(BlockId::OakLeaves, leavesPosition, 0);
-    renderer->UpdateLight();
+    this->loadGame = 0;
 }
 
 void SceneTitle::cursorPosCallback(double xpos, double ypos) {
@@ -109,7 +109,7 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
         SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
         switch (menuItem) {
         case MenuStart:
-            sceneManager->Goto(new SceneGame());
+            this->loadGame = 1;
             break;
         case MenuLoad:
             break;
@@ -125,6 +125,16 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
 
 void SceneTitle::Update() {
     auto size = window->GetWindowSize();
+    // 加载动画
+    if (this->loadGame == 1) {
+        this->loadGame = 2;
+        return;
+    }
+    else if (this->loadGame == 2) {
+        SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+        sceneManager->Goto(new SceneGame());
+        return;
+    }
 
     // 更新摄像机和渲染器
     float camPosX = sin(glfwGetTime() / 4) * 15;

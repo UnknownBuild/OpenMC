@@ -15,7 +15,7 @@ void SceneGame::Start() {
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
     camera->isGravity = true;
-    camera->SetLookPostion(glm::vec3(10, 26, 10), glm::vec3(0.0));
+    camera->SetLookPostion(glm::vec3(10, 12, 10), glm::vec3(0.0));
     // 初始化渲染器
 
     renderer = Singleton<SpriteRenderer>::GetInstance();
