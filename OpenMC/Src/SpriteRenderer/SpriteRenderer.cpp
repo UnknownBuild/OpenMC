@@ -169,7 +169,9 @@ void SpriteRenderer::ClearBlock() {
             traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator iz) {
                 delete (*iz).second;
                 });
+            (*iy).second.clear();
             });
+        (*ix).second.clear();
         });
     this->renderRegion.clear();
 }
@@ -584,7 +586,6 @@ void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 posit
         }
     }
 
-
     // 计算指定方块附近AO
     if (!region->requireUpdate) {
         auto p = getRelaPostion(position);
@@ -599,7 +600,7 @@ void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 posit
                             calcAO(&region->blockData[cell.blockIndex], region, cell.posIndex);
                         }
 
-                   }
+                    }
                 }
             }
         }

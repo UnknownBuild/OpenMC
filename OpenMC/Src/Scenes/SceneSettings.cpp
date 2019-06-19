@@ -28,6 +28,7 @@ void SceneSettings::Start() {
     }
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
+    renderer->ClearBlock();
     renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
     // 初始化资源
     ResourceManager::LoadTexture(EnvPath::GameTitleImage, "title");
@@ -89,10 +90,22 @@ void SceneSettings::Start() {
     renderer->DrawBlock(BlockId::BrownMushroom, mushroomPosition, 0);
     renderer->DrawBlock(BlockId::OakLog, oakPosition, 0);
     renderer->DrawBlock(BlockId::OakLeaves, leavesPosition, 0);
+
+    this->loadScene = 0;
 }
 
 void SceneSettings::Update() {
     auto size = window->GetWindowSize();
+
+    if (this->loadScene == 1) {
+        this->loadScene = 2;
+        return;
+    }
+    else if (this->loadScene == 2) {
+        SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+        sceneManager->Goto(new SceneTitle());
+        return;
+    }
 
     // 更新摄像机和渲染器
     float camPosX = sin(glfwGetTime() / 4) * 15;
@@ -173,7 +186,7 @@ void SceneSettings::mouseButtonCallback(int button, int action, int mods) {
             if (sightDistance > Min_Distance) sightDistance--;
             break;
         case Setting_Exit:
-            sceneManager->Goto(new SceneTitle());
+            this->loadScene = 1;
             break;
         case Setting_Save:
 
