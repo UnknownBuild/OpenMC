@@ -307,6 +307,10 @@ void SpriteRenderer::SetShowBlock(glm::vec3 pos) {
     this->showBlock = pos;
 }
 
+void SpriteRenderer::HideShowBlock() {
+    this->enableShow = false;
+}
+
 void SpriteRenderer::updateRegionLight(RenderRegionData* region) {
     bool enableLight = false;
     if (enableLight) {

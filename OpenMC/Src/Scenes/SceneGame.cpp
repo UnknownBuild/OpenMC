@@ -18,6 +18,8 @@ void SceneGame::Start() {
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
+    //
+    buildingHelper = new BuildingHelper();
     // 初始化资源
     ResourceManager::LoadTexture(EnvPath::FocusImage, "focus");
     ResourceManager::LoadTexture(EnvPath::GrassBlockImage, "GrassBlock");
@@ -296,8 +298,14 @@ void SceneGame::Start() {
     blockType.push_back(BlockId::Sand);
     blockType.push_back(BlockId::CraftingTable);
     blockType.push_back(BlockId::Furnace);
+    blockType.push_back(BlockId::Pumpkin);
+    blockType.push_back(BlockId::Melon);
     current_index = 0;
-    
+
+    for (int i = 1; i <= 4; i++) {
+        buildingHelper->buildTree(glm::vec3(35, 1, -35 + i * 4), i);
+    }
+    buildingHelper->buildTree(glm::vec3(30, 1, -35), 10);
 }
 
 void SceneGame::Update() {
@@ -310,7 +318,12 @@ void SceneGame::Update() {
 
     position = glm::vec3((int)camera->Position.x, (int)camera->Position.y, (int)camera->Position.z);
     lookingAt = caculateLookingAt();
-    renderer->SetShowBlock(lookingAt);
+    if (renderer->GetBlock(lookingAt).Id != BlockId::Air) {
+        renderer->SetShowBlock(lookingAt);
+    }
+    else {
+        renderer->HideShowBlock();
+    }
 
     // 渲染FPS
     renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);
@@ -345,7 +358,7 @@ void SceneGame::Update() {
 
 glm::vec3 SceneGame::caculateLookingAt() {
     glm::vec3 result = camera->Position;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 10; i++) {
         result.x += camera->Front.x * 1.0;
         result.y += camera->Front.y * 1.0;
         result.z += camera->Front.z * 1.0;
@@ -362,49 +375,76 @@ glm::vec3 SceneGame::caculateLookingAt() {
     return result;
 }
 
+glm::vec3 SceneGame::getIntPosition(glm::vec3 pos) {
+    glm::vec3 result;
+    result.x = pos.x > 0 ? floor(pos.x) : floor(pos.x) - 1.0;
+    result.y = pos.y > 0 ? floor(pos.x) : floor(pos.y) - 1.0;
+    result.z = pos.z > 0 ? floor(pos.z) : floor(pos.z) - 1.0;
+    return result;
+}
+
 void SceneGame::showBlockPicture() {
     auto size = window->GetWindowSize();
     switch (blockType[current_index])
     {
     case BlockId::GrassBlock:
-        renderer->DrawTexture(ResourceManager::GetTexture("GrassBlock"), glm::vec2(size.Width - 180, 180), 0.5f);
+        renderer->DrawTexture(ResourceManager::GetTexture("GrassBlock"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     case BlockId::CobbleStone:
-        renderer->DrawTexture(ResourceManager::GetTexture("CobbleStone"), glm::vec2(size.Width - 180, 180), 0.5f);
+        renderer->DrawTexture(ResourceManager::GetTexture("CobbleStone"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     case BlockId::CrackedStoneBricks:
-        renderer->DrawTexture(ResourceManager::GetTexture("CrackedStoneBricks"), glm::vec2(size.Width - 180, 180), 0.5f);
+        renderer->DrawTexture(ResourceManager::GetTexture("CrackedStoneBricks"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     case BlockId::OakLog:
-        renderer->DrawTexture(ResourceManager::GetTexture("OakLog"), glm::vec2(size.Width - 180, 180), 0.5f);
+        renderer->DrawTexture(ResourceManager::GetTexture("OakLog"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     case BlockId::Sand:
-        renderer->DrawTexture(ResourceManager::GetTexture("Sand"), glm::vec2(size.Width - 180, 180), 0.5f);
+        renderer->DrawTexture(ResourceManager::GetTexture("Sand"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     case BlockId::CraftingTable:
-        renderer->DrawTexture(ResourceManager::GetTexture("CraftingTable"), glm::vec2(size.Width - 180, 180), 0.5f);
+        renderer->DrawTexture(ResourceManager::GetTexture("CraftingTable"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     case BlockId::Furnace:
-        renderer->DrawTexture(ResourceManager::GetTexture("Furnace"), glm::vec2(size.Width - 180, 180), 0.5f);
+        renderer->DrawTexture(ResourceManager::GetTexture("Furnace"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     case BlockId::OakPlanks:
-        renderer->DrawTexture(ResourceManager::GetTexture("OakPlanks"), glm::vec2(size.Width - 180, 180), 0.5f);
+        renderer->DrawTexture(ResourceManager::GetTexture("OakPlanks"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     case BlockId::OakLeaves:
-        renderer->DrawTexture(ResourceManager::GetTexture("OakLeaves"), glm::vec2(size.Width - 180, 180), 0.5f);
+        renderer->DrawTexture(ResourceManager::GetTexture("OakLeaves"), glm::vec2(size.Width - 120, 120), 0.3f);
+        break;
+    case BlockId::Pumpkin:
+        renderer->DrawTexture(ResourceManager::GetTexture("Pumpkin"), glm::vec2(size.Width - 120, 120), 0.3f);
+        break;
+    case BlockId::Melon:
+        renderer->DrawTexture(ResourceManager::GetTexture("Melon"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
     default:
         break;
     }
+    renderer->RenderText("block type", glm::vec2(size.Width - 170, 60), 0.3);
 }
 
 glm::vec3 SceneGame::getNewBlockPosition() {
-    glm::vec3 result = position;
+    glm::vec3 result = lookingAt;
+    result.x = round(result.x);
+    result.y = round(result.y);
+    result.z = round(result.z);
 
-    for (int i = 0; i < 6; i++) {
-
+    glm::vec3 angle = camera->Front * normal[0];
+    float maxViewCos = angle.x + angle.y + angle.z;
+    int index = 0;
+    for (int i = 1; i < 6; i++) {
+        angle = camera->Front * normal[i];
+        float viewCos = angle.x + angle.y + angle.z;
+        if (viewCos > maxViewCos) {
+            maxViewCos = viewCos;
+            index = i;
+        }
     }
-    return result;
+    
+    return result - normal[index];
 }
 
 void SceneGame::Terminate() {
@@ -416,7 +456,9 @@ void SceneGame::cursorPosCallback(double xpos, double ypos) {
 
 void SceneGame::mouseButtonCallback(int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        renderer->DrawBlock(blockType[current_index], lookingAt);
+        if (renderer->GetBlock(lookingAt).Id != BlockId::Air) {
+            renderer->DrawBlock(blockType[current_index], getNewBlockPosition());
+        }
     }
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         renderer->RemoveBlock(lookingAt);

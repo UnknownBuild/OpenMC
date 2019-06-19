@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "BuildingHelper.h"
 #include "../Camera/Camera.h"
 #include "../SpriteRenderer/SpriteRenderer.h"
 #include "../World/World.h"
@@ -16,11 +17,13 @@ public:
     void showBlockPicture();
     glm::vec3 caculateLookingAt();
     glm::vec3 getNewBlockPosition();
+    glm::vec3 getIntPosition(glm::vec3 pos);
 
 private:
     SpriteRenderer* renderer;
     Camera* camera;
     World* world;
+    BuildingHelper* buildingHelper;
 
     glm::vec3 lookingAt;
     glm::vec3 position;

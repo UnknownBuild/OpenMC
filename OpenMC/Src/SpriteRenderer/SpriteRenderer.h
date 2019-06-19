@@ -117,6 +117,7 @@ public:
     void SetWindowSize(int w, int h);
 
     void SetShowBlock(glm::vec3 pos);
+    void HideShowBlock();
 
     Shader* GBufferShader;
     Shader* SsaoShader;
