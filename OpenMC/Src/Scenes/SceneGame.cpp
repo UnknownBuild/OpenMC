@@ -21,7 +21,6 @@ void SceneGame::Start() {
     camera->SetLookPostion(player->Position, glm::vec3(0, 10, 3));
     Input<0>::OnKeyClick += std::bind(&SceneGame::keyCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     Input<0>::OnScrollChanged += std::bind(&SceneGame::ScrollCallback, this, std::placeholders::_1, std::placeholders::_2);
-    // 初始化摄像机
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
@@ -399,7 +398,6 @@ void SceneGame::Update() {
         ImGui::SliderFloat("testColorZ", &testColor.z, 2, 5);
         ImGui::End();
     }*/
-    camera->Update();
 }
 
 glm::vec3 SceneGame::caculateLookingAt() {
