@@ -14,9 +14,10 @@ void SceneGame::Start() {
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
-    camera->isGravity = true;
-    camera->SetLookPostion(glm::vec3(10, 5, 10), glm::vec3(0.0));
+    camera->isGravity = false;
+    camera->SetLookPostion(glm::vec3(10, 26, 10), glm::vec3(0.0));
     // 初始化渲染器
+
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
     // 初始化资源
@@ -270,7 +271,7 @@ void SceneGame::Start() {
     renderer->RemoveBlock(glm::vec3(-5, 1, -4));
     renderer->DrawBlock(BlockId::CraftingTable, glm::vec3(-5, 1, -8),2);
 
-    renderer->UpdateLight();
+    //renderer->UpdateLight();
 
     renderer->SetShowBlock(glm::vec3(1, 2, 0));
 
@@ -318,6 +319,7 @@ void SceneGame::Update() {
     // 渲染方块
     renderer->RenderBlock(false);
 
+    camera->isGravity = true;
     {
         ImGui::Begin("Application", NULL, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::SliderFloat("testColorX", &testColor.x, 2, 5);

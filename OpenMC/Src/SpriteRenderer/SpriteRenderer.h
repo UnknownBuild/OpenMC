@@ -4,7 +4,7 @@
 #include "../Helpers/EnvPath.h"
 #include "../Helpers/Singleton.h"
 #include <list>
-#define RENDER_SIZE 24
+#define RENDER_SIZE 32
 #define OFFSET(x, y, z) (int)((x) * RENDER_SIZE * RENDER_SIZE + (y) * RENDER_SIZE + (z))
 
 struct PointList {
@@ -82,7 +82,7 @@ public:
     // 添加单个方块并更新区块光照
     void DrawBlock(BlockId id, glm::vec3 position, int dir = 0);
     // 删除指定位置方块并更新区块光照
-    void RemoveBlock(glm::vec3 position);
+    void RemoveBlock(glm::vec3 position, bool update = true);
     // 更新光照
     void UpdateLight();
     // 删除所有方块
@@ -125,7 +125,7 @@ public:
     Shader* blockShadowShader;
 private:
     void initRenderData();
-    void updateRegionLight(RenderRegionData *r);
+    void updateRegionLight(RenderRegionData* region, glm::vec3 position = glm::vec3(0));
 
 
     unsigned int makeVAO(float* vertices, int verticesLen, unsigned int* indices, int indicesLen);
