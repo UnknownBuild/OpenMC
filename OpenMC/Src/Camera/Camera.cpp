@@ -102,6 +102,7 @@ void Camera::updateDeltaTime() {
     if (lastFrame == 0) lastFrame = glfwGetTime();
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
+    if (deltaTime > 0.05) deltaTime = 0.05;
     lastFrame = currentFrame;
 }
 
