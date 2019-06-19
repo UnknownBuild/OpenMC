@@ -18,7 +18,7 @@ const float SPEED = 8.0f;
 const float SENSITIVITY = 0.05f;
 const float ZOOM = 45.0f;
 
-enum CameraKey { KEY_CHANGE };
+enum CameraKey { KEY_CHANGE, KEY_GRAVITY };
 
 class Camera {
 public:

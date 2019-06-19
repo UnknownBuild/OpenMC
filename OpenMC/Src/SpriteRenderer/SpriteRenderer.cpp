@@ -845,7 +845,8 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         } else if (dir == 1) { // 下
             model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1, 0, 0));
         } else { // 四周
-            model = glm::rotate(model, glm::radians(90.0f * (dir - 2)), glm::vec3(0, 1, 0));
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
+            model = glm::rotate(model, glm::radians(90.0f * (dir - 2)), glm::vec3(0, 0, 1));
 
         }
         shader->SetMatrix4("model", model);

@@ -2,8 +2,8 @@
 
 #include "SceneGame.h"
 
-glm::vec3 normal[6] = { glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), glm::vec3(-1, 0, 0),
-                        glm::vec3(1, 0, 0), glm::vec3(0, 0, 1), glm::vec3(0, 0, -1) };
+glm::vec3 normal[6] = { glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), glm::vec3(0, 0, 1),
+                        glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec3(-1, 0, 0) };
 
 void SceneGame::Start() {
     // 初始化输入层
@@ -15,7 +15,7 @@ void SceneGame::Start() {
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
-    camera->isGravity = true;
+    camera->isGravity = false;
     camera->SetLookPostion(glm::vec3(10, 5, 10), glm::vec3(0.0));
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
@@ -306,6 +306,8 @@ void SceneGame::Start() {
     blockType.push_back(BlockId::Pumpkin);
     blockType.push_back(BlockId::Melon);
     current_index = 0;
+    newBlockDirection = 0;
+    newBlockPosition = glm::vec3(0, 0, 0);
 
     for (int i = 1; i <= 4; i++) {
         buildingHelper->buildTree(glm::vec3(35, 1, -35 + i * 4), i);
@@ -317,14 +319,17 @@ void SceneGame::Update() {
     auto size = window->GetWindowSize();
 
     camera->Update();
-    renderer->SetWindowSize(size.Width, size.Height);
+    renderer->SetWindowSize(size.Width, size.Height); 
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 256.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
 
     position = glm::vec3((int)camera->Position.x, (int)camera->Position.y, (int)camera->Position.z);
     lookingAt = caculateLookingAt();
+    // newBlockPosition = getNewBlockPosition();
+    updateNewBlockPosition();
     if (renderer->GetBlock(lookingAt).Id != BlockId::Air) {
-        renderer->SetShowBlock(lookingAt);
+        
+        renderer->SetShowBlock(lookingAt, newBlockDirection);
     }
     else {
         renderer->HideShowBlock();
@@ -433,23 +438,71 @@ void SceneGame::showBlockPicture() {
 
 glm::vec3 SceneGame::getNewBlockPosition() {
     glm::vec3 result = lookingAt;
+    glm::vec3 direction = lookingAt - camera->Position;
     result.x = round(result.x);
     result.y = round(result.y);
     result.z = round(result.z);
 
-    glm::vec3 angle = camera->Front * normal[0];
+    glm::vec3 angle = direction * normal[0];
     float maxViewCos = angle.x + angle.y + angle.z;
     int index = 0;
     for (int i = 1; i < 6; i++) {
-        angle = camera->Front * normal[i];
+        angle = direction * normal[i];
         float viewCos = angle.x + angle.y + angle.z;
         if (viewCos > maxViewCos) {
             maxViewCos = viewCos;
             index = i;
         }
     }
-    
+
+    newBlockDirection = index;
     return result - normal[index];
+}
+
+void SceneGame::updateNewBlockPosition() {
+    glm::vec3 pos = camera->Position;
+    glm::vec3 front = camera->Front;
+    glm::vec3 temp;
+    float border[6] = { lookingAt.y + 0.5, lookingAt.y - 0.5, lookingAt.z + 0.5, lookingAt.x + 0.5, lookingAt.z - 0.5, lookingAt.x - 0.5 };
+    int direction = 0;
+
+    float t, x, y, z, b;
+    if (front.x != 0) {
+        b = front.x < 0 ? border[3] : border[5];
+        t = (b - pos.x) / front.x;
+        y = pos.y + front.y * t;
+        z = pos.z + front.z * t;
+        if (y >= border[1] && y <= border[0] && z >= border[4] && z <= border[2]) {
+            direction = front.x < 0 ? 3 : 5;
+        }
+    }
+    if (front.y != 0) {
+        b = front.y < 0 ? border[0] : border[1];
+        t = (b - pos.y) / front.y;
+        x = pos.x + front.x * t;
+        z = pos.z + front.z * t;
+        if (x >= border[5] && x <= border[3] && z >= border[4] && z <= border[2]) {
+            direction = front.y < 0 ? 0 : 1;
+        }
+    }
+    if (front.z != 0) {
+        b = front.z < 0 ? border[2] : border[4];
+        t = (b - pos.z) / front.z;
+        x = pos.x + front.x * t;
+        y = pos.y + front.y * t;
+        if (x >= border[5] && x <= border[3] && y >= border[1] && y <= border[0]) {
+            direction = front.z < 0 ? 2 : 4;
+        }
+    }
+
+    newBlockDirection = direction;
+    if (newBlockDirection == 3) {
+        newBlockDirection = 5;
+    }
+    else if (newBlockDirection == 5) {
+        newBlockDirection = 3;
+    }
+    newBlockPosition = lookingAt + normal[direction];
 }
 
 void SceneGame::Terminate() {
@@ -462,7 +515,7 @@ void SceneGame::cursorPosCallback(double xpos, double ypos) {
 void SceneGame::mouseButtonCallback(int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         if (renderer->GetBlock(lookingAt).Id != BlockId::Air) {
-            renderer->DrawBlock(blockType[current_index], getNewBlockPosition());
+            renderer->DrawBlock(blockType[current_index], newBlockPosition );
         }
     }
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {

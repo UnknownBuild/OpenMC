@@ -109,9 +109,12 @@ void Camera::processInput() {
         //    Position += Up * velocity;
         //if (window->GetKey(GLFW_KEY_E) == GLFW_PRESS)
         //    Position -= Up * velocity;
-        if (window->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS)
-            this->gravity->setVelocity(7.0f);
-            //Position += Up * velocity;
+        if (window->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS) {
+            if(this->isGravity)
+                this->gravity->setVelocity(7.0f);
+            else
+                Position += Up * velocity;
+        }
         if (window->GetKey(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
             Position -= Up * velocity;
     }
@@ -131,6 +134,15 @@ void Camera::processInput() {
         }
     } else {
         keys[KEY_CHANGE] = false;
+    }
+    if (window->GetKey(GLFW_KEY_2) == GLFW_PRESS) {
+        if (keys[KEY_GRAVITY] == false) {
+            this->isGravity = !this->isGravity;
+            keys[KEY_GRAVITY] = true;
+        }
+        else {
+            keys[KEY_GRAVITY] = false;
+        }
     }
 }
 

@@ -18,6 +18,7 @@ public:
     glm::vec3 caculateLookingAt();
     glm::vec3 getNewBlockPosition();
     glm::vec3 getIntPosition(glm::vec3 pos);
+    void updateNewBlockPosition();
 
 private:
     SpriteRenderer* renderer;
@@ -29,6 +30,8 @@ private:
     glm::vec3 position;
     vector<BlockId> blockType;
     int current_index;
+    int newBlockDirection;
+    glm::vec3 newBlockPosition;
 
     // test
     glm::vec3 testColor = glm::vec3(2, 2, 2);
