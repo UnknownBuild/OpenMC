@@ -21,6 +21,19 @@ void SceneLoad::Start() {
     }
     world->Draw(renderer);
     camera->InitFrame();
+
+
+    this->sceneExiting = false;
+    renderer->aoThread = std::thread([&]() {
+        while (!sceneExiting) {
+            renderer->UpdateLight();
+            for (int i = 0; i < 10; i++) {
+                Sleep(100);
+                if (sceneExiting) break;
+            }
+            if (sceneExiting) break;
+        }
+        });
 }
 
 void SceneLoad::Update() {
@@ -46,4 +59,7 @@ void SceneLoad::Update() {
     camera->Update();
 }
 
-void SceneLoad::Terminate() {}
+void SceneLoad::Terminate() {
+    sceneExiting = true;
+    renderer->aoThread.join();
+}

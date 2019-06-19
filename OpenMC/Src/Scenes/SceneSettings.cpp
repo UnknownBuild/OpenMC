@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include "SceneManager.h"
 #include "SceneTitle.h"
+#include <windows.h>
 
 void SceneSettings::Start() {
     Input<0>* input = Singleton<Input<0>>::GetInstance();
@@ -39,7 +40,7 @@ void SceneSettings::Start() {
     vector<glm::vec3> grassPosition;
     for (int i = -30; i < 30; i++) {
         for (int j = -30; j < 30; j++) {
-            grassPosition.push_back(glm::vec3(i, -1, j));
+            grassPosition.push_back(glm::vec3(i, 0, j));
         }
     }
     vector<glm::vec3> sea_lanternPosition = {
@@ -70,19 +71,19 @@ void SceneSettings::Start() {
     for (int i = 0; i < 50; i++) {
         int x = rand() % 41 - 20;
         int z = rand() % 41 - 20;
-        dandelionPosition.push_back(glm::vec3(x, 0, z));
+        dandelionPosition.push_back(glm::vec3(x, 1, z));
     }
     vector<glm::vec3> mushroomPosition;
     for (int i = 0; i < 50; i++) {
         int x = rand() % 41 - 20;
         int z = rand() % 41 - 20;
-        mushroomPosition.push_back(glm::vec3(x, 0, z));
+        mushroomPosition.push_back(glm::vec3(x, 1, z));
     }
     vector<glm::vec3> blue_orchidPosition;
     for (int i = 0; i < 50; i++) {
         int x = rand() % 41 - 20;
         int z = rand() % 41 - 20;
-        blue_orchidPosition.push_back(glm::vec3(x, 0, z));
+        blue_orchidPosition.push_back(glm::vec3(x, 1, z));
     }
 
     renderer->DrawBlock(BlockId::GrassBlock, grassPosition, 0);
@@ -95,6 +96,18 @@ void SceneSettings::Start() {
     this->loadScene = 0;
 
     std::cout << time(NULL) - t << std::endl;
+
+    this->sceneExiting = false;
+    renderer->aoThread = std::thread([&]() {
+        while (!sceneExiting) {
+            renderer->UpdateLight();
+            for (int i = 0; i < 10; i++) {
+                Sleep(100);
+                if (sceneExiting) break;
+            }
+            if (sceneExiting) break;
+        }
+        });
 }
 
 void SceneSettings::Update() {
@@ -203,6 +216,6 @@ void SceneSettings::mouseButtonCallback(int button, int action, int mods) {
 }
 
 void SceneSettings::Terminate() {
-
+    this->sceneExiting = true;
+    renderer->aoThread.join();
 }
-

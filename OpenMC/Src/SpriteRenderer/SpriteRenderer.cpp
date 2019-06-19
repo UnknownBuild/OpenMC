@@ -623,6 +623,7 @@ void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 posit
 // 更新光照
 void SpriteRenderer::UpdateLight() {
     // 遍历每个渲染区块
+    if (this->renderRegion.size() == 0) return;
     traverseMap<XIterator::iterator>(this->renderRegion.begin(), this->renderRegion.end(), [&](XIterator::iterator ix) {
         traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
             traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator block) {
@@ -633,11 +634,12 @@ void SpriteRenderer::UpdateLight() {
         });
 }
 void SpriteRenderer::RenderAO(RenderRegionData* region, int x, int y, int z) {
+    if (region == nullptr) return;
     if (region->requireUpdate) {
-        glm::vec3 regionPos = glm::vec4(x,y,z,0) - glm::vec4(this->viewPos, 0);
+        glm::vec3 regionPos = glm::vec4(x * RENDER_SIZE,y * RENDER_SIZE,z * RENDER_SIZE,0) - glm::vec4(this->viewPos, 0);
         float regionDis = abs(regionPos.x) + abs(regionPos.y) + abs(regionPos.z);
         // 按需更新近距离AO
-        if (regionDis < RENDER_SIZE * 3) {
+        if (regionDis < RENDER_SIZE * 2) {
             printf("Start Update AO\n");
             // this->updateRegionLight(region);
             for (auto& blockInst : region->blockData) {

@@ -319,11 +319,15 @@ void SceneGame::Start() {
 
     camera->InitFrame();
 
-    this->sceneExiting = true;
+    this->sceneExiting = false;
     renderer->aoThread = std::thread([&]() {
-        while (sceneExiting) {
+        while (!sceneExiting) {
             renderer->UpdateLight();
-            Sleep(1000);
+            for (int i = 0; i < 10; i++) {
+                Sleep(100);
+                if (sceneExiting) break;
+            }
+            if (sceneExiting) break;
         }
         });
 
@@ -524,7 +528,7 @@ void SceneGame::updateNewBlockPosition() {
 
 void SceneGame::Terminate() {
     this->sceneExiting = true;
-    renderer->aoThread.detach();
+    renderer->aoThread.join();
 }
 
 void SceneGame::cursorPosCallback(double xpos, double ypos) {
