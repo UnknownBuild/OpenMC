@@ -199,8 +199,10 @@
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Math\PerlinNoise.cpp" />
     <ClCompile Include="Src\ResourceManager\ResourceManager.cpp" />
+    <ClCompile Include="Src\Scenes\BuildingHelper.cpp" />
     <ClCompile Include="Src\Scenes\Scene.cpp" />
     <ClCompile Include="Src\Scenes\SceneGame.cpp" />
+    <ClCompile Include="Src\Scenes\SceneLoad.cpp" />
     <ClCompile Include="Src\Scenes\SceneManager.cpp" />
     <ClCompile Include="Src\Scenes\SceneMenu.cpp" />
     <ClCompile Include="Src\Scenes\SceneSettings.cpp" />
@@ -229,8 +231,10 @@
     <ClInclude Include="Src\ResourceManager\ResourceManager.h" />
     <ClInclude Include="Src\ResourceManager\Shader.h" />
     <ClInclude Include="Src\ResourceManager\Texture.h" />
+    <ClInclude Include="Src\Scenes\BuildingHelper.h" />
     <ClInclude Include="Src\Scenes\Scene.h" />
     <ClInclude Include="Src\Scenes\SceneGame.h" />
+    <ClInclude Include="Src\Scenes\SceneLoad.h" />
     <ClInclude Include="Src\Scenes\SceneManager.h" />
     <ClInclude Include="Src\Scenes\SceneMenu.h" />
     <ClInclude Include="Src\Scenes\SceneSettings.h" />

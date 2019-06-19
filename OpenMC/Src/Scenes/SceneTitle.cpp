@@ -1,8 +1,10 @@
 ﻿#include <ctime>
 #include <imgui.h>
+#include <iostream>
 
 #include "../Helpers/EnvPath.h"
 #include "SceneGame.h"
+#include "SceneLoad.h"
 #include "SceneSettings.h"
 #include "SceneManager.h"
 #include "SceneTitle.h"
@@ -19,6 +21,7 @@ void SceneTitle::Start() {
     camera = Singleton<Camera>::GetInstance();
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
+    renderer->ClearBlock();
     renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
     // 初始化资源
     ResourceManager::LoadTexture(EnvPath::GameTitleImage, "title");
@@ -26,7 +29,9 @@ void SceneTitle::Start() {
     ResourceManager::LoadModel("Resources/Models/Duck/duck.obj", "duck");
     ResourceManager::LoadModel("Resources/Models/JJMonster2/jj2.obj", "jjm2");
 
+    time_t t = time(NULL);
     initBlocks();
+    std::cout << time(NULL) - t << std::endl;
 }
 
 void SceneTitle::initBlocks() {
@@ -86,7 +91,7 @@ void SceneTitle::initBlocks() {
     renderer->DrawBlock(BlockId::BrownMushroom, mushroomPosition, 0);
     renderer->DrawBlock(BlockId::OakLog, oakPosition, 0);
     renderer->DrawBlock(BlockId::OakLeaves, leavesPosition, 0);
-    renderer->UpdateLight();
+    this->loadGame = 0;
 }
 
 void SceneTitle::cursorPosCallback(double xpos, double ypos) {
@@ -109,12 +114,13 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
         SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
         switch (menuItem) {
         case MenuStart:
-            sceneManager->Goto(new SceneGame());
+            this->loadGame = 1;
             break;
         case MenuLoad:
+            sceneManager->Goto(new SceneLoad());
             break;
         case MenuSettings:
-            sceneManager->Goto(new SceneSettings());
+            this->loadGame = 3;
             break;
         case MenuExit:
             sceneManager->Goto(nullptr);
@@ -125,6 +131,25 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
 
 void SceneTitle::Update() {
     auto size = window->GetWindowSize();
+    // 加载动画
+    if (this->loadGame == 1) {
+        this->loadGame = 2;
+        return;
+    }
+    else if (this->loadGame == 2) {
+        SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+        sceneManager->Goto(new SceneGame());
+        return;
+    }
+    else if (this->loadGame == 3) {
+        this->loadGame = 4;
+        return;
+    }
+    else if (this->loadGame == 4) {
+        SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+        sceneManager->Goto(new SceneSettings());
+        return;
+    }
 
     // 更新摄像机和渲染器
     float camPosX = sin(glfwGetTime() / 4) * 15;

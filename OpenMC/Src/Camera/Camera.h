@@ -18,7 +18,7 @@ const float SPEED = 5.0f;
 const float SENSITIVITY = 0.05f;
 const float ZOOM = 45.0f;
 
-enum CameraKey { KEY_CHANGE };
+enum CameraKey { KEY_CHANGE, KEY_GRAVITY };
 
 class Camera {
 public:
@@ -81,6 +81,11 @@ public:
     void SetViewPostion(glm::vec3 pos, glm::vec3 front, glm::vec3 up = glm::vec3(0, 1, 0));
     // 平滑过渡摄像机位置
     void TransitionTo(glm::vec3 target, float p);
+
+    // 初始化
+    void InitFrame() {
+        this->lastFrame = 0;
+    }
 
 private:
     Window* window;

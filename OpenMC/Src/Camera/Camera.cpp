@@ -69,42 +69,44 @@ void Camera::TransitionTo(glm::vec3 target, float p) {
 }
 
 void Camera::updateDeltaTime() {
+    if (lastFrame == 0) lastFrame = glfwGetTime();
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
+    if (deltaTime > 0.05) deltaTime = 0.05;
     lastFrame = currentFrame;
 }
 
 void Camera::processInput() {
     // 自由视角下键盘控制摄像机方向
-    if (this->freedomView) {
-        if (window->GetKey(GLFW_KEY_W) == GLFW_PRESS) {
-            this->FrontVelocity = SPEED;
-            this->BackVelocity = 0.0f;
-        }
-        if (window->GetKey(GLFW_KEY_S) == GLFW_PRESS) {
-            this->BackVelocity = SPEED;
-            this->FrontVelocity = 0.0f;
-        }
-        if (window->GetKey(GLFW_KEY_A) == GLFW_PRESS) {
-            this->LeftVelocity = SPEED;
-            this->RightVelocity = 0.0f;
-        }
-        if (window->GetKey(GLFW_KEY_D) == GLFW_PRESS){
-            this->RightVelocity = SPEED;
-            this->LeftVelocity = 0.0f;
-        }
-        if (window->GetKey(GLFW_KEY_Q) == GLFW_PRESS)
-            Position += Up;
-        if (window->GetKey(GLFW_KEY_E) == GLFW_PRESS)
-            Position -= Up;
-        if (window->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS) {
-            this->state = Air;
-            this->gravity->setVelocity(8.0f);
-            this->isGravity = true;
-        }
-        if (window->GetKey(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-            Position -= Up;
-    }
+    // if (this->freedomView) {
+    //     if (window->GetKey(GLFW_KEY_W) == GLFW_PRESS) {
+    //         this->FrontVelocity = SPEED;
+    //         this->BackVelocity = 0.0f;
+    //     }
+    //     if (window->GetKey(GLFW_KEY_S) == GLFW_PRESS) {
+    //         this->BackVelocity = SPEED;
+    //         this->FrontVelocity = 0.0f;
+    //     }
+    //     if (window->GetKey(GLFW_KEY_A) == GLFW_PRESS) {
+    //         this->LeftVelocity = SPEED;
+    //         this->RightVelocity = 0.0f;
+    //     }
+    //     if (window->GetKey(GLFW_KEY_D) == GLFW_PRESS){
+    //         this->RightVelocity = SPEED;
+    //         this->LeftVelocity = 0.0f;
+    //     }
+    //     if (window->GetKey(GLFW_KEY_Q) == GLFW_PRESS)
+    //         Position += Up;
+    //     if (window->GetKey(GLFW_KEY_E) == GLFW_PRESS)
+    //         Position -= Up;
+    //     if (window->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS) {
+    //         this->state = Air;
+    //         this->gravity->setVelocity(8.0f);
+    //         this->isGravity = true;
+    //     }
+    //     if (window->GetKey(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    //         Position -= Up;
+    // }
     // 切换模式
     if (window->GetKey(GLFW_KEY_1) == GLFW_PRESS) {
         if (keys[KEY_CHANGE] == false) {
@@ -133,6 +135,15 @@ void Camera::processInput() {
             this->isPerspective = false;
         }
     }
+    // if (window->GetKey(GLFW_KEY_2) == GLFW_PRESS) {
+    //     if (keys[KEY_GRAVITY] == false) {
+    //         this->isGravity = !this->isGravity;
+    //         keys[KEY_GRAVITY] = true;
+    //     }
+    //     else {
+    //         keys[KEY_GRAVITY] = false;
+    //     }
+    // }
 }
 
 void Camera::MouseCallback(double xpos, double ypos) {
@@ -171,11 +182,11 @@ void Camera::MouseCallback(double xpos, double ypos) {
 }
 
 void Camera::ScrollCallback( double xoffset, double yoffset) {
-    if (!freedomView) return;
+    /*if (!freedomView) return;
     if (Zoom >= 1.0f && Zoom <= 45.0f)
         Zoom -= yoffset;
     if (Zoom <= 1.0f)
         Zoom = 1.0f;
     if (Zoom >= 45.0f)
-        Zoom = 45.0f;
+        Zoom = 45.0f;*/
 }
