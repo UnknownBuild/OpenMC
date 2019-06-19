@@ -209,6 +209,7 @@
     <ClCompile Include="Src\Scenes\SceneTitle.cpp" />
     <ClCompile Include="Src\SpriteRenderer\SpriteRenderer.cpp" />
     <ClCompile Include="Src\Systems\Window.cpp" />
+    <ClCompile Include="Src\World\Characters\Player.cpp" />
     <ClCompile Include="Src\World\Database\BlockManager.cpp" />
     <ClCompile Include="Src\World\Map\MapGenerator.cpp" />
     <ClCompile Include="Src\World\Map\MapManager.cpp" />
