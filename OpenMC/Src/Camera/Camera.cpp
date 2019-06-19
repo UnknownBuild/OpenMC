@@ -12,6 +12,8 @@ Camera::Camera() {
     this->MouseSensitivity = SENSITIVITY;
     this->Zoom = ZOOM;
     this->freedomView = false;
+    this->gravity = new Gravity();
+    this->collision = new Collision();
 }
 
 glm::mat4 Camera::GetViewMatrix() {
@@ -21,6 +23,33 @@ glm::mat4 Camera::GetViewMatrix() {
 void Camera::Update() {
     this->processInput();
     this->updateDeltaTime();
+
+    // 碰撞检测处理
+    if (this->collision->checkNegativeX(Position)) {
+        Position.x = ceil(Position.x);
+    }
+    if (this->collision->checkPositiveX(Position)) {
+        Position.x = floor(Position.x);
+    }
+    if (this->collision->checkNegativeZ(Position)) {
+        Position.z = ceil(Position.z);
+    }
+    if (this->collision->checkPositiveZ(Position)) {
+        Position.z = floor(Position.z);
+    }
+    // 地板检测
+    if (this->collision->checkDown(Position)) {
+        this->gravity->setVelocity(0.0f);
+        Position.y = floor(Position.y + 0.5f);
+    }
+    else {
+        Position += WorldUp * this->gravity->UpdateVelocity(deltaTime);
+    }
+    // 头顶检测
+    if (this->collision->checkUp(Position)) {
+        Position.y = floor(Position.y);
+        this->gravity->setVelocity(0.0f);
+    }
 }
 
 void Camera::SetLookPostion(glm::vec3 pos, glm::vec3 look) {
@@ -68,19 +97,20 @@ void Camera::processInput() {
     if (this->freedomView) {
         float velocity = MovementSpeed * deltaTime;
         if (window->GetKey(GLFW_KEY_W) == GLFW_PRESS)
-            Position += Front * velocity;
+            Position += glm::vec3(Front.x, 0.0f, Front.z) * velocity;
         if (window->GetKey(GLFW_KEY_S) == GLFW_PRESS)
-            Position -= Front * velocity;
+            Position -= glm::vec3(Front.x, 0.0f, Front.z) * velocity;
         if (window->GetKey(GLFW_KEY_A) == GLFW_PRESS)
-            Position -= Right * velocity;
+            Position -= glm::vec3(Right.x, 0.0f, Right.z) * velocity;
         if (window->GetKey(GLFW_KEY_D) == GLFW_PRESS)
-            Position += Right * velocity;
+            Position += glm::vec3(Right.x, 0.0f, Right.z) * velocity;
         if (window->GetKey(GLFW_KEY_Q) == GLFW_PRESS)
             Position += Up * velocity;
         if (window->GetKey(GLFW_KEY_E) == GLFW_PRESS)
             Position -= Up * velocity;
         if (window->GetKey(GLFW_KEY_SPACE) == GLFW_PRESS)
-            Position += Up * velocity;
+            this->gravity->setVelocity(7.0f);
+            //Position += Up * velocity;
         if (window->GetKey(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
             Position -= Up * velocity;
     }

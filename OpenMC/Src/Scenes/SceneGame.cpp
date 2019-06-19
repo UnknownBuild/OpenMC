@@ -290,7 +290,7 @@ void SceneGame::Update() {
     // 渲染Looking At
     renderer->RenderText("looking: " + ss.str(), glm::vec2(size.Width - 400, size.Height - 20), 0.4);
     std::stringstream ss2;
-    ss2 << (int)this->position.x << ", " << (int)this->position.y << ", " << (int)this->position.z;
+    ss2 << this->position.x << ", " << this->position.y << ", " << this->position.z;
     renderer->RenderText("position: " + ss2.str(), glm::vec2(size.Width - 400, size.Height - 40), 0.4);
 
     // 渲染准星
