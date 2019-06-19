@@ -53,6 +53,9 @@ public:
     // 滚轮缩放
     float Zoom;
 
+    // 重力
+    bool isGravity;
+
     // 获取视图矩阵
     glm::mat4 GetViewMatrix();
     // 处理鼠标移动

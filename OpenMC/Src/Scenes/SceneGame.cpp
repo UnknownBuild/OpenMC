@@ -14,6 +14,7 @@ void SceneGame::Start() {
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
+    camera->isGravity = true;
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();

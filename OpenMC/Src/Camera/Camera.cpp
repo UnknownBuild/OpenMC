@@ -14,6 +14,7 @@ Camera::Camera() {
     this->freedomView = false;
     this->gravity = new Gravity();
     this->collision = new Collision();
+    this->isGravity = false;
 }
 
 glm::mat4 Camera::GetViewMatrix() {
@@ -42,7 +43,7 @@ void Camera::Update() {
         this->gravity->setVelocity(0.0f);
         Position.y = floor(Position.y + 0.5f);
     }
-    else {
+    else if(this->isGravity){
         Position += WorldUp * this->gravity->UpdateVelocity(deltaTime);
     }
     // 头顶检测
