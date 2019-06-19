@@ -19,7 +19,6 @@ void SceneGame::Start() {
     camera->isGravity = true;
     camera->SetLookPostion(glm::vec3(10, 12, 10), glm::vec3(0.0));
     // 初始化渲染器
-
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
     //
