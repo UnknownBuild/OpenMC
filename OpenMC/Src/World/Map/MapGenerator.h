@@ -15,19 +15,12 @@ private:
     void genBasicTerrain(Chunk* chunk, int32_t x, int32_t z);
     void genDensityMap(int32_t xOffset, int32_t yOffset, int32_t zOffset);
 
-    OctaveNoise<PerlinNoise> depthNoise;
-    OctaveNoise<PerlinNoise> mainNoise;
-    OctaveNoise<PerlinNoise> maxNoise;
-    OctaveNoise<PerlinNoise> minNoise;
-    OctaveNoise<PerlinNoise> surfaceNoise;
-
-    std::vector<std::vector<std::vector<float>>> heightMap;
-    std::vector<std::vector<std::vector<float>>> densityMap;
-    std::vector<std::vector<std::vector<float>>> depthMap;
-    std::vector<std::vector<std::vector<float>>> mainNoiseMap;
-    std::vector<std::vector<std::vector<float>>> maxLimitMap;
-    std::vector<std::vector<std::vector<float>>> minLimitMap;
-    std::vector<std::vector<std::vector<float>>> surfaceMap;
+    OctaveNoise<PerlinNoise> depthNoise1;
+    OctaveNoise<PerlinNoise> depthNoise2;
+    OctaveNoise<PerlinNoise> thicknessNoise;
+    OctaveNoise<PerlinNoise> grassNoise;
+    OctaveNoise<PerlinNoise> flowerNoise;
+    OctaveNoise<PerlinNoise> treeNoise;
 
     std::default_random_engine engine;
     std::uniform_int_distribution<uint32_t> rand;

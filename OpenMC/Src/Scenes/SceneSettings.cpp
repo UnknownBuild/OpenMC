@@ -33,6 +33,7 @@ void SceneSettings::Start() {
     ResourceManager::LoadTexture(EnvPath::GameTitleImage, "title");
 
     // 渲染场景
+    time_t t = time(NULL);
     srand(static_cast<unsigned int>(time(0)));
     vector<glm::vec3> grassPosition;
     for (int i = -30; i < 30; i++) {
@@ -89,6 +90,8 @@ void SceneSettings::Start() {
     renderer->DrawBlock(BlockId::BrownMushroom, mushroomPosition, 0);
     renderer->DrawBlock(BlockId::OakLog, oakPosition, 0);
     renderer->DrawBlock(BlockId::OakLeaves, leavesPosition, 0);
+
+    std::cout << time(NULL) - t << std::endl;
 }
 
 void SceneSettings::Update() {

@@ -1,5 +1,6 @@
 ﻿#include <ctime>
 #include <imgui.h>
+#include <iostream>
 
 #include "../Helpers/EnvPath.h"
 #include "SceneGame.h"
@@ -28,7 +29,9 @@ void SceneTitle::Start() {
     ResourceManager::LoadModel("Resources/Models/Duck/duck.obj", "duck");
     ResourceManager::LoadModel("Resources/Models/JJMonster2/jj2.obj", "jjm2");
 
+    time_t t = time(NULL);
     initBlocks();
+    std::cout << time(NULL) - t << std::endl;
 }
 
 void SceneTitle::initBlocks() {
