@@ -298,5 +298,15 @@
     "colors": [],
     "animation": 0,
     "light": 0
+  },
+  {
+    "id": 29,
+    "name": "quartz",
+    "type": 2,
+    "render": 12,
+    "textures": ["quartz_block_side.png"],
+    "colors": [],
+    "animation": 0,
+    "light": 0
   }
 ]

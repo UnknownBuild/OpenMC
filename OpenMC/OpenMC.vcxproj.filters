@@ -116,6 +116,9 @@
     <ClCompile Include="Src\Collision\Collision.cpp">
       <Filter>Src\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="Src\World\Characters\Player.cpp">
+      <Filter>Src\World\Characters</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Scenes\SceneLoad.cpp">
       <Filter>Src\Scenes</Filter>
     </ClCompile>

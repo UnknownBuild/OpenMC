@@ -92,6 +92,24 @@ void SceneTitle::initBlocks() {
     renderer->DrawBlock(BlockId::OakLog, oakPosition, 0);
     renderer->DrawBlock(BlockId::OakLeaves, leavesPosition, 0);
     this->loadGame = 0;
+
+
+    this->sceneExiting = false;
+    renderer->aoThread = std::thread([&]() {
+        while (!sceneExiting) {
+            renderer->UpdateLight();
+            for (int i = 0; i < 10; i++) {
+                Sleep(100);
+                if (sceneExiting) break;
+            }
+            if (sceneExiting) break;
+        }
+        });
+}
+
+void SceneTitle::Terminate() {
+    this->sceneExiting = true;
+    renderer->aoThread.join();
 }
 
 void SceneTitle::cursorPosCallback(double xpos, double ypos) {
@@ -117,7 +135,7 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
             this->loadGame = 1;
             break;
         case MenuLoad:
-            sceneManager->Goto(new SceneLoad());
+            this->loadGame = 5;
             break;
         case MenuSettings:
             this->loadGame = 3;
@@ -148,6 +166,15 @@ void SceneTitle::Update() {
     else if (this->loadGame == 4) {
         SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
         sceneManager->Goto(new SceneSettings());
+        return;
+    }
+    else if (this->loadGame == 5) {
+        this->loadGame = 6;
+        return;
+    }
+    else if (this->loadGame == 6) {
+        SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+        sceneManager->Goto(new SceneLoad());
         return;
     }
 

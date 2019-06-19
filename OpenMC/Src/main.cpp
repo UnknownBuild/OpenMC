@@ -4,6 +4,7 @@
 
 #include "Scenes/SceneManager.h"
 #include "Scenes/SceneTitle.h"
+#include "World/Characters/Player.h"
 #include "Helpers/Config.h"
 #include "Helpers/Singleton.h"
 #include "Systems/Input.h"
@@ -31,6 +32,9 @@ int main() {
     // 初始化摄像头
     Camera* camera = Singleton<Camera>::GetInstance();
     camera->Bind(window);
+    // 初始化玩家
+    Player* player = Singleton<Player>::GetInstance();
+    player->Bind(window);
 
     // 初始化方块管理
     Singleton<BlockManager>::GetInstance()->Load();

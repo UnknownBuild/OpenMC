@@ -119,12 +119,17 @@ public:
     void HideShowBlock();
     void SetShowBlock(glm::vec3 pos, int dir = 0);
 
+
+    void RenderAO(RenderRegionData* region, int x, int y, int z);
+
     Shader* GBufferShader;
     Shader* SsaoShader;
     Shader* SsaoBlurShader;
     Shader* SsaoLightShader;
     Shader* DepthShader;
     Shader* blockShadowShader;
+
+    std::thread aoThread;
 private:
     void initRenderData();
     void updateRegionLight(RenderRegionData* region, glm::vec3 position = glm::vec3(0));
@@ -184,5 +189,4 @@ private:
     int showDir;
     bool enableShow = false;
 
-    std::thread aoThread;
 };
