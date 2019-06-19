@@ -14,7 +14,7 @@
 // 默认参数
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 8.0f;
+const float SPEED = 5.0f;
 const float SENSITIVITY = 0.05f;
 const float ZOOM = 45.0f;
 
@@ -53,8 +53,18 @@ public:
     // 滚轮缩放
     float Zoom;
 
+    // 移动
+    float FrontVelocity;
+    float BackVelocity;
+    float RightVelocity;
+    float LeftVelocity;
+    // 加速度
+    float acceleration;
     // 重力
     bool isGravity;
+
+    enum State { Ground, Air };
+    State state;
 
     // 获取视图矩阵
     glm::mat4 GetViewMatrix();
@@ -80,6 +90,7 @@ private:
 
     void processInput();
     void updateDeltaTime();
+    void updateVelocity();
 
     bool freedomView = false;
 

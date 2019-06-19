@@ -20,8 +20,7 @@ glm::vec3 Collision::adjustPosition(glm::vec3 position)
 
 bool Collision::checkDown(glm::vec3 postion)
 {
-    float view_height = 1.5f;
-    postion.y -= view_height;
+    postion.y -= 2.0f;
     return checkPosition(postion);
 }
 
@@ -59,7 +58,7 @@ bool Collision::checkPosition(glm::vec3 postion)
 {
     postion = adjustPosition(postion);
     BlockData data = Singleton<SpriteRenderer>::GetInstance()->GetBlock(postion);
-    return data.Type != BlockType::None;
+    return !(data.Type == BlockType::None || data.Type  == BlockType::Liquid);
 }
 
 
