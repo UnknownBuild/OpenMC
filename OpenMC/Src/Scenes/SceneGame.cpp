@@ -11,13 +11,16 @@ void SceneGame::Start() {
     input->Clear();
     Input<0>::OnCursorPosChanged += std::bind(&SceneGame::cursorPosCallback, this, std::placeholders::_1, std::placeholders::_2);
     Input<0>::OnMouseButtonClick += std::bind(&SceneGame::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-    Input<0>::OnKeyClick += std::bind(&SceneGame::keyCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
-    Input<0>::OnScrollChanged += std::bind(&SceneGame::ScrollCallback, this, std::placeholders::_1, std::placeholders::_2);
+    // 初始化人物
+    player = Singleton<Player>::GetInstance();
+    player->setPostion(glm::vec3(0, 10, 0));
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
-    camera->isGravity = true;
-    camera->SetLookPostion(glm::vec3(10, 12, 10), glm::vec3(0.0));
+    camera->isGravity = false;
+    camera->SetLookPostion(player->Position, glm::vec3(0, 10, 3));
+    Input<0>::OnKeyClick += std::bind(&SceneGame::keyCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+    Input<0>::OnScrollChanged += std::bind(&SceneGame::ScrollCallback, this, std::placeholders::_1, std::placeholders::_2);
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
@@ -25,6 +28,8 @@ void SceneGame::Start() {
     buildingHelper = new BuildingHelper();
     // 初始化资源
     ResourceManager::LoadTexture(EnvPath::FocusImage, "focus");
+    // 初始化模型
+    ResourceManager::LoadModel("Resources/Models/JJMonster2/jj2.obj", "jjm2");
     ResourceManager::LoadTexture(EnvPath::GrassBlockImage, "GrassBlock");
     ResourceManager::LoadTexture(EnvPath::SandImage, "Sand");
     ResourceManager::LoadTexture(EnvPath::OakPlanksImage, "OakPlanks");
@@ -286,7 +291,7 @@ void SceneGame::Start() {
     // 更新光照
 
     renderer->RemoveBlock(glm::vec3(-5, 1, -4));
-    renderer->DrawBlock(BlockId::CraftingTable, glm::vec3(-5, 1, -8),2);
+    renderer->DrawBlock(BlockId::CraftingTable, glm::vec3(-5, 1, -8), 2);
 
     //renderer->UpdateLight();
 
@@ -320,10 +325,35 @@ void SceneGame::Start() {
     buildingHelper->buildHouse(glm::vec3(20, 2, -20));
 
     camera->InitFrame();
+
+    this->sceneExiting = false;
+    renderer->aoThread = std::thread([&]() {
+        while (!sceneExiting) {
+            renderer->UpdateLight();
+            for (int i = 0; i < 10; i++) {
+                Sleep(100);
+                if (sceneExiting) break;
+            }
+            if (sceneExiting) break;
+        }
+        });
+
 }
 
 void SceneGame::Update() {
     auto size = window->GetWindowSize();
+
+    camera->Update();
+    player->setFrontAndRight(camera->Front, camera->Right);
+    player->Update();
+    // 渲染模型
+    if (camera->perspective == Camera::Perspective::Third) {
+        renderer->DrawSprite(ResourceManager::GetModel("jjm2"), player->Position + glm::vec3(0, -1.5f, 0), glm::vec3(3.4), -glm::radians(camera->Yaw) - glm::radians(90.0f), true);
+        camera->Position = player->Position - glm::vec3(player->Front.x * 3, player->Front.y * 3, player->Front.z * 3);
+    }
+    else if(camera->perspective == Camera::Perspective::First){
+        camera->Position = player->Position;
+    }
 
     renderer->SetWindowSize(size.Width, size.Height);
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 256.0f),
@@ -370,7 +400,6 @@ void SceneGame::Update() {
         ImGui::SliderFloat("testColorZ", &testColor.z, 2, 5);
         ImGui::End();
     }*/
-    camera->Update();
 }
 
 glm::vec3 SceneGame::caculateLookingAt() {
@@ -519,6 +548,8 @@ void SceneGame::updateNewBlockPosition() {
 }
 
 void SceneGame::Terminate() {
+    this->sceneExiting = true;
+    renderer->aoThread.join();
 }
 
 void SceneGame::cursorPosCallback(double xpos, double ypos) {

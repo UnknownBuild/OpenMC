@@ -109,11 +109,15 @@
     </ClCompile>
     <ClCompile Include="Src\Scenes\BuildingHelper.cpp">
       <Filter>Src\Scenes</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Gravity\Gravity.cpp">
       <Filter>Src\Gravity</Filter>
     </ClCompile>
     <ClCompile Include="Src\Collision\Collision.cpp">
       <Filter>Src\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\World\Characters\Player.cpp">
+      <Filter>Src\World\Characters</Filter>
     </ClCompile>
     <ClCompile Include="Src\Scenes\SceneLoad.cpp">
       <Filter>Src\Scenes</Filter>
@@ -221,6 +225,7 @@
     </ClInclude>
     <ClInclude Include="Src\Scenes\BuildingHelper.h">
       <Filter>Src\Scenes</Filter>
+    </ClInclude>
     <ClInclude Include="Src\Gravity\Gravity.h">
       <Filter>Src\Gravity</Filter>
     </ClInclude>
