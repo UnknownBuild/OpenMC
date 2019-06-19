@@ -55,7 +55,7 @@ void Window::InitGLFW() {
     // glfwWindowHint(GLFW_SAMPLES, 4);
     // 性能测试
     // 1 - 22
-    // 2 - 26 +18%
+    // 2 - 26 +18% 
     // 4 - 32 +45%
     // 8 - 45 +100%
 }
