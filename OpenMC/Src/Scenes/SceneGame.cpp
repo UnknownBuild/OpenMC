@@ -285,7 +285,7 @@ void SceneGame::Start() {
     // 更新光照
 
     renderer->RemoveBlock(glm::vec3(-5, 1, -4));
-    renderer->DrawBlock(BlockId::CraftingTable, glm::vec3(-5, 1, -8),2);
+    renderer->DrawBlock(BlockId::CraftingTable, glm::vec3(-5, 1, -8), 2);
 
     //renderer->UpdateLight();
 
@@ -315,9 +315,18 @@ void SceneGame::Start() {
         buildingHelper->buildTree(glm::vec3(35, 1, -35 + i * 4), i);
     }
     buildingHelper->buildTree(glm::vec3(30, 1, -35), 10);
- 
+
 
     camera->InitFrame();
+
+    this->sceneExiting = true;
+    renderer->aoThread = std::thread([&]() {
+        while (sceneExiting) {
+            renderer->UpdateLight();
+            Sleep(1000);
+        }
+        });
+
 }
 
 void SceneGame::Update() {
@@ -514,6 +523,8 @@ void SceneGame::updateNewBlockPosition() {
 }
 
 void SceneGame::Terminate() {
+    this->sceneExiting = true;
+    renderer->aoThread.detach();
 }
 
 void SceneGame::cursorPosCallback(double xpos, double ypos) {

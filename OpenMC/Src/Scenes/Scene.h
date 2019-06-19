@@ -13,6 +13,7 @@ public:
 
 protected:
     Window* window;
+    bool sceneExiting = false;
 
 private:
     bool sceneChanging = false;

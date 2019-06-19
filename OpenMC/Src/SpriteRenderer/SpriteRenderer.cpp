@@ -158,7 +158,8 @@ void SpriteRenderer::RemoveBlock(glm::vec3 position, bool update) {
     if (update) {
         this->updateRegionLight(data, position);
 
-    } else {
+    }
+    else {
         data->requireUpdate = true;
     }
 }
@@ -184,7 +185,8 @@ void SpriteRenderer::DrawBlock(BlockId id, glm::vec3 position, int dir) {
     if (*region == nullptr) {
         *region = new RenderRegionData();
         memset((*region)->blocks, 0, sizeof((*region)->blocks));
-    } else {
+    }
+    else {
         // 删除旧方块
         this->RemoveBlock(position);
         int blockIndex = -1;
@@ -285,7 +287,8 @@ void SpriteRenderer::DrawBlock(BlockId id, vector<glm::vec3>& positions, int dir
             // 移除旧方块
             if (cell->init) {
                 this->RemoveBlock(position, false);
-            } else {
+            }
+            else {
                 //vector<glm::vec4>* positions = &(inst->position);
                 //// 重建索引
                 //for (int posIndex = cell->posIndex + 1; posIndex < positions->size(); posIndex++) {
@@ -587,7 +590,7 @@ void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 posit
     }
 
     // 计算指定方块附近AO
-    if (!region->requireUpdate) {
+    // if (!region->requireUpdate) {
         auto p = getRelaPostion(position);
         for (int x = p.x - 1; x <= p.x + 1; x++) {
             for (int y = p.y - 1; y <= p.y + 1; y++) {
@@ -604,29 +607,49 @@ void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 posit
                 }
             }
         }
-        return;
-    }
-    region->requireUpdate = false;
+    //  return;
+    // }
+    // region->requireUpdate = false;
 
     // 计算所有实体方块AO
-    for (auto& blockInst : region->blockData) {
-        if (blockInst.data.Type != BlockType::Solid) continue;
-        for (int posIndex = 0; posIndex < blockInst.position.size(); posIndex++) {
-            calcAO(&blockInst, region, posIndex);
-        }
-    }
+    //for (auto& blockInst : region->blockData) {
+    //    if (blockInst.data.Type != BlockType::Solid) continue;
+    //    for (int posIndex = 0; posIndex < blockInst.position.size(); posIndex++) {
+    //        calcAO(&blockInst, region, posIndex);
+    //    }
+    //}
 }
 
 // 更新光照
 void SpriteRenderer::UpdateLight() {
     // 遍历每个渲染区块
-    //traverseMap<XIterator::iterator>(this->renderRegion.begin(), this->renderRegion.end(), [&](XIterator::iterator ix) {
-    //    traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
-    //        traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator block) {
-    //            this->updateRegionLight((*block).second);
-    //            });
-    //        });
-    //    });
+    traverseMap<XIterator::iterator>(this->renderRegion.begin(), this->renderRegion.end(), [&](XIterator::iterator ix) {
+        traverseMap<YIterator::iterator>((*ix).second.begin(), (*ix).second.end(), [&](YIterator::iterator iy) {
+            traverseMap<ZIterator::iterator>((*iy).second.begin(), (*iy).second.end(), [&](ZIterator::iterator block) {
+                // this->updateRegionLight((*block).second);
+                this->RenderAO((*block).second, (*ix).first, (*iy).first, (*block).first);
+                });
+            });
+        });
+}
+void SpriteRenderer::RenderAO(RenderRegionData* region, int x, int y, int z) {
+    if (region->requireUpdate) {
+        glm::vec3 regionPos = glm::vec4(x,y,z,0) - glm::vec4(this->viewPos, 0);
+        float regionDis = abs(regionPos.x) + abs(regionPos.y) + abs(regionPos.z);
+        // 按需更新近距离AO
+        if (regionDis < RENDER_SIZE * 3) {
+            printf("Start Update AO\n");
+            // this->updateRegionLight(region);
+            for (auto& blockInst : region->blockData) {
+                if (blockInst.data.Type != BlockType::Solid) continue;
+                for (int posIndex = 0; posIndex < blockInst.position.size(); posIndex++) {
+                    calcAO(&blockInst, region, posIndex);
+                }
+            }
+            region->requireUpdate = false;
+            printf("Finish Update AO\n");
+        }
+    }
 }
 
 bool SpriteRenderer::isVisable(float x, float y, float z) {
@@ -717,13 +740,13 @@ void SpriteRenderer::RenderBlock(bool clear, Shader* shader) {
     // 选择区块
     if (enableShow) {
         BlockData data = Singleton<BlockManager>::GetInstance()->GetBlockData(BlockId::Select);
-        this->DrawBlock(data.Textures, data.Colors, data.Render, { glm::vec4(this->showBlock, 10)},
+        this->DrawBlock(data.Textures, data.Colors, data.Render, { glm::vec4(this->showBlock, 10) },
             { glm::vec4(1.0) },
-            {glm::vec4(1.0)},
-            {glm::vec4(1.0)},
-            {glm::vec4(1.0)},
-            {glm::vec4(1.0)},
-            {glm::vec4(1.0)},
+            { glm::vec4(1.0) },
+            { glm::vec4(1.0) },
+            { glm::vec4(1.0) },
+            { glm::vec4(1.0) },
+            { glm::vec4(1.0) },
             this->showDir, 0, nullptr);
     }
 
@@ -737,16 +760,16 @@ void SpriteRenderer::renderBlock(RenderRegionData* region, Shader* shader) {
     if (region == nullptr) return;
     for (auto index : region->blockIndex) {
         auto block = &region->blockData[index];
-        if (region->requireUpdate && block->position.size() != 0) {
-            glm::vec3 regionPos = block->position[0] - glm::vec4(this->viewPos, 0);
-            float regionDis = abs(regionPos.x) + abs(regionPos.y) + abs(regionPos.z);
-            // 按需更新近距离AO
-            if (regionDis < RENDER_SIZE * 3) {
-                printf("Start Update AO\n");
-                this->updateRegionLight(region);
-                printf("Finish Update AO\n");
-            }
-        }
+        //if (region->requireUpdate && block->position.size() != 0) {
+        //    glm::vec3 regionPos = block->position[0] - glm::vec4(this->viewPos, 0);
+        //    float regionDis = abs(regionPos.x) + abs(regionPos.y) + abs(regionPos.z);
+        //    // 按需更新近距离AO
+        //    if (regionDis < RENDER_SIZE * 3) {
+        //        printf("Start Update AO\n");
+        //        this->updateRegionLight(region);
+        //        printf("Finish Update AO\n");
+        //    }
+        //}
         int frame = 0;
         if (block->data.Animation != 0) {
             frame = (this->renderFrame / block->data.Animation) % block->data.Textures.size();
@@ -896,9 +919,11 @@ void SpriteRenderer::DrawBlock(const vector<Texture2D>& _textures, const vector<
         shader->SetVector4f("material.color", colors[0]);
         if (dir == 0) { // 上
 
-        } else if (dir == 1) { // 下
+        }
+        else if (dir == 1) { // 下
             model = glm::rotate(model, glm::radians(180.0f), glm::vec3(1, 0, 0));
-        } else { // 四周
+        }
+        else { // 四周
             model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1, 0, 0));
             model = glm::rotate(model, glm::radians(90.0f * (dir - 2)), glm::vec3(0, 0, 1));
 
