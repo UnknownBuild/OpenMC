@@ -20,5 +20,7 @@ private:
     MenuItem menuItem;
     const glm::vec4 YELLOW = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
     const glm::vec4 WHITE = glm::vec4(1.0f);
+
+    int loadGame = 0;
 };
 
