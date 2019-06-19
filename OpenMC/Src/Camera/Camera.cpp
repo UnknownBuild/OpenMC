@@ -218,11 +218,11 @@ void Camera::MouseCallback(double xpos, double ypos) {
 }
 
 void Camera::ScrollCallback( double xoffset, double yoffset) {
-    if (!freedomView) return;
+    /*if (!freedomView) return;
     if (Zoom >= 1.0f && Zoom <= 45.0f)
         Zoom -= yoffset;
     if (Zoom <= 1.0f)
         Zoom = 1.0f;
     if (Zoom >= 45.0f)
-        Zoom = 45.0f;
+        Zoom = 45.0f;*/
 }

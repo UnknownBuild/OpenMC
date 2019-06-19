@@ -12,6 +12,7 @@ void SceneGame::Start() {
     Input<0>::OnCursorPosChanged += std::bind(&SceneGame::cursorPosCallback, this, std::placeholders::_1, std::placeholders::_2);
     Input<0>::OnMouseButtonClick += std::bind(&SceneGame::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     Input<0>::OnKeyClick += std::bind(&SceneGame::keyCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+    Input<0>::OnScrollChanged += std::bind(&SceneGame::ScrollCallback, this, std::placeholders::_1, std::placeholders::_2);
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
@@ -29,7 +30,7 @@ void SceneGame::Start() {
     ResourceManager::LoadTexture(EnvPath::SandImage, "Sand");
     ResourceManager::LoadTexture(EnvPath::OakPlanksImage, "OakPlanks");
     ResourceManager::LoadTexture(EnvPath::OakLogImage, "OakLog");
-    ResourceManager::LoadTexture(EnvPath::GlassImage, "GlassBlock");
+    ResourceManager::LoadTexture(EnvPath::GlassImage, "Glass");
     ResourceManager::LoadTexture(EnvPath::SpruceLeavesImage, "OakLeaves");
     ResourceManager::LoadTexture(EnvPath::CraftingTableImage, "CraftingTable");
     ResourceManager::LoadTexture(EnvPath::LitFurnaceImage, "Furnace");
@@ -306,6 +307,7 @@ void SceneGame::Start() {
     blockType.push_back(BlockId::Furnace);
     blockType.push_back(BlockId::Pumpkin);
     blockType.push_back(BlockId::Melon);
+    blockType.push_back(BlockId::Glass);
     current_index = 0;
     newBlockDirection = 0;
     newBlockPosition = glm::vec3(0, 0, 0);
@@ -314,7 +316,7 @@ void SceneGame::Start() {
         buildingHelper->buildTree(glm::vec3(35, 1, -35 + i * 4), i);
     }
     buildingHelper->buildTree(glm::vec3(30, 1, -35), 10);
-    blockType.push_back(BlockId::BlueStainedGlassPane);
+ 
 
     camera->InitFrame();
 }
@@ -434,6 +436,9 @@ void SceneGame::showBlockPicture() {
     case BlockId::Melon:
         renderer->DrawTexture(ResourceManager::GetTexture("Melon"), glm::vec2(size.Width - 120, 120), 0.3f);
         break;
+    case BlockId::Glass:
+        renderer->DrawTexture(ResourceManager::GetTexture("Glass"), glm::vec2(size.Width - 120, 120), 0.3f);
+        break;
     default:
         break;
     }
@@ -516,6 +521,17 @@ void SceneGame::cursorPosCallback(double xpos, double ypos) {
 
 }
 
+void SceneGame::ScrollCallback(double xoffset, double yoffset) {
+    if (yoffset < 0) {
+        current_index++;
+        current_index %= blockType.size();
+    }
+    else {
+        current_index--;
+        current_index = current_index < 0 ? current_index + blockType.size() : current_index;
+    }
+}
+
 void SceneGame::mouseButtonCallback(int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         if (renderer->GetBlock(lookingAt).Id != BlockId::Air) {
@@ -528,12 +544,12 @@ void SceneGame::mouseButtonCallback(int button, int action, int mods) {
 }
 
 void SceneGame::keyCallback(int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_E && action == GLFW_PRESS) {
+    /*if (key == GLFW_KEY_E && action == GLFW_PRESS) {
         current_index++;
         current_index %= blockType.size();
     }
     if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
         current_index--;
         current_index = current_index < 0 ? current_index + blockType.size() : current_index;
-    }
+    }*/
 }

@@ -14,6 +14,7 @@ public:
     void cursorPosCallback(double xpos, double ypos);
     void mouseButtonCallback(int button, int action, int mods);
     void keyCallback(int key, int scancode, int action, int mods);
+    void ScrollCallback(double xoffset, double yoffset);
     void showBlockPicture();
     glm::vec3 caculateLookingAt();
     glm::vec3 getNewBlockPosition();

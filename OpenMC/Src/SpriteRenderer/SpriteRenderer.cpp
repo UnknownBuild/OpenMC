@@ -332,7 +332,6 @@ void SpriteRenderer::HideShowBlock() {
     this->enableShow = false;
 }
 
-void SpriteRenderer::updateRegionLight(RenderRegionData* region) {
 void calcAO(BlockInst* inst, RenderRegionData* region, int posIndex) {
     BlockManager* blockManager = Singleton<BlockManager>::GetInstance();
     auto p = getRelaPostion(inst->position[posIndex]);
@@ -541,6 +540,7 @@ void calcAO(BlockInst* inst, RenderRegionData* region, int posIndex) {
         }
     }
 }
+
 
 void SpriteRenderer::updateRegionLight(RenderRegionData* region, glm::vec3 position) {
 
