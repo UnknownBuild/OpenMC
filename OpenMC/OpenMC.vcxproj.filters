@@ -113,6 +113,9 @@
     <ClCompile Include="Src\Collision\Collision.cpp">
       <Filter>Src\Collision</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Scenes\SceneLoad.cpp">
+      <Filter>Src\Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Helpers\Singleton.h">
@@ -219,6 +222,9 @@
     </ClInclude>
     <ClInclude Include="Src\Collision\Collision.h">
       <Filter>Src\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scenes\SceneLoad.h">
+      <Filter>Src\Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

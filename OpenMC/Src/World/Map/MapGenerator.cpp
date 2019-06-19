@@ -30,14 +30,14 @@ void MapGenerator::genBasicTerrain(Chunk* chunk, int32_t x, int32_t z) {
     srand(2019);
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
-            heightMap[i][0][j] = depthNoise.Get((x + i + 0.1f) * 0.001f, (z + j + 0.1f) * 0.001f);
+            heightMap[i][0][j] = depthNoise.Get((x + i + 0.1f) * 0.01f, (z + j + 0.1f) * 0.01f);
             // std::cout << heightMap[i][0][j] << std::endl;
         }
     }
     // depthNoise.Get(heightMap, glm::vec3((x + 0.1f) * 0.001f, 0.0f, (z + 0.1f) * 0.001f), glm::vec3(1.0f));
     for (int i = 0; i < 16; i++) {
         for (int k = 0; k < 16; k++) {
-            int height = static_cast<int>((heightMap[i][0][k] + 0.5) * 21);
+            int height = static_cast<int>((heightMap[i][0][k] + 0.5) * 11);
             // std::cout << height << std::endl;
             for (int j = 0; j < height; j++) {
                 chunk->SetBlock(x + i, j, z + k, BlockId::Stone);

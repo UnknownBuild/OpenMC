@@ -3,6 +3,7 @@
 
 #include "../Helpers/EnvPath.h"
 #include "SceneGame.h"
+#include "SceneLoad.h"
 #include "SceneSettings.h"
 #include "SceneManager.h"
 #include "SceneTitle.h"
@@ -19,6 +20,7 @@ void SceneTitle::Start() {
     camera = Singleton<Camera>::GetInstance();
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
+    renderer->ClearBlock();
     renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
     // 初始化资源
     ResourceManager::LoadTexture(EnvPath::GameTitleImage, "title");
@@ -112,6 +114,7 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
             this->loadGame = 1;
             break;
         case MenuLoad:
+            sceneManager->Goto(new SceneLoad());
             break;
         case MenuSettings:
             sceneManager->Goto(new SceneSettings());
