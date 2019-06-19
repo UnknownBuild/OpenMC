@@ -15,6 +15,8 @@ void SceneGame::Start() {
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     camera->Bind(input);
+    camera->isGravity = true;
+    camera->SetLookPostion(glm::vec3(10, 5, 10), glm::vec3(0.0));
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
@@ -34,193 +36,196 @@ void SceneGame::Start() {
     ResourceManager::LoadTexture(EnvPath::PumpkinImage, "Pumpkin");
     ResourceManager::LoadTexture(EnvPath::StoneImage, "CrackedStoneBricks");
     ResourceManager::LoadTexture(EnvPath::CobblestoneImage, "CobbleStone");
+    ResourceManager::LoadTexture(EnvPath::FocusImage, "focus"); 
     // 初始化世界
     world = Singleton<World>::GetInstance();
     if (!world->Init("test")) {
         window->Dialog("World Error", "Failed to initializate world.");
     }
+    //world->Draw(renderer);
 
     // test begin
     vector<glm::vec3> grassPosition = {
-        glm::vec3(1, 1, 1),
-        glm::vec3(2, 1, 2),
-        glm::vec3(2, 1, 1),
-        glm::vec3(3, 1, 2),
-        glm::vec3(3, 1, 1),
+        glm::vec3(1, 2, 1),
+        glm::vec3(2, 2, 2),
+        glm::vec3(2, 2, 1),
+        glm::vec3(3, 2, 2),
+        glm::vec3(3, 2, 1),
 
-        glm::vec3(5, 1, 7),
-        glm::vec3(5, 1, 8),
-        glm::vec3(5, 1, 9),
-        glm::vec3(5, 1, 10),
-        glm::vec3(6, 1, 7),
+        glm::vec3(5, 2, 7),
+        glm::vec3(5, 2, 8),
+        glm::vec3(5, 2, 9),
+        glm::vec3(5, 2, 10),
+        glm::vec3(6, 2, 7),
 
-        glm::vec3(6, 1, 10),
-        glm::vec3(7, 1, 7),
-        glm::vec3(7, 1, 10),
-        glm::vec3(8, 1, 7),
-        glm::vec3(8, 1, 8),
+        glm::vec3(6, 2, 10),
+        glm::vec3(7, 2, 7),
+        glm::vec3(7, 2, 10),
+        glm::vec3(8, 2, 7),
+        glm::vec3(8, 2, 8),
 
-        glm::vec3(8, 1, 9),
-        glm::vec3(8, 1, 10)
+        glm::vec3(8, 2, 9),
+        glm::vec3(8, 2, 10)
 
     };
     int grassCount = 17;
-    for (int i = -40; i < 40; i++) {
-        for (int j = -40; j < 40; j++) {
+    for (int i = -60; i < 60; i++) {
+        for (int j = -60; j < 60; j++) {
+            grassPosition.push_back(glm::vec3(i, 1, j));
             grassPosition.push_back(glm::vec3(i, 0, j));
         }
     }
     vector<glm::vec3> torchPosition = {
-        glm::vec3(5, 1, -3)
+        glm::vec3(5, 2, -3)
     };
     vector<glm::vec3> waterPosition = {
-        glm::vec3(6, 1, 8),
-        glm::vec3(6, 1, 9),
-        glm::vec3(7, 1, 8),
-        glm::vec3(7, 1, 9),
+        glm::vec3(6, 2, 8),
+        glm::vec3(6, 2, 9),
+        glm::vec3(7, 2, 8),
+        glm::vec3(7, 2, 9),
     };
     vector<glm::vec3> sea_lanternPosition = {
-        glm::vec3(10, 1, 12),
         glm::vec3(10, 2, 12),
+        glm::vec3(10, 3, 12),
     };
     vector<glm::vec3> dandelionPosition = {
-        glm::vec3(-1, 1, -1),
-        glm::vec3(-2, 1, 0),
+        glm::vec3(-1, 2, -1),
+        glm::vec3(-2, 2, 0),
     };
     vector<glm::vec3> brown_mushroomPosition = {
-        glm::vec3(12, 1, 10),
+        glm::vec3(12, 2, 10),
     };
     vector<glm::vec3> horn_coralPosition = {
-        glm::vec3(12, 1, 12),
+        glm::vec3(12, 2, 12),
     };
     vector<glm::vec3> dirtPosition = {
-        glm::vec3(12, 1, 16),
         glm::vec3(12, 2, 16),
+        glm::vec3(12, 3, 16),
     };
     vector<glm::vec3> cobble_stonePosition = {
-        glm::vec3(12, 1, 18),
         glm::vec3(12, 2, 18),
+        glm::vec3(12, 3, 18),
     };
     vector<glm::vec3> grassTopPosition = {
-        glm::vec3(1, 1, 6),
-        glm::vec3(1, 1, 7),
-        glm::vec3(0, 1, 7),
-        glm::vec3(1, 1, 8),
-        glm::vec3(2, 1, 8),
+        glm::vec3(1, 2, 6),
+        glm::vec3(1, 2, 7),
+        glm::vec3(0, 2, 7),
+        glm::vec3(1, 2, 8),
+        glm::vec3(2, 2, 8),
     };
     vector<glm::vec3> sandPosition = {
-        glm::vec3(1, 1, -2),
-        glm::vec3(1, 1, -1),
-        glm::vec3(2, 2, 0),
-        glm::vec3(1, 1, 0),
+        glm::vec3(1, 2, -2),
+        glm::vec3(1, 2, -1),
         glm::vec3(2, 1, 0),
+        glm::vec3(1, 2, 0),
+        glm::vec3(2, 2, 0),
     };
     vector<glm::vec3> oakPostions = {
-        glm::vec3(-3, 1, 2),
-        glm::vec3(-3, 1, 3),
+        glm::vec3(-3, 2, 2),
         glm::vec3(-3, 2, 3),
-        glm::vec3(-4, 1, 3),
-        glm::vec3(-4, 1, -4),
+        glm::vec3(-3, 3, 3),
+        glm::vec3(-4, 2, 3),
         glm::vec3(-4, 2, -4),
         glm::vec3(-4, 3, -4),
-        glm::vec3(-3, 1, -4),
+        glm::vec3(-4, 4, -4),
         glm::vec3(-3, 2, -4),
         glm::vec3(-3, 3, -4),
-        glm::vec3(-5, 1, -4),
+        glm::vec3(-3, 4, -4),
         glm::vec3(-5, 2, -4),
         glm::vec3(-5, 3, -4),
-        glm::vec3(-4, 1, -3),
-        glm::vec3(-4, 3, -3),
-        glm::vec3(-3, 1, -3),
+        glm::vec3(-5, 4, -4),
+        glm::vec3(-4, 2, -3),
+        glm::vec3(-4, 4, -3),
         glm::vec3(-3, 2, -3),
         glm::vec3(-3, 3, -3),
-        glm::vec3(-5, 1, -3),
+        glm::vec3(-3, 4, -3),
         glm::vec3(-5, 2, -3),
         glm::vec3(-5, 3, -3),
-        glm::vec3(-4, 1, -2),
-        glm::vec3(-4, 3, -2),
-        glm::vec3(-3, 1, -2),
+        glm::vec3(-5, 4, -3),
+        glm::vec3(-4, 2, -2),
+        glm::vec3(-4, 4, -2),
         glm::vec3(-3, 2, -2),
         glm::vec3(-3, 3, -2),
-        glm::vec3(-5, 1, -2),
+        glm::vec3(-3, 4, -2),
         glm::vec3(-5, 2, -2),
         glm::vec3(-5, 3, -2),
+        glm::vec3(-5, 4, -2),
     };
     vector<glm::vec3> blue_orchidPosition = {
-        glm::vec3(12, 1, 11),
+        glm::vec3(12, 2, 11),
     };
     vector<glm::vec3> stonePosition2 = {
-        glm::vec3(3, 1, -3),
-        glm::vec3(3, 1, -4),
+        glm::vec3(3, 2, -3),
         glm::vec3(3, 2, -4),
-        glm::vec3(4, 1, -4),
+        glm::vec3(3, 3, -4),
+        glm::vec3(4, 2, -4),
     };
     vector<glm::vec3> glassPosition = {
-        glm::vec3(7, 1, -3),
-        glm::vec3(7, 1, -4),
+        glm::vec3(7, 2, -3),
         glm::vec3(7, 2, -4),
-        glm::vec3(8, 1, -4),
+        glm::vec3(7, 3, -4),
+        glm::vec3(8, 2, -4),
     };
     vector<glm::vec3> tablePosition = {
-        glm::vec3(1, 2, 0),
+        glm::vec3(1, 3, 0),
     };
     vector<glm::vec3> furnacePosition = {
-        glm::vec3(3, 3, 3),
+        glm::vec3(3, 4, 3),
     };
     vector<glm::vec3> oakPosition = {
-        glm::vec3(1, 1, 9),
         glm::vec3(1, 2, 9),
         glm::vec3(1, 3, 9),
         glm::vec3(1, 4, 9),
+        glm::vec3(1, 5, 9),
     };
     vector<glm::vec3> cactusPosition = {
-        glm::vec3(10, 1, 10),
-        glm::vec3(10, 2, 10),
         glm::vec3(10, 3, 10),
         glm::vec3(10, 4, 10),
         glm::vec3(10, 5, 10),
+        glm::vec3(10, 6, 10),
+        glm::vec3(10, 7, 10),
     };
     vector<glm::vec3> leavePosition = {
-        glm::vec3(1, 5, 9),
-        glm::vec3(2, 5, 9),
-        glm::vec3(0, 5, 9),
-        glm::vec3(1, 5, 8),
-        glm::vec3(1, 5, 10),
-        glm::vec3(2, 5, 8),
-        glm::vec3(2, 5, 10),
-        glm::vec3(0, 5, 8),
-        glm::vec3(0, 5, 10),
         glm::vec3(1, 6, 9),
+        glm::vec3(2, 6, 9),
+        glm::vec3(0, 6, 9),
         glm::vec3(1, 6, 8),
         glm::vec3(1, 6, 10),
         glm::vec3(2, 6, 8),
+        glm::vec3(2, 6, 10),
+        glm::vec3(0, 6, 8),
+        glm::vec3(0, 6, 10),
+        glm::vec3(1, 7, 9),
+        glm::vec3(1, 7, 8),
+        glm::vec3(1, 7, 10),
+        glm::vec3(2, 7, 8),
     };
     vector<glm::vec3> doorPosition = {
-        glm::vec3(6, 1, 6),
+        glm::vec3(6, 2, 6),
     };
     vector<glm::vec3> oakDoorPosition = {
-        glm::vec3(6, 1, 4),
+        glm::vec3(6, 2, 4),
     };
     vector<glm::vec3> colorGlassPosition = {
-        glm::vec3(4, 1, 7),
-        glm::vec3(4, 1, 8),
+        glm::vec3(4, 2, 7),
+        glm::vec3(4, 2, 8),
     };
     vector<glm::vec3> stonePosition = {
-            glm::vec3(3, 1, 3),
-            glm::vec3(3, 1, 4),
+            glm::vec3(3, 2, 3),
             glm::vec3(3, 2, 4),
-            glm::vec3(4, 1, 4) };
+            glm::vec3(3, 3, 4),
+            glm::vec3(4, 2, 4) };
 
     vector<glm::vec3> beetrootPostion = {
-        glm::vec3(13, 1, 13),
+        glm::vec3(13, 2, 13),
     };
 
     renderer->SetLight(glm::vec3(0.5f, -0.3f, 0.4f));
     renderer->ClearPointLight();
-    renderer->AddPointLight(glm::vec3(5, 1, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 40);
-    renderer->AddPointLight(glm::vec3(-3, 1, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 40);
+    renderer->AddPointLight(glm::vec3(5, 2, -3), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 40);
+    renderer->AddPointLight(glm::vec3(-3, 2, 5), glm::vec3(0.3), glm::vec3(0.7, 0, 0), glm::vec3(0.3, 0, 0), 40);
 
-    vector<glm::vec3> firePosition = { glm::vec3(-3, 1, 5) };
+    vector<glm::vec3> firePosition = { glm::vec3(-3, 2, 5) };
     // 渲染火
     renderer->DrawBlock(BlockId::Fire, firePosition);
     // 渲染圆石
@@ -333,7 +338,7 @@ void SceneGame::Update() {
     // 渲染Looking At
     renderer->RenderText("looking: " + ss.str(), glm::vec2(size.Width - 400, size.Height - 20), 0.4);
     std::stringstream ss2;
-    ss2 << (int)this->position.x << ", " << (int)this->position.y << ", " << (int)this->position.z;
+    ss2 << this->position.x << ", " << this->position.y << ", " << this->position.z;
     renderer->RenderText("position: " + ss2.str(), glm::vec2(size.Width - 400, size.Height - 40), 0.4);
 
     // 渲染准星
