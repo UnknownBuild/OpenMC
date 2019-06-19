@@ -9,8 +9,10 @@ class World final {
 public:
     bool Init(std::string name);
     bool Init(std::string name, uint32_t seed);
+    void SetPosition(glm::vec3 position);
     void Draw(SpriteRenderer* renderer);
 
 private:
+    glm::vec3 position;
     // std::vector<Character> characters;
 };

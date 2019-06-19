@@ -30,8 +30,14 @@ void SceneLoad::Update() {
     renderer->SetView(glm::perspective(( float) glm::radians(camera->Zoom), size.Width / ( float) size.Height, 0.1f, 256.0f),
         camera->GetViewMatrix(), camera->Position, camera->Front);
 
+    world->SetPosition(camera->Position);
+    world->Draw(renderer);
+
     // 渲染FPS
     renderer->RenderText(std::to_string(static_cast<int>(ImGui::GetIO().Framerate)) + " FPS", glm::vec2(10, size.Height - 20), 0.4);
+    std::stringstream ss2;
+    ss2 << camera->Position.x << ", " << camera->Position.y << ", " << camera->Position.z;
+    renderer->RenderText("position: " + ss2.str(), glm::vec2(size.Width - 400, size.Height - 40), 0.4);
     // 渲染天空盒
     renderer->RenderSkyBox();
     // 渲染方块
