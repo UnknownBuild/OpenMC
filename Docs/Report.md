@@ -799,9 +799,34 @@ fogFactor = 1 - pow(e, -pow(cameraDistance * 0.01, 2));
 
 ### Map generation
 
-使用柏林噪声生成地图
+地图生成取决于地图种子，相同的地图种子将生成相同的地形。
 
-// TODO
+首先使用地图种子来初始化一个32位无符号整型的伪随机数生成器，然后使用伪随机数生成器来生成出生点坐标、噪声种子等。
+
+```c++
+std::default_random_engine engine;
+std::uniform_int_distribution<uint32_t> rand;
+uint32_t seed;
+```
+
+然后使用多个不同参数的基于Perlin噪声的Octave噪声来生成地图，噪声主要用于生成高度图、密度图、概率。
+
+```c++
+OctaveNoise<PerlinNoise> depthNoise1;
+OctaveNoise<PerlinNoise> depthNoise2;
+OctaveNoise<PerlinNoise> thicknessNoise;
+OctaveNoise<PerlinNoise> grassNoise;
+OctaveNoise<PerlinNoise> flowerNoise;
+OctaveNoise<PerlinNoise> treeNoise;
+```
+
+地图生成的主要流程如下：
+
+1. 生成地形高度图：使用`depthNoise1`、`depthNoise2`噪声组合生成高度，对较低或较高的高度进行矫正。
+2. 生成地形层厚度图：使用`thicknessNoise`生成泥土厚度。
+3. 填充方块：填充基岩、圆石、泥土，同时为地表填充草方块。
+4. 生成花草：使用`grassNoise`、`flowerNoise`生成花草。
+5. 生成树木：使用`treeNoise`生成树木。
 
 ### Map System
 
@@ -823,4 +848,11 @@ fogFactor = 1 - pow(e, -pow(cameraDistance * 0.01, 2));
 
 ## 小组成员分工
 
-陈荣真 - 负责方块渲染部分的工作
+陈荣真 - 负责方块渲染部分
+
+陈思琦 - 负责重力与碰撞检测，摄像机跟随与人物渲染
+
+陈统盼 - 负责方块元信息加载，方块的放置和破坏
+
+陈秀嘉 - 负责项目架构和地图系统
+

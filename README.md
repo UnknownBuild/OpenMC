@@ -6,7 +6,7 @@ A simple game like Minecraft built by OpenGL.
 
 - Windows
 - Visual Studio 2019 (支持 Vcpkg，理论上 2017 也支持)
-- Python 3 (支持 GLAD 源码生成)
+- ~~Python 3 (支持 GLAD 源码生成)~~ (Vcpkg会下载便携版Python)
 - Git
 
 ## Quick Start
