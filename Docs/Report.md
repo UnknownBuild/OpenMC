@@ -836,9 +836,35 @@ OctaveNoise<PerlinNoise> treeNoise;
 
 ### Add or Remove Block
 
-方块的动态添加与删除
+方块的动态添加与删除。
 
-// TODO
+添加或删除方块首先需要确定当前摄像机所面对的方块。可以利用相机的Position向量及Front向量求出，由于Front向量是表示相机当前朝向的标准化向量，故可以通过在Position向量上累加Front向量来求出相机视线上的点的坐标。在累加求出每个坐标之后，对这些坐标取整，得到对应的游戏坐标，判断该坐标是否存在方块，若存在，则该方块即为摄像机面对的方块，否则继续进行坐标向量累加。
+
+此外在添加方块时，为了确定放置的位置，还要判断出当前面对的是目标方块的哪个面。同样需要利用相机的Position向量及Front向量。由于游戏坐标位于各个方块的中心点，且方块的边长为1个单位坐标，故方块各个面的位置坐标均可求出：
+
+```c++
+float border[6] = { lookingAt.y + 0.5, lookingAt.y - 0.5, lookingAt.z + 0.5, lookingAt.x + 0.5, lookingAt.z - 0.5, lookingAt.x - 0.5 };
+```
+
+对于方块的每组平行面，同一时刻只能看到两个平行面中的一个，可以利用Front向量的符号确定看到的是哪个平行面。然后利用直线参数方程求出相机视线与该平行面A所在平面的交点，若交点的另外两维坐标处于对应平行面所在的平面之间，则可以确定A为当前朝向的面。
+
+在添加方块时将方块放置到当前看向的面所朝向的方块位置，如下图的标记所示：
+
+|                   放置前                   |                   放置后                   |
+| :----------------------------------------: | :----------------------------------------: |
+| ![1563111754203](assets/1563111754203.png) | ![1563113255841](assets/1563113255841.png) |
+
+```c++
+position = glm::vec3((int)camera->Position.x, (int)camera->Position.y, (int)camera->Position.z);
+lookingAt = caculateLookingAt();
+updateNewBlockPosition();
+if (renderer->GetBlock(lookingAt).Id != BlockId::Air) {
+	renderer->SetShowBlock(lookingAt, newBlockDirection);
+}
+else {
+	renderer->HideShowBlock();
+}
+```
 
 ## 遇到的问题和解决方案
 
