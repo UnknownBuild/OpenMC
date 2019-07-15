@@ -1,4 +1,7 @@
-﻿## Custom Ignore Rules
+﻿## MacOS
+.DS_Store
+
+## Custom Ignore Rules
 imgui.ini
 OpenMC/Saves/
 
