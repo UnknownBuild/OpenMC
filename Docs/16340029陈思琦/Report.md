@@ -1,4 +1,4 @@
-# PAOGD | Final Report
+# Final Report
 
 ## 实现功能
 
@@ -102,4 +102,4 @@ else if(camera->perspective == Camera::Perspective::First){
 }
 ```
 
-![background](../Docs/Report/background.gif)
+![background](../Report/background.gif)
