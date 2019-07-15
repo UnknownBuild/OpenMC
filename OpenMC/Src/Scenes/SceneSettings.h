@@ -25,6 +25,7 @@ private:
     SettingItem settingItem;
     GLint windowSizeIndex;
 
+    GLboolean isFullScreen;
     GLint sightDistance;
     GLint Max_Distance = 10;
     GLint Min_Distance = 5;

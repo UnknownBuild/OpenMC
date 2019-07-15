@@ -32,6 +32,10 @@ public:
         return WinSize(width, height);
     }
 
+    inline void SetWindowSize(int Width, int Height) {
+        glfwSetWindowSize(window, Width, Height);
+    }
+
     inline int GetKey(int key) {
         return glfwGetKey(window, key);
     }

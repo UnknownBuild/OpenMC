@@ -14,7 +14,10 @@ void SceneSettings::Start() {
     camera = Singleton<Camera>::GetInstance();
     // 加载设置
     config = Config();
-    config.Load();
+    if (!config.Load()) {
+        cout << "load config fail!" << endl;
+    }
+    isFullScreen = config.IsFullScreen;
     GLint height = config.Height, width = config.Width;
     sightDistance = config.SightDistance;
     // 初始化窗口大小选项参数
@@ -205,7 +208,8 @@ void SceneSettings::mouseButtonCallback(int button, int action, int mods) {
             this->loadScene = 1;
             break;
         case Setting_Save:
-
+            this->config.Save(isFullScreen, size_array[windowSizeIndex].x, size_array[windowSizeIndex].y, sightDistance);
+            window->SetWindowSize(size_array[windowSizeIndex].x, size_array[windowSizeIndex].y);
             break;
         case Null:
             break;

@@ -4,6 +4,7 @@
 class Config final {
 public:
     bool Load();
+    bool Save(bool, int, int, int);
 
     // Window
     bool IsFullScreen = false;
