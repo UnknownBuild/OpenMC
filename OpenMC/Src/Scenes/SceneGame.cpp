@@ -246,7 +246,7 @@ void SceneGame::Start() {
     // 渲染海晶灯
     renderer->DrawBlock(BlockId::SeaLantern, sea_lanternPosition);
     // 渲染圆石
-    // renderer->DrawBlock(BlockId::Stone, stonePosition);
+    // renderer->DrawBlock(BlockId::Stone, stonePosition); 
     // renderer->DrawBlock(BlockId::Stone, stones);
     // 渲染煤
     renderer->DrawBlock(BlockId::Dirt, dirtPosition);
