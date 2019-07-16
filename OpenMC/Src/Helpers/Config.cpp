@@ -71,7 +71,7 @@ bool Config::Save(bool isFullScreen, int Width, int Height, int sightDistance)
     for (auto& member : d.GetObject()) {
         if (member.name == "window_full_screen") {
             if (!member.value.IsBool()) return false;
-            member.value.SetBool(IsFullScreen);
+            member.value.SetBool(isFullScreen);
         }
         else if (member.name == "window_resolution") {
             if (!member.value.IsString()) return false;

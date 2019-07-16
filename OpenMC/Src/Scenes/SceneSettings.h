@@ -21,7 +21,15 @@ private:
     Config config;
     vector<glm::vec2> size_array;
 
-    enum SettingItem { Null=0 , Index_Increase, Index_Decrease, Sight_Distance_Increase, Sight_Distance_Decrease, Setting_Exit, Setting_Save};
+    enum SettingItem { Null=0 ,
+        Index_Increase,
+        Index_Decrease,
+        Sight_Distance_Increase,
+        Sight_Distance_Decrease,
+        FullScreen_Change,
+        Setting_Exit,
+        Setting_Save,
+    };
     SettingItem settingItem;
     GLint windowSizeIndex;
 

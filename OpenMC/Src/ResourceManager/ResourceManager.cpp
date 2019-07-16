@@ -83,6 +83,16 @@ Shader ResourceManager::loadShaderFromFile(const GLchar * vShaderFile, const GLc
         gShaderStream << geometryShaderFile.rdbuf();
         geometryShaderFile.close();
         geometryCode = gShaderStream.str();
+        if (int(geometryCode[0]) == -17 && int(geometryCode[1]) == -69) {
+            geometryCode = geometryCode.substr(3);
+        }
+    }
+    // delete bom header
+    if (int(vertexCode[0]) == -17 && int(vertexCode[1]) == -69) {
+        vertexCode = vertexCode.substr(3);
+    }
+    if (int(fragmentCode[0]) == -17 && int(fragmentCode[1]) == -69) {
+        fragmentCode = fragmentCode.substr(3);
     }
   } catch (std::exception e) {
     std::cout << "ERROR::SHADER: Failed to read shader files" << std::endl;

@@ -32,8 +32,13 @@ public:
         return WinSize(width, height);
     }
 
-    inline void SetWindowSize(int Width, int Height) {
-        glfwSetWindowSize(window, Width, Height);
+    inline void SetWindowAttribute(int Width, int Height, bool isFullScreen) {
+        if (isFullScreen) {
+            glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, Width, Height, GLFW_DONT_CARE);
+        }
+        else {
+            glfwSetWindowMonitor(window, NULL, 100, 100, Width, Height, GLFW_DONT_CARE);
+        }
     }
 
     inline int GetKey(int key) {

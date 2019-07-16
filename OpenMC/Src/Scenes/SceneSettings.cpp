@@ -24,6 +24,7 @@ void SceneSettings::Start() {
     size_array = vector<glm::vec2>();
     size_array.push_back(glm::vec2(1024, 768));
     size_array.push_back(glm::vec2(1920, 1080));
+    size_array.push_back(glm::vec2(9999, 9999));
     for (int i = 0, len = size_array.size(); i < len; i++) {
         if (size_array[i].x == width && size_array[i].y == height) {
             windowSizeIndex = i;
@@ -151,6 +152,11 @@ void SceneSettings::Update() {
     renderer->RenderText("<<", glm::vec2(mid_width - 200, mid_height-50), 1.0f, settingItem == Sight_Distance_Decrease ? YELLOW : WHITE);
     renderer->RenderText(to_string(sightDistance), glm::vec2(mid_width, mid_height-50), 0.75f, WHITE);
     renderer->RenderText(">>", glm::vec2(mid_width + 200, mid_height-50), 1.0f, settingItem == Sight_Distance_Increase ? YELLOW : WHITE);
+    // 全屏
+    string fullscreen_string = isFullScreen ? "Yes" : "No";
+    renderer->RenderText("full screen:", glm::vec2(mid_width - 100, mid_height - 120), 0.75f, WHITE);
+    renderer->RenderText(fullscreen_string, glm::vec2(mid_width - 10, mid_height - 170), 0.75f, WHITE);
+    renderer->RenderText(">>", glm::vec2(mid_width + 200, mid_height - 170), 1.0f, settingItem == FullScreen_Change ? YELLOW : WHITE);
     // 离开按键
     renderer->RenderText("Exit", glm::vec2(50, size.Height-100), 1.0f, settingItem == Setting_Exit ? YELLOW : WHITE);
     // 保存按键
@@ -175,6 +181,9 @@ void SceneSettings::cursorPosCallback(double xpos, double ypos) {
     }
     else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 50 && size.Height - ypos <= mid_height + 50) {
         settingItem = Sight_Distance_Increase;
+    }
+    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 170 && size.Height - ypos <= mid_height - 70) {
+        settingItem = FullScreen_Change;
     }
     else if (xpos >= 50 && xpos <= 150 && size.Height - ypos >= size.Height - 100 && size.Height - ypos <= size.Height) {
         settingItem = Setting_Exit;
@@ -204,12 +213,15 @@ void SceneSettings::mouseButtonCallback(int button, int action, int mods) {
         case Sight_Distance_Decrease:
             if (sightDistance > Min_Distance) sightDistance--;
             break;
+        case FullScreen_Change:
+            isFullScreen = !isFullScreen;
+            break;
         case Setting_Exit:
             this->loadScene = 1;
             break;
         case Setting_Save:
             this->config.Save(isFullScreen, size_array[windowSizeIndex].x, size_array[windowSizeIndex].y, sightDistance);
-            window->SetWindowSize(size_array[windowSizeIndex].x, size_array[windowSizeIndex].y);
+            window->SetWindowAttribute(size_array[windowSizeIndex].x, size_array[windowSizeIndex].y, isFullScreen);
             break;
         case Null:
             break;
