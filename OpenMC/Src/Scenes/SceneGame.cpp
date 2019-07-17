@@ -342,6 +342,9 @@ void SceneGame::Start() {
 
 void SceneGame::Update() {
     auto size = window->GetWindowSize();
+    if (size.Height == 0) {
+        return;
+    }
 
     camera->Update();
     player->setFrontAndRight(camera->Front, camera->Right);

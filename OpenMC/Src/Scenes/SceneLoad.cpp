@@ -46,6 +46,9 @@ void SceneLoad::Start() {
 
 void SceneLoad::Update() {
     auto size = window->GetWindowSize();
+    if (size.Height == 0) {
+        return;
+    }
 
     camera->Update();
     player->setFrontAndRight(camera->Front, camera->Right);

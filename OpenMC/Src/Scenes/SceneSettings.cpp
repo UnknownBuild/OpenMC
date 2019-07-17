@@ -116,6 +116,9 @@ void SceneSettings::Start() {
 
 void SceneSettings::Update() {
     auto size = window->GetWindowSize();
+    if (size.Height == 0) {
+        return;
+    }
 
     if (this->loadScene == 1) {
         this->loadScene = 2;
