@@ -24,7 +24,6 @@ void SceneSettings::Start() {
     size_array = vector<glm::vec2>();
     size_array.push_back(glm::vec2(1024, 768));
     size_array.push_back(glm::vec2(1920, 1080));
-    size_array.push_back(glm::vec2(9999, 9999));
     for (int i = 0, len = size_array.size(); i < len; i++) {
         if (size_array[i].x == width && size_array[i].y == height) {
             windowSizeIndex = i;
@@ -171,24 +170,24 @@ void SceneSettings::Update() {
 void SceneSettings::cursorPosCallback(double xpos, double ypos) {
     auto size = window->GetWindowSize();
     GLfloat mid_width = size.Width / 2, mid_height = size.Height / 2;
-    if (xpos >= mid_width - 200 && xpos <= mid_width - 150 && size.Height - ypos >= mid_height + 100 && size.Height - ypos <= mid_height + 200) {
+    if (xpos >= mid_width - 200 && xpos <= mid_width - 150 && size.Height - ypos >= mid_height + 90 && size.Height - ypos <= mid_height + 120) {
         settingItem = Index_Decrease;
     }
-    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height + 100 && size.Height - ypos <= mid_height + 200) {
+    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height + 90 && size.Height - ypos <= mid_height + 120) {
         settingItem = Index_Increase;
-    } else if (xpos >= mid_width - 200 && xpos <= mid_width - 150 && size.Height - ypos >= mid_height - 50 && size.Height - ypos <= mid_height + 50) {
+    } else if (xpos >= mid_width - 200 && xpos <= mid_width - 150 && size.Height - ypos >= mid_height - 60 && size.Height - ypos <= mid_height - 30) {
         settingItem = Sight_Distance_Decrease;
     }
-    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 50 && size.Height - ypos <= mid_height + 50) {
+    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 60 && size.Height - ypos <= mid_height - 30) {
         settingItem = Sight_Distance_Increase;
     }
-    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 170 && size.Height - ypos <= mid_height - 70) {
+    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 180 && size.Height - ypos <= mid_height - 150) {
         settingItem = FullScreen_Change;
     }
-    else if (xpos >= 50 && xpos <= 150 && size.Height - ypos >= size.Height - 100 && size.Height - ypos <= size.Height) {
+    else if (xpos >= 50 && xpos <= 150 && size.Height - ypos >= size.Height - 120 && size.Height - ypos <= size.Height - 80) {
         settingItem = Setting_Exit;
     }
-    else if (xpos >= mid_width - 50 && xpos <= mid_width + 50 && size.Height - ypos >= 100 && size.Height - ypos <= 200) {
+    else if (xpos >= mid_width - 50 && xpos <= mid_width + 50 && size.Height - ypos >= 90 && size.Height - ypos <= 130) {
         settingItem = Setting_Save;
     }
     else {

@@ -21,7 +21,7 @@ void World::SetPosition(glm::vec3 position) {
 void World::Draw(SpriteRenderer* renderer) {
     int32_t x = static_cast<int>(position.x);
     int32_t z = static_cast<int>(position.y);
-    std::vector<Chunk*> chunks = Singleton<MapManager>::GetInstance()->GetActiveChunks(x, z, 5);
+    std::vector<Chunk*> chunks = Singleton<MapManager>::GetInstance()->GetActiveChunks(x, z, 2);
     if (chunks.size() == 0) {
         return;
     }
