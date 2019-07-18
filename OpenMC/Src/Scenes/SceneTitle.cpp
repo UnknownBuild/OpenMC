@@ -149,6 +149,9 @@ void SceneTitle::mouseButtonCallback(int button, int action, int mods) {
 
 void SceneTitle::Update() {
     auto size = window->GetWindowSize();
+    if (size.Height == 0) {
+        return;
+    }
     // 加载动画
     if (this->loadGame == 1) {
         this->loadGame = 2;
