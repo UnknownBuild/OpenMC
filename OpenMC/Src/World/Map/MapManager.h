@@ -13,6 +13,7 @@ public:
 
 private:
     Chunk* loadChunk(int32_t x, int32_t z);
+    void unloadChunk(int32_t x, int32_t z, int vision);
 
     std::map<std::pair<int, int>, Chunk*> chunks;
 

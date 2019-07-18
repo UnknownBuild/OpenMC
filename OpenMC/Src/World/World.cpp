@@ -73,4 +73,7 @@ void World::Draw(SpriteRenderer* renderer) {
     renderer->DrawBlock(BlockId::BlueOrchid, blueOrchids);
     renderer->DrawBlock(BlockId::OakLog, oakLogs);
     renderer->DrawBlock(BlockId::OakLeaves, oakLeaves);
+
+    // 卸载无用区块
+
 }
