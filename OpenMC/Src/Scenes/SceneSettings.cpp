@@ -173,24 +173,24 @@ void SceneSettings::Update() {
 void SceneSettings::cursorPosCallback(double xpos, double ypos) {
     auto size = window->GetWindowSize();
     GLfloat mid_width = size.Width / 2, mid_height = size.Height / 2;
-    if (xpos >= mid_width - 200 && xpos <= mid_width - 150 && size.Height - ypos >= mid_height + 90 && size.Height - ypos <= mid_height + 120) {
+    if (xpos >= mid_width - 200 && xpos <= mid_width - 150 && size.Height - ypos >= mid_height + 80 && size.Height - ypos <= mid_height + 120) {
         settingItem = Index_Decrease;
     }
-    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height + 90 && size.Height - ypos <= mid_height + 120) {
+    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height + 80 && size.Height - ypos <= mid_height + 120) {
         settingItem = Index_Increase;
-    } else if (xpos >= mid_width - 200 && xpos <= mid_width - 150 && size.Height - ypos >= mid_height - 60 && size.Height - ypos <= mid_height - 30) {
+    } else if (xpos >= mid_width - 200 && xpos <= mid_width - 150 && size.Height - ypos >= mid_height - 70 && size.Height - ypos <= mid_height - 30) {
         settingItem = Sight_Distance_Decrease;
     }
-    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 60 && size.Height - ypos <= mid_height - 30) {
+    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 70 && size.Height - ypos <= mid_height - 30) {
         settingItem = Sight_Distance_Increase;
     }
-    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 180 && size.Height - ypos <= mid_height - 150) {
+    else if (xpos >= mid_width + 200 && xpos <= mid_width + 250 && size.Height - ypos >= mid_height - 190 && size.Height - ypos <= mid_height - 150) {
         settingItem = FullScreen_Change;
     }
-    else if (xpos >= 50 && xpos <= 150 && size.Height - ypos >= size.Height - 120 && size.Height - ypos <= size.Height - 80) {
+    else if (xpos >= 50 && xpos <= 190 && size.Height - ypos >= size.Height - 130 && size.Height - ypos <= size.Height - 80) {
         settingItem = Setting_Exit;
     }
-    else if (xpos >= mid_width - 50 && xpos <= mid_width + 50 && size.Height - ypos >= 90 && size.Height - ypos <= 130) {
+    else if (xpos >= mid_width - 50 && xpos <= mid_width + 100 && size.Height - ypos >= 80 && size.Height - ypos <= 130) {
         settingItem = Setting_Save;
     }
     else {
