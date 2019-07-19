@@ -5,6 +5,7 @@
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/writer.h>
+#include <iostream>
 
 #include "../../Helpers/EnvPath.h"
 #include "MapManager.h"
@@ -92,6 +93,9 @@ std::vector<Chunk*> MapManager::GetActiveChunks(int32_t x, int32_t z, int vision
     std::vector<Chunk*> v;
     x = x / 16;
     z = z / 16;
+    if (chunks.size() > 20) {
+        // unloadChunk(x, z, vision);
+    }
     for (int32_t x0 = x - vision + 1; x0 < x + vision; x0++) {
         for (int32_t z0 = z - vision + 1; z0 < z + vision; z0++) {
             if (chunks.count({ x0, z0 })) {
@@ -111,4 +115,22 @@ std::vector<Chunk*> MapManager::GetActiveChunks(int32_t x, int32_t z, int vision
 
 Chunk* MapManager::loadChunk(int32_t x, int32_t z) {
     return gen->GenChunk(x * 16, z * 16);
+}
+
+void MapManager::unloadChunk(int32_t x, int32_t z, int vision) {
+    std::cout << "start unload chunks" << std::endl;
+    std::map<std::pair<int, int>, Chunk*>::iterator iter;
+    int count = 0;
+    for (iter = chunks.begin(); iter != chunks.end(); ) {
+        int cx = iter->first.first;
+        int cz = iter->first.second;
+        std::map<std::pair<int, int>, Chunk*>::iterator tempIter = iter;
+        iter++;
+        if (!(cx >= x - vision + 1 && cx < x + vision &&
+            cz >= z - vision + 1 && cz < z + vision)) {
+            count++;
+            chunks.erase(tempIter);
+        }
+    }
+    std::cout << "unload chunks: " << count << std::endl;
 }
