@@ -84,6 +84,15 @@ Available architecture triplets:
 </PropertyGroup>
 ```
 
-## 可执行文件
+## Release
 
-[Release](https://github.com/UnknownBuild/OpenMC/releases/tag/v0.1)
+[Release v0.3](https://github.com/UnknownBuild/OpenMC/releases/tag/v0.3)
+
+[Release v0.2](https://github.com/UnknownBuild/OpenMC/releases/tag/v0.2)
+
+[Release v0.1](https://github.com/UnknownBuild/OpenMC/releases/tag/v0.1)
+
+## Team
+
+Powered by Unknown Construction Team.
+
