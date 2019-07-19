@@ -82,6 +82,12 @@ public:
     // 平滑过渡摄像机位置
     void TransitionTo(glm::vec3 target, float p);
 
+    // 开启/关闭自由视角
+    void OpenFreeView();
+    void CloseFreeView();
+    // 初始化视角
+    void InitView();
+
     // 初始化
     void InitFrame() {
         this->lastFrame = 0;

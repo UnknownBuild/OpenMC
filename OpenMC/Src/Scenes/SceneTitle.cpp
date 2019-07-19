@@ -19,10 +19,13 @@ void SceneTitle::Start() {
     Input<0>::OnMouseButtonClick += std::bind(&SceneTitle::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
+    camera->InitView();
     // 初始化渲染器
     renderer = Singleton<SpriteRenderer>::GetInstance();
     renderer->ClearBlock();
     renderer->SetLight(glm::vec3(-0.2f, -1.0f, -0.3f));
+    // 不显示框
+    renderer->HideShowBlock();
     // 初始化资源
     ResourceManager::LoadTexture(EnvPath::GameTitleImage, "title");
 

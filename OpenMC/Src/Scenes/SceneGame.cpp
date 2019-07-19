@@ -1,11 +1,14 @@
 ﻿#include <imgui.h>
 
 #include "SceneGame.h"
+#include "SceneManager.h"
+#include "SceneTitle.h"
 
 glm::vec3 normal[6] = { glm::vec3(0, 1, 0), glm::vec3(0, -1, 0), glm::vec3(0, 0, 1),
                         glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec3(-1, 0, 0) };
 
 void SceneGame::Start() {
+    window->SetInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // 初始化输入层
     Input<0> * input = Singleton<Input<0>>::GetInstance();
     input->Clear();
@@ -19,6 +22,7 @@ void SceneGame::Start() {
     camera->Bind(input);
     camera->isGravity = false;
     camera->SetLookPostion(player->Position, glm::vec3(0, 10, 3));
+    camera->OpenFreeView();
     Input<0>::OnKeyClick += std::bind(&SceneGame::keyCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     Input<0>::OnScrollChanged += std::bind(&SceneGame::ScrollCallback, this, std::placeholders::_1, std::placeholders::_2);
     // 初始化渲染器
@@ -314,6 +318,7 @@ void SceneGame::Start() {
     blockType.push_back(BlockId::Melon);
     blockType.push_back(BlockId::Glass);
     blockType.push_back(BlockId::Quartz);
+    status = 0;
     current_index = 0;
     newBlockDirection = 0;
     newBlockPosition = glm::vec3(0, 0, 0);
@@ -384,6 +389,22 @@ void SceneGame::Update() {
     std::stringstream ss2;
     ss2 << this->position.x << ", " << this->position.y << ", " << this->position.z;
     renderer->RenderText("position: " + ss2.str(), glm::vec2(size.Width - 400, size.Height - 40), 0.4);
+
+    // 渲染暂停菜单
+    if (status == 1) {
+        renderer->RenderText("MainMenu", glm::vec2(50, 350), 1.0f, menuItem == MainMenu ? YELLOW : WHITE);
+        renderer->RenderText("Help", glm::vec2(50, 250), 1.0f, menuItem == Help ? YELLOW : WHITE);
+        renderer->RenderText("Back", glm::vec2(50, 150), 1.0f, menuItem == Back ? YELLOW : WHITE);
+    }
+    if (status == 2) {
+        renderer->RenderText("Move:             W S A D", glm::vec2(50, 650), 0.8f, WHITE);
+        renderer->RenderText("Jump:             Space", glm::vec2(50, 550), 0.8f, WHITE);
+        renderer->RenderText("Create Block: left mouse button", glm::vec2(50, 450), 0.8f, WHITE);
+        renderer->RenderText("Break Block:  right mouse button", glm::vec2(50, 350), 0.8f, WHITE);
+        renderer->RenderText("Change Block: mouse wheel", glm::vec2(50, 250), 0.8f, WHITE);
+        renderer->RenderText("Back", glm::vec2(50, 150), 1.0f, menuItem == Back ? YELLOW : WHITE);
+    }
+    
 
     // 渲染准星
     renderer->DrawTexture(ResourceManager::GetTexture("focus"), glm::vec2(size.Width / 2, size.Height / 2), 0.4f);
@@ -556,7 +577,19 @@ void SceneGame::Terminate() {
 }
 
 void SceneGame::cursorPosCallback(double xpos, double ypos) {
-
+    auto size = window->GetWindowSize();
+    if (xpos >= 50 && xpos <= 350 && size.Height - ypos >= 325 && size.Height - ypos <= 375) {
+        menuItem = MainMenu;
+    }
+    else if (xpos >= 50 && xpos <= 350 && size.Height - ypos >= 225 && size.Height - ypos <= 275) {
+        menuItem = Help;
+    }
+    else if (xpos >= 50 && xpos <= 200 && size.Height - ypos >= 125 && size.Height - ypos <= 175) {
+        menuItem = Back;
+    }
+    else {
+        menuItem = Null;
+    }
 }
 
 void SceneGame::ScrollCallback(double xoffset, double yoffset) {
@@ -571,13 +604,41 @@ void SceneGame::ScrollCallback(double xoffset, double yoffset) {
 }
 
 void SceneGame::mouseButtonCallback(int button, int action, int mods) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        if (renderer->GetBlock(lookingAt).Id != BlockId::Air) {
-            renderer->DrawBlock(blockType[current_index], newBlockPosition );
+    if (status == 0) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            if (renderer->GetBlock(lookingAt).Id != BlockId::Air) {
+                renderer->DrawBlock(blockType[current_index], newBlockPosition);
+            }
+        }
+        if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+            renderer->RemoveBlock(lookingAt);
         }
     }
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-        renderer->RemoveBlock(lookingAt);
+    else if (status == 1) {
+        SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            switch (menuItem) {
+            case MainMenu:
+                sceneManager->Goto(new SceneTitle());
+                break;
+            case Help:
+                status = 2;
+                break;
+            case Back:
+                camera->OpenFreeView();
+                window->SetInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                status = 0;
+                break;
+            }
+        }
+        
+    }
+    else if (status == 2) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            if (menuItem == Back) {
+                status = 1;
+            }
+        }       
     }
 }
 
@@ -590,4 +651,27 @@ void SceneGame::keyCallback(int key, int scancode, int action, int mods) {
         current_index--;
         current_index = current_index < 0 ? current_index + blockType.size() : current_index;
     }*/
+    if (window->GetKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        if (keys[KEY_CHANGE] == false) {
+            switch (status) {
+            case 0:
+                status = 1;
+                camera->CloseFreeView();
+                window->SetInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                break;
+            case 1:
+                status = 0;
+                camera->OpenFreeView();
+                window->SetInputMode(GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                break;
+            case 2:
+                status = 1;
+                break;
+            }
+            keys[KEY_CHANGE] = true;
+        }
+    }
+    else {
+        keys[KEY_CHANGE] = false;
+    }
 }

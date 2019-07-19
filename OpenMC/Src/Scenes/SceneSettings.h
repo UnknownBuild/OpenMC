@@ -13,6 +13,7 @@ public:
 
     void cursorPosCallback(double xpos, double ypos);
     void mouseButtonCallback(int button, int action, int mods);
+    void keyCallback(int key, int scancode, int action, int mods);
 
 private:
     SpriteRenderer* renderer;
@@ -35,8 +36,8 @@ private:
 
     GLboolean isFullScreen;
     GLint sightDistance;
-    GLint Max_Distance = 10;
-    GLint Min_Distance = 5;
+    GLint Max_Distance = 5;
+    GLint Min_Distance = 1;
 
     const glm::vec4 YELLOW = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
     const glm::vec4 WHITE = glm::vec4(1.0f);

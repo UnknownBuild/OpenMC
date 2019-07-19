@@ -1,6 +1,7 @@
 ﻿#include "../Helpers/Singleton.h"
 #include "Map/MapManager.h"
 #include "World.h"
+#include "../Helpers/Config.h"
 
 bool World::Init(std::string name) {
     return Singleton<MapManager>::GetInstance()->Load(name);
@@ -21,7 +22,8 @@ void World::SetPosition(glm::vec3 position) {
 void World::Draw(SpriteRenderer* renderer) {
     int32_t x = static_cast<int>(position.x);
     int32_t z = static_cast<int>(position.y);
-    std::vector<Chunk*> chunks = Singleton<MapManager>::GetInstance()->GetActiveChunks(x, z, 2);
+    Config* config = Singleton<Config>::GetInstance();
+    std::vector<Chunk*> chunks = Singleton<MapManager>::GetInstance()->GetActiveChunks(x, z, config->SightDistance);
     if (chunks.size() == 0) {
         return;
     }

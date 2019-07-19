@@ -35,6 +35,13 @@ private:
     int current_index;
     int newBlockDirection;
     glm::vec3 newBlockPosition;
+    int status; //0-playing  1-paused   2-help
+    bool keys[100];
+
+    enum MenuItem { Null = 0, MainMenu, Help, Back };
+    MenuItem menuItem;
+    const glm::vec4 YELLOW = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+    const glm::vec4 WHITE = glm::vec4(1.0f);
 
     // test
     glm::vec3 testColor = glm::vec3(2, 2, 2);

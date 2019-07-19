@@ -25,6 +25,13 @@ Camera::Camera() {
     this->isPerspective = false;
 }
 
+void Camera::InitView() {
+    this->Front = glm::vec3(0.0f, 0.0f, -1.0f);
+    this->Up = glm::vec3(0.0f, 1.0f, 0.0f);
+    this->Yaw = YAW;
+    this->Pitch = PITCH;
+}
+
 glm::mat4 Camera::GetViewMatrix() {
     return glm::lookAt(Position, Position + Front, Up);
 }
@@ -74,6 +81,15 @@ void Camera::updateDeltaTime() {
     deltaTime = currentFrame - lastFrame;
     if (deltaTime > 0.05) deltaTime = 0.05;
     lastFrame = currentFrame;
+}
+
+void Camera::OpenFreeView() {
+    this->freedomView = true;
+}
+
+void Camera::CloseFreeView() {
+    this->freedomView = false;
+    this->firstMouse = true;
 }
 
 void Camera::processInput() {

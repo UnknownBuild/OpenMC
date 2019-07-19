@@ -10,6 +10,7 @@ void SceneSettings::Start() {
     input->Clear();
     Input<0>::OnCursorPosChanged += std::bind(&SceneSettings::cursorPosCallback, this, std::placeholders::_1, std::placeholders::_2);
     Input<0>::OnMouseButtonClick += std::bind(&SceneSettings::mouseButtonCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    Input<0>::OnKeyClick += std::bind(&SceneSettings::keyCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     // 初始化摄像机
     camera = Singleton<Camera>::GetInstance();
     // 加载设置
@@ -230,6 +231,13 @@ void SceneSettings::mouseButtonCallback(int button, int action, int mods) {
         default:
             break;
         }
+    }
+}
+
+void SceneSettings::keyCallback(int key, int scancode, int action, int mods) {
+    if (window->GetKey(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        SceneManager* sceneManager = Singleton<SceneManager>::GetInstance();
+        this->loadScene = 1;
     }
 }
 
