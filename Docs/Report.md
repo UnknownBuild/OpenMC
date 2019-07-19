@@ -884,11 +884,91 @@ OctaveNoise<PerlinNoise> treeNoise;
 4. 生成花草：使用`grassNoise`、`flowerNoise`生成花草。
 5. 生成树木：使用`treeNoise`生成树木。
 
+```c++
+void MapGenerator::genBasicTerrain(Chunk* chunk, int32_t x, int32_t z) {
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 16; j++) {
+            // 生成高度图
+            float noise1 = depthNoise1.Get((x + i + 0.1f) * 0.01f, (z + j + 0.1f) * 0.01f);
+            float noise2 = depthNoise2.Get((x + i + 0.1f) * -0.01f, (z + j + 0.1f) * -0.01f);
+            int height = static_cast<int>(noise1 * (noise2 * 32 + 16));
+            if (height < 16) {
+                height = (height + 16) / 2;
+            }
+            // 生成厚度图
+            float noise3 = thicknessNoise.Get((x + i + 0.1f) * 0.01f, (z + j + 0.1f) * 0.01f);
+            int thickness = static_cast<int>(noise3 * 4 + 2);
+            for (int k = 0; k < height; k++) {
+                if (k < height - thickness) {
+                    chunk->SetBlock(x + i, k, z + j, BlockId::Stone);
+                } else if (k < height - 1) {
+                    chunk->SetBlock(x + i, k, z + j, BlockId::Dirt);
+                } else {
+                    chunk->SetBlock(x + i, k, z + j, BlockId::GrassBlock);
+                }
+            }
+            // 生成草、花
+            if (grassNoise.Get((x + i) * 1.0f, (z + j) * 1.0f) > 0.7) {
+                chunk->SetBlock(x + i, height, z + j, BlockId::Grass);
+            }
+            if (grassNoise.Get((x + i) * 0.1f, (z + j) * 0.1f) > 0.75) {
+                chunk->SetBlock(x + i, height, z + j, BlockId::BlueOrchid);
+            }
+            // 生成树
+            if (i >= 2 && i <= 13 && j >= 2 && j <= 13) {
+                if (treeNoise.Get(x + i, z + j) > 0.8) {
+                    for (int k = 0; k <= 5; k++) {
+                        chunk->SetBlock(x + i, height + k, z + j, BlockId::OakLog);
+                    }
+                    for (int k = 4, step = 2; k <= 6; k++) {
+                        if (k == 6) {
+                            step = 1;
+                        }
+                        for (int x0 = i - step; x0 <= i + step; x0++) {
+                            for (int z0 = j - step; z0 <= j + step; z0++) {
+                                chunk->SetBlock(x + x0, height + k, z + z0, BlockId::OakLeaves);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
 ### Map System
 
-加载和存储地图
+地图的加载主要逻辑就是获取活动区块，将活动区块加入到渲染列表中。
 
-// TODO
+在加载流程中，我们需要指定当前角色的位置、视距，位置由Camera通知World，而视距由World主动获取本地设置。
+
+在获取活动区块时，会判断区块是否已存在内存中。如果不存在，则该区块即为活动区块，如果区块存在，则判断区块是否已被更新，若更新则视为活动区块。
+
+当区块不存在内存中，会调用`loadChunk`进行区块加载。
+
+```c++
+std::vector<Chunk*> MapManager::GetActiveChunks(int32_t x, int32_t z, int vision) {
+    std::vector<Chunk*> v;
+    x = x / 16;
+    z = z / 16;
+    for (int32_t x0 = x - vision + 1; x0 < x + vision; x0++) {
+        for (int32_t z0 = z - vision + 1; z0 < z + vision; z0++) {
+            if (chunks.count({ x0, z0 })) {
+                Chunk* chunk = chunks[{ x0, z0 }];
+                if (chunk->IsUpdate()) {
+                    v.push_back(chunk);
+                }
+            } else {
+                Chunk* chunk = loadChunk(x0, z0);
+                chunks[{ x0, z0 }] = chunk;
+                v.push_back(chunk);
+            }
+        }
+    }
+    return v;
+}
+```
 
 ### Add or Remove Block
 
@@ -924,9 +1004,15 @@ else {
 
 ## 遇到的问题和解决方案
 
-遇到的问题和解决方法都在上面了。
+除游戏架构外，遇到的问题和解决方法都在上面了。
 
 渲染部分主要是阴影、光照、混合以及超大数量的方块渲染。
+
+地图生成部分主要是对原始地形的优化和调整，比如由柏林噪声生成的原始地形在高峰或低谷的时候会比较陡，并且两者相差巨大。最终我们选择采用在极高值和极低值附近进行相对调整，将其曲线变得缓和。
+
+游戏架构部分遇到了不少问题，一个是对场景管理，原本计划选择入栈出栈的形式来管理场景，但是对场景生命周期管理上较复杂，而且涉及OpenGL渲染方块覆盖等情况，最终决定使用唯一场景的形式来进行场景管理。并且，在场景销毁上采用延迟销毁，即在场景的`Update`生命周期内多次调用`Goto`函数最终会一起销毁场景。
+
+在`Input`类的设计上，也遇到了不少问题，由于需要使用静态函数来转换成C类风格函数指针，然后交付给GLFW回调，导致输入类不支持声明对象。因此，为了实现多个不同的输入类，我们采用了模板来实现`Input`，其中模板接受类型为无符号整型。
 
 ## 小组成员分工
 
