@@ -14,6 +14,10 @@ public:
     void cursorPosCallback(double xpos, double ypos);
     void mouseButtonCallback(int button, int action, int mods);
     void keyCallback(int key, int scancode, int action, int mods);
+    void ScrollCallback(double xoffset, double yoffset);
+    void showBlockPicture();
+    glm::vec3 caculateLookingAt();
+    void updateNewBlockPosition();
 
 private:
     SpriteRenderer* renderer;
@@ -21,6 +25,12 @@ private:
     World* world;
     Player* player;
 
+    glm::vec3 lookingAt;
+    glm::vec3 position;
+    vector<BlockId> blockType;
+    int current_index;
+    int newBlockDirection;
+    glm::vec3 newBlockPosition;
     enum MenuItem { Null = 0, MainMenu, Help, Back };
     MenuItem menuItem;
     const glm::vec4 YELLOW = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
